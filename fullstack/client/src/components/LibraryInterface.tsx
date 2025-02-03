@@ -35,7 +35,7 @@ const LibraryInterface: React.FC = () => {
             await axios.post(`/api/library/return/${itemId}`);
             // Optionally refresh items or update state
         } catch (err) {
-            setError('Failed to return item');;
+            setError('Failed to return item');
         }
     };
 
