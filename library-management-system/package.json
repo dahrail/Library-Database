@@ -1,0 +1,29 @@
+{
+  "name": "library-management-system",
+  "version": "1.0.0",
+  "description": "A fullstack library management system for managing books, media, loans, holds, fines, and events.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "client": "npm start --prefix client",
+    "server": "nodemon server/server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run build --prefix client"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mysql2": "^2.2.5",
+    "sequelize": "^6.6.5",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7",
+    "concurrently": "^6.0.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
