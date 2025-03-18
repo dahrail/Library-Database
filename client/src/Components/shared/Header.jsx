@@ -8,6 +8,7 @@ const Header = () => {
       <div className="logo">
         <h1>Library Management System</h1>
       </div>
+      <hr className="divider" /> {/* Add this line for the divider */}
       <nav className="navigation">
         <ul>
           <li><Link to="/">Home</Link></li>
