@@ -70,6 +70,41 @@ body {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
+/* Navigation buttons styles */
+.nav-buttons {
+  display: flex;
+  gap: 12px;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.nav-button {
+  background-color: transparent;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.nav-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.nav-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments for the navigation buttons */
+@media (max-width: 800px) {
+  .nav-buttons {
+    display: none; /* Hide navigation on small screens */
+  }
+}
+
 /* Content container for all screens except login */
 .content-container {
   padding: 20px;

@@ -239,6 +239,15 @@ function App() {
     <div className="top-bar">
       <div className="top-bar-content">
         <div className="logo">BookFinder</div>
+        
+        {/* Navigation buttons */}
+        <div className="nav-buttons">
+          <button className="nav-button">Browse & Borrow</button>
+          <button className="nav-button">Media</button>
+          <button className="nav-button">Electronics</button>
+          <button className="nav-button">Events</button>
+        </div>
+        
         {isLoggedIn && userData && (
           <div className="user-info">
             <span>Hello, {userData.FirstName}</span>
