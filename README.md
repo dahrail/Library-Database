@@ -35,14 +35,15 @@ code .
 ### Deploying the website
 ```bash
 cd client
-npx create-react-app .npm install react-scripts
+npx create-react-app .
+npm install react-scripts
 npm start
 ```
 
 ### Deploying the backend/server
 ```bash
 Backend:
-cd backend
+cd server
 npm install express mysql cors nodemon
 npm install react react-dom
 npm start
