@@ -28,7 +28,7 @@ BookFinder is our custom-made library management system created a university lib
 ### Cloning the repository
 ```bash
 git clone https://github.com/dahrail/Library-Database
-cd frontend
+cd client
 code .
 ```
 
