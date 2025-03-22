@@ -477,32 +477,36 @@ function App() {
       {currentScreen === 'loans' && (
         <div>
           <h2>Your Loans</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Item Type</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Borrowed At</th>
-                <th>Due At</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loans.map((loan, index) => (
-                <tr key={index}>
-                  <td>{loan.FirstName}</td>
-                  <td>{loan.LastName}</td>
-                  <td>{loan.ItemType}</td>
-                  <td>{loan.Title}</td>
-                  <td>{loan.Author}</td>
-                  <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
-                  <td>{new Date(loan.DueAT).toLocaleString()}</td>
+          {loans.length === 0 ? (
+            <p>You have no loan history.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Item Type</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Borrowed At</th>
+                  <th>Due At</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {loans.map((loan, index) => (
+                  <tr key={index}>
+                    <td>{loan.FirstName}</td>
+                    <td>{loan.LastName}</td>
+                    <td>{loan.ItemType}</td>
+                    <td>{loan.Title}</td>
+                    <td>{loan.Author}</td>
+                    <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
+                    <td>{new Date(loan.DueAT).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
           <button onClick={navigateToHome}>Back to Home</button>
         </div>
       )}
