@@ -84,7 +84,7 @@ WIP
 
 Catalog Search Queries:
 
-???
+WIP
 
 ### Reports for Admins:
 ### Fines Report:
@@ -122,10 +122,11 @@ Pie chart of genres most frequently checked out.
 
 ### Waitlist Trigger
 This trigger is activated when an item that was fully checked out is returned or was previously unavailable. It ensures the waitlist is managed by notifying the next member in the queue about the availability of the item. It does this by sending an email to that user.
-???
+
+WIP
 
 ### Fines Trigger
-???
+WIP
 ```
 
 ## Addtional Notes
