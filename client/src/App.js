@@ -153,11 +153,18 @@ function App() {
   const handleRegister = async (e) => {
     e.preventDefault();
 
+    // Combine the phone number parts
+    const fullPhoneNumber = `${newUser.PhonePart1}${newUser.PhonePart2}${newUser.PhonePart3}`;
+
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newUser, Role: 'Student' }) // Add Role as 'Student'
+        body: JSON.stringify({ 
+          ...newUser, 
+          PhoneNumber: fullPhoneNumber, // Send the combined phone number
+          Role: 'Student' // Add Role as 'Student'
+        })
       });
 
       const data = await response.json();
@@ -524,11 +531,34 @@ function App() {
             </div>
             <div>
               <label>Phone Number:</label>
-              <input
-                type="text"
-                value={newUser.PhoneNumber}
-                onChange={(e) => setNewUser({ ...newUser, PhoneNumber: e.target.value })}
-              />
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  maxLength="3"
+                  value={newUser.PhonePart1 || ''}
+                  onChange={(e) => setNewUser({ ...newUser, PhonePart1: e.target.value })}
+                  required
+                  style={{ width: '50px', marginRight: '5px' }}
+                />
+                -
+                <input
+                  type="text"
+                  maxLength="3"
+                  value={newUser.PhonePart2 || ''}
+                  onChange={(e) => setNewUser({ ...newUser, PhonePart2: e.target.value })}
+                  required
+                  style={{ width: '50px', margin: '0 5px' }}
+                />
+                -
+                <input
+                  type="text"
+                  maxLength="4"
+                  value={newUser.PhonePart3 || ''}
+                  onChange={(e) => setNewUser({ ...newUser, PhonePart3: e.target.value })}
+                  required
+                  style={{ width: '70px', marginLeft: '5px' }}
+                />
+              </div>
             </div>
             <button type="submit">Confirm</button>
           </form>
