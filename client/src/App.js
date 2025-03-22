@@ -22,6 +22,14 @@ function App() {
     AvailableCopies: '',
     ShelfLocation: '' // Add ShelfLocation field
   });
+  const [newUser, setNewUser] = useState({
+    Username: '',
+    Password: '',
+    FirstName: '',
+    LastName: '',
+    Email: '',
+    PhoneNumber: ''
+  });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -73,6 +81,10 @@ function App() {
     setCurrentScreen('addBook'); // Navigate to the add book screen
   };
 
+  const navigateToRegister = () => {
+    setCurrentScreen('register'); // Navigate to the register screen
+  };
+
   const handleAddBook = async (e) => {
     e.preventDefault();
 
@@ -94,6 +106,30 @@ function App() {
     } catch (error) {
       console.error('Error adding book:', error);
       alert('An error occurred while adding the book.');
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newUser, Role: 'Student' }) // Add Role as 'Student'
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Registration successful!');
+        setCurrentScreen('login'); // Navigate back to the login screen
+      } else {
+        alert('Failed to register: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error registering user:', error);
+      alert('An error occurred while registering.');
     }
   };
 
@@ -121,6 +157,7 @@ function App() {
             />
           </div>
           <button type="submit">Login</button>
+          <button type="button" onClick={navigateToRegister}>Register</button> {/* Add this button */}
         </form>
       )}
 
@@ -314,6 +351,69 @@ function App() {
             <button type="submit">Confirm</button>
           </form>
           <button onClick={() => setCurrentScreen('home')}>Back to Home</button>
+        </div>
+      )}
+
+      {currentScreen === 'register' && (
+        <div>
+          <h2>Register</h2>
+          <form onSubmit={handleRegister}>
+            <div>
+              <label>Username:</label>
+              <input
+                type="text"
+                value={newUser.Username}
+                onChange={(e) => setNewUser({ ...newUser, Username: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Password:</label>
+              <input
+                type="password"
+                value={newUser.Password}
+                onChange={(e) => setNewUser({ ...newUser, Password: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>First Name:</label>
+              <input
+                type="text"
+                value={newUser.FirstName}
+                onChange={(e) => setNewUser({ ...newUser, FirstName: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Last Name:</label>
+              <input
+                type="text"
+                value={newUser.LastName}
+                onChange={(e) => setNewUser({ ...newUser, LastName: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Email:</label>
+              <input
+                type="email"
+                value={newUser.Email}
+                onChange={(e) => setNewUser({ ...newUser, Email: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Phone Number:</label>
+              <input
+                type="text"
+                value={newUser.PhoneNumber}
+                onChange={(e) => setNewUser({ ...newUser, PhoneNumber: e.target.value })}
+              />
+            </div>
+            <button type="submit">Confirm</button>
+          </form>
+          <button onClick={() => setCurrentScreen('login')}>Back to Login</button>
         </div>
       )}
     </div>

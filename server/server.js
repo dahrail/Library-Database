@@ -43,6 +43,30 @@ app.post('/api/login', (req, res) => {
   );
 });
 
+// Register endpoint
+app.post('/api/register', (req, res) => {
+  const { Username, Password, FirstName, LastName, Email, PhoneNumber, Role } = req.body;
+
+  const query = `
+    INSERT INTO USER (Username, Password, FirstName, LastName, Email, PhoneNumber, Role, AccountCreateAt, AccountStatus)
+    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'Active')
+  `;
+
+  pool.query(
+    query,
+    [Username, Password, FirstName, LastName, Email, PhoneNumber, Role],
+    (err, results) => {
+      if (err) {
+        console.error('Error registering user:', err);
+        res.status(500).json({ success: false, error: 'Failed to register user' });
+        return;
+      }
+
+      res.json({ success: true });
+    }
+  );
+});
+
 // Existing API endpoint
 app.get('/api', (req, res) => {
   pool.query('SELECT * FROM USER', (err, result, fields) => {
