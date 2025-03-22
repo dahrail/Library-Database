@@ -3,7 +3,7 @@
 This project was created for the course Database Systems (3380) at the University of Houston. The objective of our design was to create a library database website named BookFinder where users such as Faculty, Admin, and Student are able to use the library website.
 
 ## About 
-BookFinder is our custom-made library management system created a university library, which have users such as students, faculty, and administrators. It provides them a digital interface for browsing and managing books, music, and electronics. Since there are three roles with different access to the website, there will exist special features where each role has different checkouts, waitlists, fines, and admin tasks. The website will have triggers and data reports.
+BookFinder is our custom-made library management system made for a university, which have users such as students, faculty, and administrators. It provides them a digital interface for browsing and managing books, music, and electronics. Since there are three roles with different access to the website, there will exist special features where each role has different checkouts, waitlists, fines, and admin tasks. The website will have triggers and data reports.
 
 ## Technologies Used:
 
@@ -28,22 +28,22 @@ BookFinder is our custom-made library management system created a university lib
 ### Cloning the repository
 ```bash
 git clone https://github.com/dahrail/Library-Database
-cd frontend
+cd client
 code .
 ```
 
 ### Deploying the website
 ```bash
 cd client
-npx create-react-app .npm install react-scripts
+npx create-react-app .
+npm install react-scripts
 npm start
 ```
 
 ### Deploying the backend/server
 ```bash
 Backend:
-cd backend
-npm install express mysql cors nodemon
+cd server
 npm install react react-dom
 npm start
 ```
@@ -84,7 +84,7 @@ WIP
 
 Catalog Search Queries:
 
-???
+WIP
 
 ### Reports for Admins:
 ### Fines Report:
@@ -122,37 +122,11 @@ Pie chart of genres most frequently checked out.
 
 ### Waitlist Trigger
 This trigger is activated when an item that was fully checked out is returned or was previously unavailable. It ensures the waitlist is managed by notifying the next member in the queue about the availability of the item. It does this by sending an email to that user.
-```
-SHOW CREATE TRIGGER book_deactivate_earliest_waitlist_on_return;
-DELIMITER //
-CREATE DEFINER=`admin3380`@`%` TRIGGER `book_deactivate_earliest_waitlist_on_return` AFTER UPDATE ON `checkedoutbookhistory` FOR EACH ROW BEGIN
-  -- Declare the variable at the start of the BEGIN block
-  DECLARE earliest_waitlist_id INT;
 
-  -- Check if the book has been returned
-  IF NEW.timeStampReturn IS NOT NULL THEN
-    -- Get the waitlistId of the earliest active waitlist entry for this book
-    SELECT waitlistId
-    INTO earliest_waitlist_id
-    FROM waitlist
-    WHERE itemId = NEW.bookId
-      AND itemType = 'book'
-      AND active = TRUE
-    ORDER BY waitlistTimeStamp ASC
-    LIMIT 1;
-
-    -- If an active waitlist entry exists, deactivate it
-    IF earliest_waitlist_id IS NOT NULL THEN
-      UPDATE waitlist
-      SET active = FALSE
-      WHERE waitlistId = earliest_waitlist_id;
-    END IF;
-  END IF;
-END
-```
+WIP
 
 ### Fines Trigger
-???
+WIP
 ```
 
 ## Addtional Notes
