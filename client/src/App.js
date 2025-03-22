@@ -30,25 +30,31 @@ function App() {
     Email: '',
     PhoneNumber: ''
   });
+  const [selectedBook, setSelectedBook] = useState(null); // Store the selected book
+  const [loans, setLoans] = useState([]); // Store the list of loans
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Send login credentials to the backend
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (data.success) {
-      setIsLoggedIn(true); // Set login state to true
-      setUserData(data.user); // Store user details
-      setCurrentScreen('welcome'); // Navigate to the welcome screen
-    } else {
-      alert(data.error || 'Invalid email or password');
+      if (data.success) {
+        setIsLoggedIn(true); // Set login state to true
+        setUserData(data.user); // Store user details, including UserID
+        setCurrentScreen('welcome'); // Navigate to the welcome screen
+      } else {
+        alert(data.error || 'Invalid email or password');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      alert('An error occurred while logging in.');
     }
   };
 
@@ -73,7 +79,7 @@ function App() {
   };
 
   const handleLoan = (book) => {
-    console.log(`Loaning book: ${book.title}`); // Log the book being loaned
+    setSelectedBook(book); // Store the selected book
     setCurrentScreen('loan'); // Navigate to the loan screen
   };
 
@@ -83,6 +89,23 @@ function App() {
 
   const navigateToRegister = () => {
     setCurrentScreen('register'); // Navigate to the register screen
+  };
+
+  const navigateToLoans = async () => {
+    try {
+      const response = await fetch(`/api/loans/${userData.UserID}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setLoans(data.loans); // Store the loans in state
+        setCurrentScreen('loans'); // Navigate to the loans screen
+      } else {
+        alert('Failed to fetch loans: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching loans:', error);
+      alert('An error occurred while fetching loans.');
+    }
   };
 
   const handleAddBook = async (e) => {
@@ -133,6 +156,34 @@ function App() {
     }
   };
 
+  const handleConfirmLoan = async () => {
+    console.log("Confirming loan for BookID:", selectedBook.bookID); // Log the BookID
+    console.log("UserID being sent:", userData.UserID); // Log the UserID
+    try {
+      const response = await fetch('/api/confirmLoan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          BookID: selectedBook.bookID,
+          UserID: userData.UserID, // Send the UserID
+          Role: userData.Role // Send the Role
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Loan confirmed successfully!');
+        setCurrentScreen('home'); // Navigate back to the home screen
+      } else {
+        alert('Failed to confirm loan: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error confirming loan:', error);
+      alert('An error occurred while confirming the loan.');
+    }
+  };
+
   return (
     <div>
       {currentScreen === 'login' && (
@@ -176,6 +227,7 @@ function App() {
         <div>
           <h2>Team 7 Library (Role: {userData.Role})</h2>
           <button onClick={navigateToBooks}>Books</button>
+          <button onClick={navigateToLoans}>Loans</button> {/* Add Loans button */}
           {userData.Role === 'Admin' && (
             <button onClick={navigateToAddBook}>Add New Book</button>
           )}
@@ -206,7 +258,7 @@ function App() {
                   <td>{book.copies}</td>
                   <td>
                     <button
-                      onClick={() => handleLoan(book)}
+                      onClick={() => handleLoan(book)} // Pass the entire book object, including BookID
                       disabled={book.copies === 0} // Disable button if no copies are available
                       style={{
                         backgroundColor: book.copies === 0 ? 'gray' : 'blue',
@@ -225,11 +277,16 @@ function App() {
         </div>
       )}
 
-      {currentScreen === 'loan' && (
+      {currentScreen === 'loan' && selectedBook && (
         <div>
           <h2>Loan Screen</h2>
-          <p>This is the loan screen. You can add loan functionality here.</p>
+          <p>Checking out a loan for book: <strong>{selectedBook.title}</strong></p>
+          <p>
+            The book will be due in{' '}
+            <strong>{userData.Role === 'Student' ? '7 days' : '14 days'}</strong>.
+          </p>
           <button onClick={() => setCurrentScreen('books')}>Back to Books</button>
+          <button onClick={handleConfirmLoan}>Confirm</button> {/* Add Confirm button */}
         </div>
       )}
 
@@ -414,6 +471,39 @@ function App() {
             <button type="submit">Confirm</button>
           </form>
           <button onClick={() => setCurrentScreen('login')}>Back to Login</button>
+        </div>
+      )}
+
+      {currentScreen === 'loans' && (
+        <div>
+          <h2>Your Loans</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Item Type</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Borrowed At</th>
+                <th>Due At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loans.map((loan, index) => (
+                <tr key={index}>
+                  <td>{loan.FirstName}</td>
+                  <td>{loan.LastName}</td>
+                  <td>{loan.ItemType}</td>
+                  <td>{loan.Title}</td>
+                  <td>{loan.Author}</td>
+                  <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
+                  <td>{new Date(loan.DueAT).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button onClick={navigateToHome}>Back to Home</button>
         </div>
       )}
     </div>

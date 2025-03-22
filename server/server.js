@@ -24,7 +24,7 @@ app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
 
   pool.query(
-    'SELECT FirstName, Role FROM USER WHERE Email = ? AND Password = ?',
+    'SELECT UserID, FirstName, Role FROM USER WHERE Email = ? AND Password = ?',
     [email, password],
     (err, results) => {
       if (err) {
@@ -80,22 +80,26 @@ app.get('/api', (req, res) => {
 });
 
 app.get('/api/books', (req, res) => {
-  pool.query('SELECT B.Title, B.Author, B.Genre, B.PublicationYear, I.AvailableCopies FROM BOOK AS B, BOOK_INVENTORY AS I WHERE B.BookID = I.BookID', (err, results) => {
-    if (err) {
-      console.error("Error executing query:", err);
-      res.status(500).json({ error: "Internal server error" });
-      return;
+  pool.query(
+    'SELECT B.BookID, B.Title, B.Author, B.Genre, B.PublicationYear, I.AvailableCopies FROM BOOK AS B, BOOK_INVENTORY AS I WHERE B.BookID = I.BookID',
+    (err, results) => {
+      if (err) {
+        console.error("Error executing query:", err);
+        res.status(500).json({ error: "Internal server error" });
+        return;
+      }
+      const books = results.map(book => ({
+        bookID: book.BookID, // Include BookID
+        title: book.Title,
+        author: book.Author,
+        genre: book.Genre,
+        year: book.PublicationYear,
+        copies: book.AvailableCopies
+      }));
+      console.log("Books sent to frontend:", books); // Log the mapped results
+      res.json(books); // Send the mapped results to the frontend
     }
-    const books = results.map(book => ({
-      title: book.Title,
-      author: book.Author,
-      genre: book.Genre,
-      year: book.PublicationYear,
-      copies: book.AvailableCopies
-    }));
-    console.log("Books sent to frontend:", books); // Log the mapped results
-    res.json(books); // Send the mapped results to the frontend
-  });
+  );
 });
 
 app.post('/api/addBook', (req, res) => {
@@ -152,6 +156,98 @@ app.post('/api/addBook', (req, res) => {
       );
     }
   );
+});
+
+app.post('/api/confirmLoan', (req, res) => {
+  const { BookID, UserID, Role } = req.body; // Receive UserID and Role from the frontend
+  console.log("Received BookID for loan confirmation:", BookID);
+
+  const decrementQuery = `
+    UPDATE BOOK_INVENTORY
+    SET AvailableCopies = AvailableCopies - 1
+    WHERE BookID = ? AND AvailableCopies > 0
+  `;
+
+  const insertLoanQuery = `
+    INSERT INTO LOAN (UserID, ItemType, ItemID, BorrowedAt, DueAT)
+    VALUES (?, 'Book', ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY))
+  `;
+
+  // Determine the loan period based on the user's role
+  const loanPeriod = Role === 'Student' ? 7 : 14;
+
+  // Start a transaction
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting database connection:', err);
+      res.status(500).json({ success: false, error: 'Database connection error' });
+      return;
+    }
+
+    connection.beginTransaction((err) => {
+      if (err) {
+        console.error('Error starting transaction:', err);
+        connection.release();
+        res.status(500).json({ success: false, error: 'Transaction error' });
+        return;
+      }
+
+      // Decrement AvailableCopies
+      connection.query(decrementQuery, [BookID], (err, results) => {
+        if (err || results.affectedRows === 0) {
+          console.error('Error decrementing AvailableCopies or no rows affected:', err);
+          connection.rollback(() => connection.release());
+          res.status(400).json({ success: false, error: 'No available copies to loan' });
+          return;
+        }
+
+        // Insert into LOAN table
+        connection.query(insertLoanQuery, [UserID, BookID, loanPeriod], (err, results) => {
+          if (err) {
+            console.error('Error inserting into LOAN table:', err);
+            connection.rollback(() => connection.release());
+            res.status(500).json({ success: false, error: 'Failed to create loan record' });
+            return;
+          }
+
+          // Commit the transaction
+          connection.commit((err) => {
+            if (err) {
+              console.error('Error committing transaction:', err);
+              connection.rollback(() => connection.release());
+              res.status(500).json({ success: false, error: 'Transaction commit error' });
+              return;
+            }
+
+            connection.release();
+            res.json({ success: true });
+          });
+        });
+      });
+    });
+  });
+});
+
+app.get('/api/loans/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT U.FirstName, U.LastName, L.ItemType, B.Title, B.Author, L.BorrowedAt, L.DueAT
+    FROM LOAN AS L
+    JOIN USER AS U ON L.UserID = U.UserID
+    JOIN BOOK AS B ON L.ItemID = B.BookID
+    WHERE L.UserID = ?
+  `;
+
+  pool.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching loans:', err);
+      res.status(500).json({ success: false, error: 'Failed to fetch loans' });
+      return;
+    }
+
+    res.json({ success: true, loans: results });
+  });
 });
 
 app.listen(5000, () => {
