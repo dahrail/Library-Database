@@ -20,6 +20,23 @@ body {
   align-items: center;
   min-height: 100vh;
   padding: 20px;
+  background-image: url('./FuturisticLibrary.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* Add a dark overlay to improve form readability */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
 }
 
 .login-form {
@@ -28,7 +45,9 @@ body {
   padding: 30px;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
 }
 
 .login-title {
