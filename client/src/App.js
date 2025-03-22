@@ -16,7 +16,11 @@ function App() {
     Publisher: '',
     Language: '',
     Format: '',
-    ISBN: ''
+    ISBN: '',
+    BookInventoryID: '',
+    TotalCopies: '',
+    AvailableCopies: '',
+    ShelfLocation: '' // Add ShelfLocation field
   });
 
   const handleLogin = async (e) => {
@@ -268,6 +272,42 @@ function App() {
                 type="text"
                 value={newBook.ISBN}
                 onChange={(e) => setNewBook({ ...newBook, ISBN: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>BookInventoryID:</label>
+              <input
+                type="number"
+                value={newBook.BookInventoryID}
+                onChange={(e) => setNewBook({ ...newBook, BookInventoryID: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Total Copies:</label>
+              <input
+                type="number"
+                value={newBook.TotalCopies}
+                onChange={(e) => setNewBook({ ...newBook, TotalCopies: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Available Copies:</label>
+              <input
+                type="number"
+                value={newBook.AvailableCopies}
+                onChange={(e) => setNewBook({ ...newBook, AvailableCopies: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Shelf Location:</label>
+              <input
+                type="text"
+                value={newBook.ShelfLocation}
+                onChange={(e) => setNewBook({ ...newBook, ShelfLocation: e.target.value })}
                 required
               />
             </div>

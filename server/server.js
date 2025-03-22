@@ -84,25 +84,48 @@ app.post('/api/addBook', (req, res) => {
     Publisher,
     Language,
     Format,
-    ISBN
+    ISBN,
+    BookInventoryID,
+    TotalCopies,
+    AvailableCopies,
+    ShelfLocation // Add ShelfLocation field
   } = req.body;
 
-  const query = `
+  const bookQuery = `
     INSERT INTO BOOK (BookID, Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
+  const inventoryQuery = `
+    INSERT INTO BOOK_INVENTORY (BookInventoryID, BookID, TotalCopies, AvailableCopies, ShelfLocation)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  // Insert into BOOK table
   pool.query(
-    query,
+    bookQuery,
     [BookID, Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
-    (err, results) => {
+    (err, bookResults) => {
       if (err) {
         console.error('Error inserting book:', err);
         res.status(500).json({ success: false, error: 'Failed to add book' });
         return;
       }
 
-      res.json({ success: true });
+      // Insert into BOOK_INVENTORY table
+      pool.query(
+        inventoryQuery,
+        [BookInventoryID, BookID, TotalCopies, AvailableCopies, ShelfLocation],
+        (err, inventoryResults) => {
+          if (err) {
+            console.error('Error inserting book inventory:', err);
+            res.status(500).json({ success: false, error: 'Failed to add book inventory' });
+            return;
+          }
+
+          res.json({ success: true });
+        }
+      );
     }
   );
 });
