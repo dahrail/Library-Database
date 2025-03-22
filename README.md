@@ -3,7 +3,7 @@
 This project was created for the course Database Systems (3380) at the University of Houston. The objective of our design was to create a library database website named BookFinder where users such as Faculty, Admin, and Student are able to use the library website.
 
 ## About 
-BookFinder is our custom-made library management system created a university library, which have users such as students, faculty, and administrators. It provides them a digital interface for browsing and managing books, music, and electronics. Since there are three roles with different access to the website, there will exist special features where each role has different checkouts, waitlists, fines, and admin tasks. The website will have triggers and data reports.
+BookFinder is our custom-made library management system for a university library, which have users such as students, faculty, and administrators. It provides them a digital interface for browsing and managing books, music, and electronics. Since there are three roles with different access to the website, there will exist special features where each role has different checkouts, waitlists, fines, and admin tasks. The website will have triggers and data reports.
 
 ## Technologies Used:
 
