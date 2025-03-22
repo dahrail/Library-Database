@@ -44,7 +44,6 @@ npm start
 ```bash
 Backend:
 cd server
-npm install express mysql cors nodemon
 npm install react react-dom
 npm start
 ```
