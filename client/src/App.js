@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './App.css'; // Make sure CSS is imported
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
@@ -243,29 +244,37 @@ function App() {
   return (
     <div>
       {currentScreen === 'login' && (
-        <form onSubmit={handleLogin}>
-          <h2>Login</h2>
-          <div>
-            <label>Email:</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label>Password:</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit">Login</button>
-          <button type="button" onClick={navigateToRegister}>Register</button> {/* Add this button */}
-        </form>
+        <div className="login-container">
+          <form onSubmit={handleLogin} className="login-form">
+            <h2 className="login-title">Library Login</h2>
+            <div className="form-group">
+              <label>Email:</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="form-input"
+                placeholder="Enter your email"
+              />
+            </div>
+            <div className="form-group">
+              <label>Password:</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="form-input"
+                placeholder="Enter your password"
+              />
+            </div>
+            <div className="form-buttons">
+              <button type="submit" className="btn btn-primary">Login</button>
+              <button type="button" onClick={navigateToRegister} className="btn btn-secondary">Register</button>
+            </div>
+          </form>
+        </div>
       )}
 
       {currentScreen === 'welcome' && isLoggedIn && (
