@@ -241,12 +241,49 @@ function App() {
     }
   };
 
+  // Navigation bar component
+  const TopBar = () => (
+    <div className="top-bar">
+      <div className="top-bar-content">
+        <div className="logo">BookFinder</div>
+        
+        {/* Navigation buttons */}
+        <div className="nav-buttons">
+          <button className="nav-button">Browse & Borrow</button>
+          <button className="nav-button">Media</button>
+          <button className="nav-button">Electronics</button>
+          <button className="nav-button">Events</button>
+        </div>
+        
+        {isLoggedIn && userData && (
+          <div className="user-info">
+            <span>Hello, {userData.FirstName}</span>
+            <button 
+              className="logout-button"
+              onClick={() => {
+                setIsLoggedIn(false);
+                setUserData(null);
+                setCurrentScreen('login');
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <div>
+    <div className="app-container">
+      {/* Show TopBar on all screens */}
+      <TopBar />
+      
       {currentScreen === 'login' && (
         <div className="login-container">
           <form onSubmit={handleLogin} className="login-form">
-            <h2 className="login-title">Library Login</h2>
+            <h2 className="login-title">BookFinder</h2>
+            <p className="login-subtitle">University Library Portal</p>
             <div className="form-group">
               <label>Email:</label>
               <input
@@ -278,7 +315,7 @@ function App() {
       )}
 
       {currentScreen === 'welcome' && isLoggedIn && (
-        <div>
+        <div className="content-container">
           <h2>Welcome!</h2>
           <p>
             You are logged in as <strong>{userData.FirstName}</strong> with role{' '}
@@ -289,7 +326,7 @@ function App() {
       )}
 
       {currentScreen === 'home' && (
-        <div>
+        <div className="content-container">
           <h2>Team 7 Library (Role: {userData.Role})</h2>
           <button onClick={navigateToBooks}>Books</button>
           <button onClick={navigateToLoans}>Loans</button>
@@ -301,7 +338,7 @@ function App() {
       )}
 
       {currentScreen === 'books' && (
-        <div>
+        <div className="content-container">
           <h2>Books</h2>
           <table>
             <thead>
@@ -356,7 +393,7 @@ function App() {
       )}
 
       {currentScreen === 'loan' && selectedBook && (
-        <div>
+        <div className="content-container">
           <h2>Loan Screen</h2>
           <p>Checking out a loan for book: <strong>{selectedBook.title}</strong></p>
           <p>
@@ -369,7 +406,7 @@ function App() {
       )}
 
       {currentScreen === 'addBook' && (
-        <div>
+        <div className="content-container">
           <h2>Add New Book</h2>
           <form onSubmit={handleAddBook}>
             <div>
@@ -490,7 +527,7 @@ function App() {
       )}
 
       {currentScreen === 'register' && (
-        <div>
+        <div className="content-container">
           <h2>Register</h2>
           <form onSubmit={handleRegister}>
             <div>
@@ -576,7 +613,7 @@ function App() {
       )}
 
       {currentScreen === 'loans' && (
-        <div>
+        <div className="content-container">
           <h2>Your Loans</h2>
           {loans.length === 0 ? (
             <p>You have no loan history.</p>
@@ -613,7 +650,7 @@ function App() {
       )}
 
       {currentScreen === 'hold' && selectedBook && (
-        <div>
+        <div className="content-container">
           <h2>Hold Screen</h2>
           <p>You are placing a hold for the book: <strong>{selectedBook.title}</strong></p>
           <p>We will notify you when the book becomes available.</p>
@@ -623,7 +660,7 @@ function App() {
       )}
 
       {currentScreen === 'holds' && (
-        <div>
+        <div className="content-container">
           <h2>Your Holds</h2>
           {holds.length === 0 ? (
             <p>You have no active holds.</p>

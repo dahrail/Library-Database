@@ -7,13 +7,119 @@
   --dark-color: #34495e;
   --error-color: #e74c3c;
   --success-color: #2ecc71;
+  --top-bar-height: 64px;
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f5f7fa;
+  margin: 0;
+  padding: 0;
 }
 
+/* TopBar styles */
+.top-bar {
+  height: var(--top-bar-height);
+  background: #505050; /* Changed to solid gray */
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.top-bar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: white; /* Changed to solid white instead of gradient */
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  -webkit-text-fill-color: white; /* Override previous gradient styling */
+  margin-left: -100px; /* Add negative margin to move the logo to the left */
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logout-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Navigation buttons styles */
+.nav-buttons {
+  display: flex;
+  gap: 12px;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.nav-button {
+  background-color: transparent;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.nav-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.nav-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments for the navigation buttons */
+@media (max-width: 800px) {
+  .nav-buttons {
+    display: none; /* Hide navigation on small screens */
+  }
+}
+
+/* Content container for all screens except login */
+.content-container {
+  padding: 20px;
+  margin-top: var(--top-bar-height);
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* App container */
+.app-container {
+  min-height: 100vh;
+}
+
+/* Login page styling adjustments */
 .login-container {
   display: flex;
   justify-content: center;
@@ -53,8 +159,17 @@ body {
 .login-title {
   text-align: center;
   color: var(--dark-color);
+  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.login-subtitle {
+  text-align: center;
+  color: var(--secondary-color);
   margin-bottom: 25px;
-  font-size: 24px;
+  font-size: 16px;
+  opacity: 0.8;
 }
 
 .form-group {
@@ -139,5 +254,21 @@ body {
   
   .btn {
     width: 100%;
+  }
+}
+
+/* Add responsiveness for the top bar */
+@media (max-width: 600px) {
+  .top-bar-content {
+    padding: 0 10px;
+  }
+  
+  .logo {
+    font-size: 20px;
+  }
+  
+  .user-info {
+    font-size: 14px;
+    gap: 8px;
   }
 }
