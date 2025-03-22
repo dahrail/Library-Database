@@ -293,7 +293,7 @@ app.get('/api/holds/:userId', (req, res) => {
     FROM USER AS U
     JOIN HOLD AS H ON U.UserID = H.UserID
     JOIN BOOK AS B ON H.ItemID = B.BookID
-    WHERE U.UserID = ? AND H.HoldStatus = 'Pending'
+    WHERE U.UserID = ? AND H.HoldStatus IN ('Pending', 'Active') -- Include both Pending and Active holds
   `;
 
   pool.query(query, [userId], (err, results) => {
