@@ -34,6 +34,7 @@ function App() {
   const [selectedBook, setSelectedBook] = useState(null); // Store the selected book
   const [loans, setLoans] = useState([]); // Store the list of loans
   const [holds, setHolds] = useState([]); // Store the list of holds
+  const [selectedLoan, setSelectedLoan] = useState(null); // Store the selected loan
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -232,6 +233,37 @@ function App() {
       console.error('Error placing hold:', error);
       alert('An error occurred while placing the hold.');
     }
+  };
+
+  const handleConfirmReturn = async () => {
+    try {
+      console.log('Sending LoanID to backend:', selectedLoan.LoanID); // Log the LoanID being sent
+
+      const response = await fetch('/api/confirmReturn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ LoanID: selectedLoan.LoanID }) // Send the LoanID to the backend
+      });
+
+      const data = await response.json();
+
+      console.log('Response from backend:', data); // Log the response from the backend
+
+      if (data.success) {
+        alert(`The item "${selectedLoan.Title}" has been successfully returned.`);
+        setCurrentScreen('loans'); // Navigate back to the loans screen
+      } else {
+        alert('Failed to return the item: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error confirming return:', error);
+      alert('An error occurred while confirming the return.');
+    }
+  };
+
+  const navigateToReturnConfirmation = (loan) => {
+    setSelectedLoan(loan); // Set the selected loan
+    setCurrentScreen('returnConfirmation'); // Navigate to the return confirmation screen
   };
 
   // Navigation bar component
@@ -610,6 +642,19 @@ function App() {
                     <td>{loan.Author}</td>
                     <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
                     <td>{new Date(loan.DueAT).toLocaleString()}</td>
+                    <td>
+                      <button
+                        onClick={() => navigateToReturnConfirmation(loan)} // Pass the loan object
+                        style={{
+                          backgroundColor: loan.ReturnedAt ? 'gray' : 'red',
+                          color: 'white',
+                          cursor: loan.ReturnedAt ? 'not-allowed' : 'pointer',
+                        }}
+                        disabled={!!loan.ReturnedAt} // Disable if already returned
+                      >
+                        Return
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -661,6 +706,17 @@ function App() {
             </table>
           )}
           <button onClick={navigateToHome}>Back to Home</button>
+        </div>
+      )}
+
+      {currentScreen === 'returnConfirmation' && selectedLoan && (
+        <div>
+          <h2>Return Confirmation</h2>
+          <p>
+            Are you sure you want to return the item: <strong>{selectedLoan.Title}</strong> by <strong>{selectedLoan.Author}</strong>?
+          </p>
+          <button onClick={() => setCurrentScreen('loans')}>Cancel</button>
+          <button onClick={handleConfirmReturn}>Confirm Return</button>
         </div>
       )}
     </div>

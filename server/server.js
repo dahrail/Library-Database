@@ -315,30 +315,72 @@ app.post('/api/confirmReturn', (req, res) => {
 
   console.log('Received LoanID from frontend:', LoanID); // Log the LoanID received
 
-  const query = `
+  // Query to update the loan's ReturnedAt field
+  const updateLoanQuery = `
     UPDATE LOAN
     SET ReturnedAt = NOW() 
     WHERE LoanID = ?
   `;
 
-  console.log('Executing query:', query, 'with LoanID:', LoanID); // Log the query and LoanID
+  // Query to increment AvailableCopies in BOOK_INVENTORY
+  const incrementCopiesQuery = `
+    UPDATE BOOK_INVENTORY
+    SET AvailableCopies = AvailableCopies + 1
+    WHERE BookID = (
+      SELECT ItemID FROM LOAN WHERE LoanID = ? AND ItemType = 'Book'
+    )
+  `;
 
-  pool.query(query, [LoanID], (err, results) => {
+  // Execute both queries in sequence
+  pool.getConnection((err, connection) => {
     if (err) {
-      console.error('Error updating loan:', err); // Log any errors
-      res.status(500).json({ success: false, error: 'Failed to update loan' });
+      console.error('Error getting database connection:', err);
+      res.status(500).json({ success: false, error: 'Database connection error' });
       return;
     }
 
-    console.log('Query results:', results); // Log the results of the query
+    connection.beginTransaction((err) => {
+      if (err) {
+        console.error('Error starting transaction:', err);
+        connection.release();
+        res.status(500).json({ success: false, error: 'Transaction error' });
+        return;
+      }
 
-    if (results.affectedRows === 0) {
-      console.warn('No rows affected. Loan not found or already returned.'); // Log a warning if no rows were updated
-      res.status(404).json({ success: false, error: 'Loan not found or already returned' });
-      return;
-    }
+      // Update the loan's ReturnedAt field
+      connection.query(updateLoanQuery, [LoanID], (err, results) => {
+        if (err || results.affectedRows === 0) {
+          console.error('Error updating loan or no rows affected:', err);
+          connection.rollback(() => connection.release());
+          res.status(404).json({ success: false, error: 'Loan not found or already returned' });
+          return;
+        }
 
-    res.json({ success: true });
+        // Increment AvailableCopies in BOOK_INVENTORY
+        connection.query(incrementCopiesQuery, [LoanID], (err, results) => {
+          if (err || results.affectedRows === 0) {
+            console.error('Error incrementing AvailableCopies or no rows affected:', err);
+            connection.rollback(() => connection.release());
+            res.status(500).json({ success: false, error: 'Failed to update book inventory' });
+            return;
+          }
+
+          // Commit the transaction
+          connection.commit((err) => {
+            if (err) {
+              console.error('Error committing transaction:', err);
+              connection.rollback(() => connection.release());
+              res.status(500).json({ success: false, error: 'Transaction commit error' });
+              return;
+            }
+
+            console.log('Loan returned and book inventory updated successfully');
+            connection.release();
+            res.json({ success: true });
+          });
+        });
+      });
+    });
   });
 });
 
