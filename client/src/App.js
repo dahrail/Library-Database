@@ -34,6 +34,7 @@ function App() {
   const [selectedBook, setSelectedBook] = useState(null); // Store the selected book
   const [loans, setLoans] = useState([]); // Store the list of loans
   const [holds, setHolds] = useState([]); // Store the list of holds
+  const [selectedLoan, setSelectedLoan] = useState(null); // Store the selected loan
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -241,39 +242,6 @@ function App() {
     }
   };
 
-  // Navigation bar component
-  const TopBar = () => (
-    <div className="top-bar">
-      <div className="top-bar-content">
-        <div className="logo">BookFinder</div>
-        
-        {/* Navigation buttons */}
-        <div className="nav-buttons">
-          <button className="nav-button">Browse & Borrow</button>
-          <button className="nav-button">Media</button>
-          <button className="nav-button">Electronics</button>
-          <button className="nav-button">Events</button>
-        </div>
-        
-        {isLoggedIn && userData && (
-          <div className="user-info">
-            <span>Hello, {userData.FirstName}</span>
-            <button 
-              className="logout-button"
-              onClick={() => {
-                setIsLoggedIn(false);
-                setUserData(null);
-                setCurrentScreen('login');
-              }}
-            >
-              Logout
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   return (
     <div className="app-container">
       {/* Show TopBar on all screens */}
@@ -330,7 +298,7 @@ function App() {
           <h2>Team 7 Library (Role: {userData.Role})</h2>
           <button onClick={navigateToBooks}>Books</button>
           <button onClick={navigateToLoans}>Loans</button>
-          <button onClick={navigateToHolds}>Holds</button> {/* Add Holds button */}
+          <button onClick={navigateToHolds}>Holds</button>
           {userData.Role === 'Admin' && (
             <button onClick={navigateToAddBook}>Add New Book</button>
           )}
@@ -628,6 +596,8 @@ function App() {
                   <th>Author</th>
                   <th>Borrowed At</th>
                   <th>Due At</th>
+                  <th>Returned At</th> {/* New column for ReturnedAt */}
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -640,6 +610,27 @@ function App() {
                     <td>{loan.Author}</td>
                     <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
                     <td>{new Date(loan.DueAT).toLocaleString()}</td>
+                    <td>
+                      {loan.ReturnedAt
+                        ? new Date(loan.ReturnedAt).toLocaleString() // Display the datetime if ReturnedAt is not null
+                        : 'Yet to be returned'} {/* Display "Yet to be returned" if null */}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => navigateToReturnConfirmation(loan)}
+                        disabled={!!loan.ReturnedAt} // Disable the button if ReturnedAt is not null
+                        style={{
+                          backgroundColor: loan.ReturnedAt ? 'gray' : 'red', // Gray if returned, red otherwise
+                          color: 'white',
+                          cursor: loan.ReturnedAt ? 'not-allowed' : 'pointer',
+                          border: 'none',
+                          padding: '5px 10px',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        Return
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -691,6 +682,17 @@ function App() {
             </table>
           )}
           <button onClick={navigateToHome}>Back to Home</button>
+        </div>
+      )}
+
+      {currentScreen === 'returnConfirmation' && selectedLoan && (
+        <div>
+          <h2>Return Confirmation</h2>
+          <p>
+            Are you sure you want to return the item: <strong>{selectedLoan.Title}</strong> by <strong>{selectedLoan.Author}</strong>?
+          </p>
+          <button onClick={() => setCurrentScreen('loans')}>Cancel</button> {/* Cancel button first */}
+          <button onClick={handleConfirmReturn}>Confirm Return</button> {/* Confirm button second */}
         </div>
       )}
     </div>

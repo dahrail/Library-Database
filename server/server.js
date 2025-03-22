@@ -251,7 +251,16 @@ app.get('/api/loans/:userId', (req, res) => {
   const { userId } = req.params;
 
   const query = `
-    SELECT U.FirstName, U.LastName, L.ItemType, B.Title, B.Author, L.BorrowedAt, L.DueAT
+    SELECT 
+      L.LoanID, 
+      U.FirstName, 
+      U.LastName, 
+      L.ItemType, 
+      B.Title, 
+      B.Author, 
+      L.BorrowedAt, 
+      L.DueAT, 
+      L.ReturnedAt
     FROM LOAN AS L
     JOIN USER AS U ON L.UserID = U.UserID
     JOIN BOOK AS B ON L.ItemID = B.BookID
@@ -265,6 +274,7 @@ app.get('/api/loans/:userId', (req, res) => {
       return;
     }
 
+    console.log('Loans fetched for user:', userId, results); // Log the results
     res.json({ success: true, loans: results });
   });
 });
@@ -297,6 +307,38 @@ app.get('/api/holds/:userId', (req, res) => {
     console.log('Holds fetched for user:', userId, results);
 
     res.json({ success: true, holds: results });
+  });
+});
+
+app.post('/api/confirmReturn', (req, res) => {
+  const { LoanID } = req.body; // Receive the LoanID from the frontend
+
+  console.log('Received LoanID from frontend:', LoanID); // Log the LoanID received
+
+  const query = `
+    UPDATE LOAN
+    SET ReturnedAt = NOW() 
+    WHERE LoanID = ?
+  `;
+
+  console.log('Executing query:', query, 'with LoanID:', LoanID); // Log the query and LoanID
+
+  pool.query(query, [LoanID], (err, results) => {
+    if (err) {
+      console.error('Error updating loan:', err); // Log any errors
+      res.status(500).json({ success: false, error: 'Failed to update loan' });
+      return;
+    }
+
+    console.log('Query results:', results); // Log the results of the query
+
+    if (results.affectedRows === 0) {
+      console.warn('No rows affected. Loan not found or already returned.'); // Log a warning if no rows were updated
+      res.status(404).json({ success: false, error: 'Loan not found or already returned' });
+      return;
+    }
+
+    res.json({ success: true });
   });
 });
 
