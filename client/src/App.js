@@ -34,7 +34,6 @@ function App() {
   const [selectedBook, setSelectedBook] = useState(null); // Store the selected book
   const [loans, setLoans] = useState([]); // Store the list of loans
   const [holds, setHolds] = useState([]); // Store the list of holds
-  const [selectedLoan, setSelectedLoan] = useState(null); // Store the selected loan
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -155,18 +154,11 @@ function App() {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // Combine the phone number parts
-    const fullPhoneNumber = `${newUser.PhonePart1}${newUser.PhonePart2}${newUser.PhonePart3}`;
-
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ...newUser, 
-          PhoneNumber: fullPhoneNumber, // Send the combined phone number
-          Role: 'Student' // Add Role as 'Student'
-        })
+        body: JSON.stringify({ ...newUser, Role: 'Student' }) // Add Role as 'Student'
       });
 
       const data = await response.json();
@@ -242,44 +234,49 @@ function App() {
     }
   };
 
-  const navigateToReturnConfirmation = (loan) => {
-    console.log('Navigating to ReturnConfirmation with loan:', loan); // Log the loan object
-    setSelectedLoan(loan); // Store the selected loan, including LoanID
-    setCurrentScreen('returnConfirmation'); // Navigate to the return confirmation screen
-  };
-
-  const handleConfirmReturn = async () => {
-    try {
-      console.log('Sending LoanID to backend:', selectedLoan.LoanID); // Log the LoanID being sent
-
-      const response = await fetch('/api/confirmReturn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ LoanID: selectedLoan.LoanID }) // Send the LoanID to the backend
-      });
-
-      const data = await response.json();
-
-      console.log('Response from backend:', data); // Log the response from the backend
-
-      if (data.success) {
-        alert(`The item "${selectedLoan.Title}" has been successfully returned.`);
-        setCurrentScreen('loans'); // Navigate back to the loans screen
-      } else {
-        alert('Failed to return the item: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error confirming return:', error);
-      alert('An error occurred while confirming the return.');
-    }
-  };
+  // Navigation bar component
+  const TopBar = () => (
+    <div className="top-bar">
+      <div className="top-bar-content">
+        <div className="logo">BookFinder</div>
+        
+        {/* Navigation buttons */}
+        <div className="nav-buttons">
+          <button className="nav-button">Browse & Borrow</button>
+          <button className="nav-button">Media</button>
+          <button className="nav-button">Electronics</button>
+          <button className="nav-button">Events</button>
+        </div>
+        
+        {isLoggedIn && userData && (
+          <div className="user-info">
+            <span>Hello, {userData.FirstName}</span>
+            <button 
+              className="logout-button"
+              onClick={() => {
+                setIsLoggedIn(false);
+                setUserData(null);
+                setCurrentScreen('login');
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
-    <div>
+    <div className="app-container">
+      {/* Show TopBar on all screens */}
+      <TopBar />
+      
       {currentScreen === 'login' && (
         <div className="login-container">
           <form onSubmit={handleLogin} className="login-form">
-            <h2 className="login-title">Library Login</h2>
+            <h2 className="login-title">BookFinder</h2>
+            <p className="login-subtitle">University Library Portal</p>
             <div className="form-group">
               <label>Email:</label>
               <input
@@ -311,7 +308,7 @@ function App() {
       )}
 
       {currentScreen === 'welcome' && isLoggedIn && (
-        <div>
+        <div className="content-container">
           <h2>Welcome!</h2>
           <p>
             You are logged in as <strong>{userData.FirstName}</strong> with role{' '}
@@ -322,11 +319,11 @@ function App() {
       )}
 
       {currentScreen === 'home' && (
-        <div>
+        <div className="content-container">
           <h2>Team 7 Library (Role: {userData.Role})</h2>
           <button onClick={navigateToBooks}>Books</button>
           <button onClick={navigateToLoans}>Loans</button>
-          <button onClick={navigateToHolds}>Holds</button>
+          <button onClick={navigateToHolds}>Holds</button> {/* Add Holds button */}
           {userData.Role === 'Admin' && (
             <button onClick={navigateToAddBook}>Add New Book</button>
           )}
@@ -334,7 +331,7 @@ function App() {
       )}
 
       {currentScreen === 'books' && (
-        <div>
+        <div className="content-container">
           <h2>Books</h2>
           <table>
             <thead>
@@ -389,7 +386,7 @@ function App() {
       )}
 
       {currentScreen === 'loan' && selectedBook && (
-        <div>
+        <div className="content-container">
           <h2>Loan Screen</h2>
           <p>Checking out a loan for book: <strong>{selectedBook.title}</strong></p>
           <p>
@@ -402,7 +399,7 @@ function App() {
       )}
 
       {currentScreen === 'addBook' && (
-        <div>
+        <div className="content-container">
           <h2>Add New Book</h2>
           <form onSubmit={handleAddBook}>
             <div>
@@ -523,7 +520,7 @@ function App() {
       )}
 
       {currentScreen === 'register' && (
-        <div>
+        <div className="content-container">
           <h2>Register</h2>
           <form onSubmit={handleRegister}>
             <div>
@@ -573,34 +570,11 @@ function App() {
             </div>
             <div>
               <label>Phone Number:</label>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  maxLength="3"
-                  value={newUser.PhonePart1 || ''}
-                  onChange={(e) => setNewUser({ ...newUser, PhonePart1: e.target.value })}
-                  required
-                  style={{ width: '50px', marginRight: '5px' }}
-                />
-                -
-                <input
-                  type="text"
-                  maxLength="3"
-                  value={newUser.PhonePart2 || ''}
-                  onChange={(e) => setNewUser({ ...newUser, PhonePart2: e.target.value })}
-                  required
-                  style={{ width: '50px', margin: '0 5px' }}
-                />
-                -
-                <input
-                  type="text"
-                  maxLength="4"
-                  value={newUser.PhonePart3 || ''}
-                  onChange={(e) => setNewUser({ ...newUser, PhonePart3: e.target.value })}
-                  required
-                  style={{ width: '70px', marginLeft: '5px' }}
-                />
-              </div>
+              <input
+                type="text"
+                value={newUser.PhoneNumber}
+                onChange={(e) => setNewUser({ ...newUser, PhoneNumber: e.target.value })}
+              />
             </div>
             <button type="submit">Confirm</button>
           </form>
@@ -609,7 +583,7 @@ function App() {
       )}
 
       {currentScreen === 'loans' && (
-        <div>
+        <div className="content-container">
           <h2>Your Loans</h2>
           {loans.length === 0 ? (
             <p>You have no loan history.</p>
@@ -624,8 +598,6 @@ function App() {
                   <th>Author</th>
                   <th>Borrowed At</th>
                   <th>Due At</th>
-                  <th>Returned At</th> {/* New column for ReturnedAt */}
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -638,27 +610,6 @@ function App() {
                     <td>{loan.Author}</td>
                     <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
                     <td>{new Date(loan.DueAT).toLocaleString()}</td>
-                    <td>
-                      {loan.ReturnedAt
-                        ? new Date(loan.ReturnedAt).toLocaleString() // Display the datetime if ReturnedAt is not null
-                        : 'Yet to be returned'} {/* Display "Yet to be returned" if null */}
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => navigateToReturnConfirmation(loan)}
-                        disabled={!!loan.ReturnedAt} // Disable the button if ReturnedAt is not null
-                        style={{
-                          backgroundColor: loan.ReturnedAt ? 'gray' : 'red', // Gray if returned, red otherwise
-                          color: 'white',
-                          cursor: loan.ReturnedAt ? 'not-allowed' : 'pointer',
-                          border: 'none',
-                          padding: '5px 10px',
-                          borderRadius: '4px',
-                        }}
-                      >
-                        Return
-                      </button>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -669,7 +620,7 @@ function App() {
       )}
 
       {currentScreen === 'hold' && selectedBook && (
-        <div>
+        <div className="content-container">
           <h2>Hold Screen</h2>
           <p>You are placing a hold for the book: <strong>{selectedBook.title}</strong></p>
           <p>We will notify you when the book becomes available.</p>
@@ -679,7 +630,7 @@ function App() {
       )}
 
       {currentScreen === 'holds' && (
-        <div>
+        <div className="content-container">
           <h2>Your Holds</h2>
           {holds.length === 0 ? (
             <p>You have no active holds.</p>
@@ -710,17 +661,6 @@ function App() {
             </table>
           )}
           <button onClick={navigateToHome}>Back to Home</button>
-        </div>
-      )}
-
-      {currentScreen === 'returnConfirmation' && selectedLoan && (
-        <div>
-          <h2>Return Confirmation</h2>
-          <p>
-            Are you sure you want to return the item: <strong>{selectedLoan.Title}</strong> by <strong>{selectedLoan.Author}</strong>?
-          </p>
-          <button onClick={() => setCurrentScreen('loans')}>Cancel</button> {/* Cancel button first */}
-          <button onClick={handleConfirmReturn}>Confirm Return</button> {/* Confirm button second */}
         </div>
       )}
     </div>
