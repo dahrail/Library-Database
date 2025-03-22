@@ -228,6 +228,25 @@ app.post('/api/confirmLoan', (req, res) => {
   });
 });
 
+app.post('/api/confirmHold', (req, res) => {
+  const { UserID, ItemType, ItemID } = req.body;
+
+  const query = `
+    INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAT, HoldStatus)
+    VALUES (?, ?, ?, NOW(), 'Pending')
+  `;
+
+  pool.query(query, [UserID, ItemType, ItemID], (err, results) => {
+    if (err) {
+      console.error('Error inserting hold:', err);
+      res.status(500).json({ success: false, error: 'Failed to place hold' });
+      return;
+    }
+
+    res.json({ success: true });
+  });
+});
+
 app.get('/api/loans/:userId', (req, res) => {
   const { userId } = req.params;
 
@@ -247,6 +266,37 @@ app.get('/api/loans/:userId', (req, res) => {
     }
 
     res.json({ success: true, loans: results });
+  });
+});
+
+app.get('/api/holds/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT 
+      U.FirstName, 
+      U.LastName, 
+      B.Title, 
+      B.Author, 
+      DATE_FORMAT(CONVERT_TZ(H.RequestAT, '+00:00', @@session.time_zone), '%Y-%m-%dT%H:%i:%sZ') AS RequestAT, 
+      H.HoldStatus
+    FROM USER AS U
+    JOIN HOLD AS H ON U.UserID = H.UserID
+    JOIN BOOK AS B ON H.ItemID = B.BookID
+    WHERE U.UserID = ? AND H.HoldStatus = 'Pending'
+  `;
+
+  pool.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching holds:', err);
+      res.status(500).json({ success: false, error: 'Failed to fetch holds' });
+      return;
+    }
+
+    // Log the results being sent to the frontend
+    console.log('Holds fetched for user:', userId, results);
+
+    res.json({ success: true, holds: results });
   });
 });
 

@@ -32,6 +32,7 @@ function App() {
   });
   const [selectedBook, setSelectedBook] = useState(null); // Store the selected book
   const [loans, setLoans] = useState([]); // Store the list of loans
+  const [holds, setHolds] = useState([]); // Store the list of holds
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -105,6 +106,23 @@ function App() {
     } catch (error) {
       console.error('Error fetching loans:', error);
       alert('An error occurred while fetching loans.');
+    }
+  };
+
+  const navigateToHolds = async () => {
+    try {
+      const response = await fetch(`/api/holds/${userData.UserID}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setHolds(data.holds); // Store the holds in state
+        setCurrentScreen('holds'); // Navigate to the holds screen
+      } else {
+        alert('Failed to fetch holds: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching holds:', error);
+      alert('An error occurred while fetching holds.');
     }
   };
 
@@ -184,6 +202,37 @@ function App() {
     }
   };
 
+  const navigateToHold = (book) => {
+    setSelectedBook(book); // Store the selected book
+    setCurrentScreen('hold'); // Navigate to the hold screen
+  };
+
+  const handleConfirmHold = async () => {
+    try {
+      const response = await fetch('/api/confirmHold', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          UserID: userData.UserID, // Send UserID from userData
+          ItemType: 'Book', // Set ItemType to "Book"
+          ItemID: selectedBook.bookID, // Send the selected BookID
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.success) {
+        alert('Hold placed successfully!');
+        setCurrentScreen('books'); // Navigate back to the books screen
+      } else {
+        alert('Failed to place hold: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error placing hold:', error);
+      alert('An error occurred while placing the hold.');
+    }
+  };
+
   return (
     <div>
       {currentScreen === 'login' && (
@@ -227,7 +276,8 @@ function App() {
         <div>
           <h2>Team 7 Library (Role: {userData.Role})</h2>
           <button onClick={navigateToBooks}>Books</button>
-          <button onClick={navigateToLoans}>Loans</button> {/* Add Loans button */}
+          <button onClick={navigateToLoans}>Loans</button>
+          <button onClick={navigateToHolds}>Holds</button> {/* Add Holds button */}
           {userData.Role === 'Admin' && (
             <button onClick={navigateToAddBook}>Add New Book</button>
           )}
@@ -257,17 +307,29 @@ function App() {
                   <td>{book.year}</td>
                   <td>{book.copies}</td>
                   <td>
-                    <button
-                      onClick={() => handleLoan(book)} // Pass the entire book object, including BookID
-                      disabled={book.copies === 0} // Disable button if no copies are available
-                      style={{
-                        backgroundColor: book.copies === 0 ? 'gray' : 'blue',
-                        color: 'white',
-                        cursor: book.copies === 0 ? 'not-allowed' : 'pointer',
-                      }}
-                    >
-                      Loan
-                    </button>
+                    {book.copies > 0 ? (
+                      <button
+                        onClick={() => handleLoan(book)} // Pass the book object
+                        style={{
+                          backgroundColor: 'blue',
+                          color: 'white',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Loan
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => navigateToHold(book)} // Navigate to the hold page
+                        style={{
+                          backgroundColor: 'orange',
+                          color: 'white',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Hold
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -502,6 +564,51 @@ function App() {
                     <td>{loan.Author}</td>
                     <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
                     <td>{new Date(loan.DueAT).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <button onClick={navigateToHome}>Back to Home</button>
+        </div>
+      )}
+
+      {currentScreen === 'hold' && selectedBook && (
+        <div>
+          <h2>Hold Screen</h2>
+          <p>You are placing a hold for the book: <strong>{selectedBook.title}</strong></p>
+          <p>We will notify you when the book becomes available.</p>
+          <button onClick={() => setCurrentScreen('books')}>Back to Books</button>
+          <button onClick={handleConfirmHold}>Confirm</button> {/* Add Confirm button */}
+        </div>
+      )}
+
+      {currentScreen === 'holds' && (
+        <div>
+          <h2>Your Holds</h2>
+          {holds.length === 0 ? (
+            <p>You have no active holds.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Requested At</th>
+                  <th>Hold Status</th> {/* Add HoldStatus column */}
+                </tr>
+              </thead>
+              <tbody>
+                {holds.map((hold, index) => (
+                  <tr key={index}>
+                    <td>{hold.FirstName}</td>
+                    <td>{hold.LastName}</td>
+                    <td>{hold.Title}</td>
+                    <td>{hold.Author}</td>
+                    <td>{new Date(hold.RequestAT).toLocaleString()}</td> {/* Correctly parse and format the date */}
+                    <td>{hold.HoldStatus}</td>
                   </tr>
                 ))}
               </tbody>
