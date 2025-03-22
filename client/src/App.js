@@ -242,16 +242,44 @@ function App() {
     }
   };
 
+  const navigateToReturnConfirmation = (loan) => {
+    console.log('Navigating to ReturnConfirmation with loan:', loan); // Log the loan object
+    setSelectedLoan(loan); // Store the selected loan, including LoanID
+    setCurrentScreen('returnConfirmation'); // Navigate to the return confirmation screen
+  };
+
+  const handleConfirmReturn = async () => {
+    try {
+      console.log('Sending LoanID to backend:', selectedLoan.LoanID); // Log the LoanID being sent
+
+      const response = await fetch('/api/confirmReturn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ LoanID: selectedLoan.LoanID }) // Send the LoanID to the backend
+      });
+
+      const data = await response.json();
+
+      console.log('Response from backend:', data); // Log the response from the backend
+
+      if (data.success) {
+        alert(`The item "${selectedLoan.Title}" has been successfully returned.`);
+        setCurrentScreen('loans'); // Navigate back to the loans screen
+      } else {
+        alert('Failed to return the item: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error confirming return:', error);
+      alert('An error occurred while confirming the return.');
+    }
+  };
+
   return (
-    <div className="app-container">
-      {/* Show TopBar on all screens */}
-      <TopBar />
-      
+    <div>
       {currentScreen === 'login' && (
         <div className="login-container">
           <form onSubmit={handleLogin} className="login-form">
-            <h2 className="login-title">BookFinder</h2>
-            <p className="login-subtitle">University Library Portal</p>
+            <h2 className="login-title">Library Login</h2>
             <div className="form-group">
               <label>Email:</label>
               <input
@@ -283,7 +311,7 @@ function App() {
       )}
 
       {currentScreen === 'welcome' && isLoggedIn && (
-        <div className="content-container">
+        <div>
           <h2>Welcome!</h2>
           <p>
             You are logged in as <strong>{userData.FirstName}</strong> with role{' '}
@@ -294,7 +322,7 @@ function App() {
       )}
 
       {currentScreen === 'home' && (
-        <div className="content-container">
+        <div>
           <h2>Team 7 Library (Role: {userData.Role})</h2>
           <button onClick={navigateToBooks}>Books</button>
           <button onClick={navigateToLoans}>Loans</button>
@@ -306,7 +334,7 @@ function App() {
       )}
 
       {currentScreen === 'books' && (
-        <div className="content-container">
+        <div>
           <h2>Books</h2>
           <table>
             <thead>
@@ -361,7 +389,7 @@ function App() {
       )}
 
       {currentScreen === 'loan' && selectedBook && (
-        <div className="content-container">
+        <div>
           <h2>Loan Screen</h2>
           <p>Checking out a loan for book: <strong>{selectedBook.title}</strong></p>
           <p>
@@ -374,7 +402,7 @@ function App() {
       )}
 
       {currentScreen === 'addBook' && (
-        <div className="content-container">
+        <div>
           <h2>Add New Book</h2>
           <form onSubmit={handleAddBook}>
             <div>
@@ -495,7 +523,7 @@ function App() {
       )}
 
       {currentScreen === 'register' && (
-        <div className="content-container">
+        <div>
           <h2>Register</h2>
           <form onSubmit={handleRegister}>
             <div>
@@ -581,7 +609,7 @@ function App() {
       )}
 
       {currentScreen === 'loans' && (
-        <div className="content-container">
+        <div>
           <h2>Your Loans</h2>
           {loans.length === 0 ? (
             <p>You have no loan history.</p>
@@ -641,7 +669,7 @@ function App() {
       )}
 
       {currentScreen === 'hold' && selectedBook && (
-        <div className="content-container">
+        <div>
           <h2>Hold Screen</h2>
           <p>You are placing a hold for the book: <strong>{selectedBook.title}</strong></p>
           <p>We will notify you when the book becomes available.</p>
@@ -651,7 +679,7 @@ function App() {
       )}
 
       {currentScreen === 'holds' && (
-        <div className="content-container">
+        <div>
           <h2>Your Holds</h2>
           {holds.length === 0 ? (
             <p>You have no active holds.</p>
