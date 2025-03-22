@@ -1,10 +1,9 @@
 # Team 7 Library Database Project
 
-This project was developed as part of the Database Systems (COSC 3380) course at the University of Houston. The objective was to design and implement a comprehensive database system and a full-stack website for a fictional library. The system, named Lumina Archives, integrates modern web technologies with database management to simulate the operations of a real-world library, allowing interaction between users, admins, and library resources..
+This project was created for the course Database Systems (3380) at the University of Houston. The objective of our design was to create a library database website named BookFinder where users such as Faculty, Admin, and Student are able to use the library website.
 
 ## About 
-Lumina Archives is a comprehensive library management system designed to enhance the user experience for both members and administrators. It provides a interface for browsing and managing books, music, and technology items, alongside  event management and member profile functionalities. With role-based access, the platform caters to students, faculty, and admins with tailored features such as item checkouts, waitlists, fines management, and administrative operations. The system prioritizes efficiency, accessibility, and accountability through automated triggers, dynamic reporting, and real-time updates. Whether you're exploring the catalog, managing library resources, or tracking operational data.
-
+BookFinder is our custom-made library management system created a university library, which have users such as students, faculty, and administrators. It provides them a digital interface for browsing and managing books, music, and electronics. Since there are three roles with different access to the website, there will exist special features where each role has different checkouts, waitlists, fines, and admin tasks. The website will have triggers and data reports.
 
 ## Technologies Used:
 
@@ -28,15 +27,15 @@ Lumina Archives is a comprehensive library management system designed to enhance
 
 ### Cloning the repository
 ```bash
-git clone https://github.com/kelanwu17/COSC3380-Library-Database.git
+git clone https://github.com/dahrail/Library-Database
 cd frontend
 code .
 ```
 
 ### Deploying the website
 ```bash
-cd frontend
-npm install
+cd client
+npx create-react-app .npm install react-scripts
 npm start
 ```
 
@@ -44,58 +43,40 @@ npm start
 ```bash
 Backend:
 cd backend
-npm install
-npm run dev
+npm install express mysql cors nodemon
+npm install react react-dom
+npm start
 ```
 
-Deployed Website: https://luminaarchives.vercel.app/
+Deployed Website: WIP
 
 ## 5 Project Requirements
 
 ## User Authentication for Different User Roles
-Roles and Capabilities:
+Roles and Permissions:
 
-Members:
 Students:
-Can check out 1 item per category (Books, Music, Tech) and must return items within 1 week.
+Has the ability to check out an item per category of Books, Media, and Electronics. These items must be returned in one week.
+
 Faculty: 
-Can check out 2 items per category and must return items within 2 weeks.
+Has the ability to check out 2 items per category. These must be returned in two weeks.
+
 Common capabilities:
-Browse catalogs (Books, Music, Tech).
-Check out items, reserve items, and join waitlists.
-View profile, including checked-out history, fines, and holds.
-Manage event sign-ups and check-ins.
+Browse categories, check out and reserve items, and join waitlists. View accounts where users can see their checked out items, fines, and holds. There is also manage event sign-ups and check-ins
 
 Admins:
-General Admin:
-Manage books, music, tech, events, and members (add, edit, deactivate).
-Technicians:
-Full access to manage all admin tasks, view reports, and track employee logs.
-Librarians/Assistant Librarians: 
-Can manage library items, members, and events but cannot access reports, employee logs, or manage other admins.
+Admins are able to manage books, media, electronics, events, and view members.
 
 ## Data Entry Forms
 
 Add New Data:
-Members:
-Can self-register by providing required details (e.g., name, DOB, email, role).
-Admins:
-Add new books, music, and tech items to the catalog.
-Create new events.
-Add new members to the system.
+WIP
 
 Modify Existing Data:
-Members:
-Update their profile details.
-Reserve or waitlist items from the catalog.
-Sign up for events and check-in when active.
-Admins:
-Update item details (e.g., availability, title).
-Edit member information (excluding username and password).
+WIP
 
 Delete Data:
-Admins:
-Deactivate items, events, or member accounts instead of deleting, ensuring historical accuracy.
+WIP
 
 ## Data Queries
 
@@ -103,20 +84,9 @@ Deactivate items, events, or member accounts instead of deleting, ensuring histo
 
 Catalog Search Queries:
 
-Retrieve items by title, genre, or availability status for books, music, and tech.
-Checked-Out Items Query:
+???
 
-Retrieve a list of items currently checked out, including due dates and member details.
-Member Profile Query:
-
-Retrieve member information, including checked-out history, fines, and reservations.
-Waitlist Query:
-
-Retrieve the queue for waitlisted items with member signup order.
-
-
-
-### Reports for Admins (Technician Role Only):
+### Reports for Admins:
 ### Fines Report:
 
 Displays total fines collected over time, filtered by date range.
@@ -182,31 +152,10 @@ END
 ```
 
 ### Fines Trigger
-This trigger is activated when a member fails to return a checked-out item by the due date. Once the item is returned, the trigger populates the Return Date and calculates the number of overdue days by finding the difference between the Return Date and the Due Date. The trigger then computes the total fine based on a daily overdue rate and adds this amount to the member's profile. The fine will be visible on the member's profile page once the item is returned
-```
-DELIMITER //
-CREATE DEFINER=`admin3380`@`%` TRIGGER `add_fine_on_return` 
-AFTER UPDATE ON `checkedoutbookhistory` 
-FOR EACH ROW BEGIN
-    DECLARE overdue_days INT; 
-    IF NEW.timeStampReturn IS NOT NULL AND NEW.timeStampDue < NEW.timeStampReturn THEN
-        SET overdue_days = DATEDIFF(NEW.timeStampReturn, NEW.timeStampDue);
-        
-        INSERT INTO Fines (itemId, itemType, memberId, fineAmount)
-        VALUES (NEW.bookId, 'book', NEW.memberId, overdue_days * 1);
-    END IF;
-END
+???
 ```
 
 ## Addtional Notes
 Improvements to be made:
 
-- fix time zones conversion
-- add drop down menu for 
-    - roles in manage member   
-    - age category in manage books
-    - event creater/holder with admin name instead of ID
-- add active status in manage books/tech
-- make UI desgin consistent throught the webiste 
-
-
+- Fix time zones conversion
