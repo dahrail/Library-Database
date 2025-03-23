@@ -1,20 +1,8 @@
 const express = require("express");
 const nodemailer = require("nodemailer");
-const mysql = require("mysql2");
+const pool = require("./db");
 const app = express();
 app.use(express.json());
-
-// Set up MySQL connection pool
-const pool = mysql.createPool({
-  host: "team7library.mysql.database.azure.com",
-  user: "Team7Admin",
-  password: "Admin123uma",
-  database: "librarynew",
-  connectionLimit: 5,
-  ssl: {
-    rejectUnauthorized: true, // Ensures SSL is used
-  },
-});
 
 // Set up email transport
 const transporter = nodemailer.createTransport({

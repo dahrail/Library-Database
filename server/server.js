@@ -1,23 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const { createPool } = require('mysql');
+const pool = require("./db");
 
 app.use(cors());
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
-
-const pool = createPool({
-  host: "team7library.mysql.database.azure.com",
-  user: "Team7Admin",
-  password: "Admin123uma",
-  database: "librarynew",
-  connectionLimit: 5,
-  ssl: {
-    rejectUnauthorized: true // Ensures SSL is used
-  }
-});
 
 // Login endpoint
 app.post('/api/login', (req, res) => {
