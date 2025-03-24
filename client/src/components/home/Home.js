@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../styles/home/Home.css';
 
-const Home = ({ userData, navigateToBooks, navigateToLoans, navigateToHolds, navigateToFines, navigateToAddBook }) => {
+const Home = ({ userData, navigateToBooks, navigateToLoans, navigateToHolds, navigateToFines, navigateToAddBook, navigateToDataReport }) => {
   return (
     <div className="content-container home-container">
       <h2>Team 7 Library (Role: {userData.Role})</h2>
@@ -12,6 +12,9 @@ const Home = ({ userData, navigateToBooks, navigateToLoans, navigateToHolds, nav
         <button onClick={navigateToFines} className="menu-button">Fines</button>
         {userData.Role === 'Admin' && (
           <button onClick={navigateToAddBook} className="menu-button admin-button">Add New Book</button>
+        )}
+        {(userData.Role === 'Faculty' || userData.Role === 'Admin') && (
+          <button onClick={navigateToDataReport} className="menu-button admin-button">Data Report</button>
         )}
       </div>
     </div>

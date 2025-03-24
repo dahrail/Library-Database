@@ -29,6 +29,7 @@ function App() {
   const [holds, setHolds] = useState([]);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [fines, setFines] = useState([]);
+  const [reportData, setReportData] = useState(null);
 
   // Login handler
   const handleLogin = async (email, password) => {
@@ -60,6 +61,7 @@ function App() {
   const navigateToLogin = () => setCurrentScreen('login');
   const navigateToRegister = () => setCurrentScreen('register');
   const navigateToAddBook = () => setCurrentScreen('addBook');
+  const navigateToDataReport = () => setCurrentScreen('dataReport');
 
   // Books navigation and handlers
   const navigateToBooks = async () => {
@@ -238,6 +240,7 @@ function App() {
           navigateToHolds={navigateToHolds} 
           navigateToFines={navigateToFines} 
           navigateToAddBook={navigateToAddBook} 
+          navigateToDataReport={navigateToDataReport} // Pass the function
         />
       )}
 
@@ -302,6 +305,57 @@ function App() {
           fines={fines} 
           navigateToHome={navigateToHome} 
         />
+      )}
+
+      {currentScreen === 'dataReport' && (
+        <div className="content-container">
+          <h2>Data Report</h2>
+          <p>Click the button below to load the user data report.</p>
+          <button
+            onClick={async () => {
+              try {
+                const response = await fetch('/api/dataReport');
+                const data = await response.json();
+
+                if (data.success) {
+                  setReportData(data.data); // Store the query results in state
+                } else {
+                  alert('Failed to load data report: ' + data.error);
+                }
+              } catch (error) {
+                console.error('Error loading data report:', error);
+                alert('An error occurred while loading the data report.');
+              }
+            }}
+            className="btn-primary"
+          >
+            Load User Data Report
+          </button>
+
+          {/* Display the query results */}
+          {reportData && reportData.length > 0 && (
+            <table className="data-report-table">
+              <thead>
+                <tr>
+                  {Object.keys(reportData[0]).map((key, index) => (
+                    <th key={index}>{key}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {reportData.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {Object.values(row).map((value, colIndex) => (
+                      <td key={colIndex}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          <button onClick={navigateToHome} className="btn-back">Back to Home</button>
+        </div>
       )}
     </div>
   );

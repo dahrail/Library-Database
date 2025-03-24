@@ -503,6 +503,20 @@ app.get('/api/fines/:userId', (req, res) => {
   });
 });
 
+app.get('/api/dataReport', (req, res) => {
+  const query = 'SELECT * FROM USER'; // Replace with your desired query
+
+  pool.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing data report query:', err);
+      res.status(500).json({ success: false, error: 'Failed to fetch data report' });
+      return;
+    }
+
+    res.json({ success: true, data: results });
+  });
+});
+
 app.listen(5000, () => {
   console.log("server started on port 5000");
 });

@@ -1,0 +1,25 @@
+.data-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.data-report-table th {
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.data-report-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.data-report-table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
