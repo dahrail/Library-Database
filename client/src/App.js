@@ -373,7 +373,8 @@ function App() {
                 <th>Genre</th>
                 <th>Year</th>
                 <th>Available Copies</th>
-                <th>Action</th>
+                <th>Loan</th>
+                <th>Hold</th> {/* Add Hold column */}
               </tr>
             </thead>
             <tbody>
@@ -387,14 +388,36 @@ function App() {
                   <td>
                     <button
                       onClick={() => handleLoan(book)}
-                      disabled={book.isGrayedOut} // Disable the button if it should be grayed out
+                      disabled={
+                        book.copies === 0 || // Disable if no copies are available
+                        (book.otherUserHasHold && !book.userHasHold) // Disable if another user has an active hold
+                      }
                       style={{
-                        backgroundColor: book.isGrayedOut ? 'gray' : 'green', // Gray if grayed out, green otherwise
+                        backgroundColor:
+                          book.copies === 0 || (book.otherUserHasHold && !book.userHasHold)
+                            ? 'gray'
+                            : 'green',
                         color: 'white',
-                        cursor: book.isGrayedOut ? 'not-allowed' : 'pointer',
+                        cursor:
+                          book.copies === 0 || (book.otherUserHasHold && !book.userHasHold)
+                            ? 'not-allowed'
+                            : 'pointer',
                       }}
                     >
                       Loan
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => book.copies === 0 && navigateToHold(book)} // Navigate to Hold screen if copies are 0
+                      disabled={book.copies > 0} // Disable Hold button if copies are available
+                      style={{
+                        backgroundColor: book.copies > 0 ? 'gray' : 'orange', // Gray if disabled, orange if active
+                        color: 'white',
+                        cursor: book.copies > 0 ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      Hold
                     </button>
                   </td>
                 </tr>
@@ -658,7 +681,7 @@ function App() {
           <p>You are placing a hold for the book: <strong>{selectedBook.title}</strong></p>
           <p>We will notify you when the book becomes available.</p>
           <button onClick={() => setCurrentScreen('books')}>Back to Books</button>
-          <button onClick={handleConfirmHold}>Confirm</button> {/* Add Confirm button */}
+          <button onClick={handleConfirmHold}>Confirm</button>
         </div>
       )}
 

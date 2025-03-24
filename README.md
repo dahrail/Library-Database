@@ -53,6 +53,18 @@ Deployed Website: WIP
 ## 5 Project Requirements
 
 ## User Authentication for Different User Roles
+Registering:
+
+Students:
+Registering is possible on the website. When you hit register, it default takes you to register as a student.
+
+Faculty:
+Registering is possible on the website, as long as you know the passcode. After you hit register and it takes you to the register as a student page, you are given the option to register as a faculty member. If you enter the correct passcode, it takes you to the page where you can register as faculty.
+
+Admins:
+Admins are manually added into the database because of the nature of the admin permissions.
+
+
 Roles and Permissions:
 
 Students:
