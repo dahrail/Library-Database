@@ -119,7 +119,7 @@ body {
   min-height: 100vh;
 }
 
-/* Login page styling adjustments */
+/* Login page styling */
 .login-container {
   display: flex;
   justify-content: center;
@@ -133,7 +133,7 @@ body {
   position: relative;
 }
 
-/* Add a dark overlay to improve form readability */
+/* Dark overlay for login background */
 .login-container::before {
   content: '';
   position: absolute;
