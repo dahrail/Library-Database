@@ -1,7 +1,7 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 const app = express();
-const { createPool } = require('mysql');
+const { createPool } = require("mysql");
 
 app.use(cors());
 
@@ -15,21 +15,23 @@ const pool = createPool({
   database: "librarynew",
   connectionLimit: 5,
   ssl: {
-    rejectUnauthorized: true // Ensures SSL is used
-  }
+    rejectUnauthorized: true, // Ensures SSL is used
+  },
 });
 
 // Login endpoint
-app.post('/api/login', (req, res) => {
+app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
 
   pool.query(
-    'SELECT UserID, FirstName, Role FROM USER WHERE Email = ? AND Password = ?',
+    "SELECT UserID, FirstName, Role FROM USER WHERE Email = ? AND Password = ?",
     [email, password],
     (err, results) => {
       if (err) {
         console.error("Error executing query:", err);
-        res.status(500).json({ success: false, error: "Internal server error" });
+        res
+          .status(500)
+          .json({ success: false, error: "Internal server error" });
         return;
       }
 
@@ -44,8 +46,9 @@ app.post('/api/login', (req, res) => {
 });
 
 // Register endpoint
-app.post('/api/register', (req, res) => {
-  const { Username, Password, FirstName, LastName, Email, PhoneNumber, Role } = req.body;
+app.post("/api/register", (req, res) => {
+  const { Username, Password, FirstName, LastName, Email, PhoneNumber, Role } =
+    req.body;
 
   const query = `
     INSERT INTO USER (Username, Password, FirstName, LastName, Email, PhoneNumber, Role, AccountCreateAt, AccountStatus)
@@ -57,8 +60,10 @@ app.post('/api/register', (req, res) => {
     [Username, Password, FirstName, LastName, Email, PhoneNumber, Role],
     (err, results) => {
       if (err) {
-        console.error('Error registering user:', err);
-        res.status(500).json({ success: false, error: 'Failed to register user' });
+        console.error("Error registering user:", err);
+        res
+          .status(500)
+          .json({ success: false, error: "Failed to register user" });
         return;
       }
 
@@ -68,8 +73,8 @@ app.post('/api/register', (req, res) => {
 });
 
 // Existing API endpoint
-app.get('/api', (req, res) => {
-  pool.query('SELECT * FROM USER', (err, result, fields) => {
+app.get("/api", (req, res) => {
+  pool.query("SELECT * FROM USER", (err, result, fields) => {
     if (err) {
       console.error("Error executing query:", err);
       res.status(500).json({ error: "Error executing query" });
@@ -79,22 +84,22 @@ app.get('/api', (req, res) => {
   });
 });
 
-app.get('/api/books', (req, res) => {
+app.get("/api/books", (req, res) => {
   pool.query(
-    'SELECT B.BookID, B.Title, B.Author, B.Genre, B.PublicationYear, I.AvailableCopies FROM BOOK AS B, BOOK_INVENTORY AS I WHERE B.BookID = I.BookID',
+    "SELECT B.BookID, B.Title, B.Author, B.Genre, B.PublicationYear, I.AvailableCopies FROM BOOK AS B, BOOK_INVENTORY AS I WHERE B.BookID = I.BookID",
     (err, results) => {
       if (err) {
         console.error("Error executing query:", err);
         res.status(500).json({ error: "Internal server error" });
         return;
       }
-      const books = results.map(book => ({
+      const books = results.map((book) => ({
         bookID: book.BookID, // Include BookID
         title: book.Title,
         author: book.Author,
         genre: book.Genre,
         year: book.PublicationYear,
-        copies: book.AvailableCopies
+        copies: book.AvailableCopies,
       }));
       console.log("Books sent to frontend:", books); // Log the mapped results
       res.json(books); // Send the mapped results to the frontend
@@ -102,7 +107,7 @@ app.get('/api/books', (req, res) => {
   );
 });
 
-app.post('/api/addBook', (req, res) => {
+app.post("/api/addBook", (req, res) => {
   const {
     BookID,
     Title,
@@ -116,7 +121,7 @@ app.post('/api/addBook', (req, res) => {
     BookInventoryID,
     TotalCopies,
     AvailableCopies,
-    ShelfLocation // Add ShelfLocation field
+    ShelfLocation, // Add ShelfLocation field
   } = req.body;
 
   const bookQuery = `
@@ -132,11 +137,21 @@ app.post('/api/addBook', (req, res) => {
   // Insert into BOOK table
   pool.query(
     bookQuery,
-    [BookID, Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
+    [
+      BookID,
+      Title,
+      Author,
+      Genre,
+      PublicationYear,
+      Publisher,
+      Language,
+      Format,
+      ISBN,
+    ],
     (err, bookResults) => {
       if (err) {
-        console.error('Error inserting book:', err);
-        res.status(500).json({ success: false, error: 'Failed to add book' });
+        console.error("Error inserting book:", err);
+        res.status(500).json({ success: false, error: "Failed to add book" });
         return;
       }
 
@@ -146,8 +161,10 @@ app.post('/api/addBook', (req, res) => {
         [BookInventoryID, BookID, TotalCopies, AvailableCopies, ShelfLocation],
         (err, inventoryResults) => {
           if (err) {
-            console.error('Error inserting book inventory:', err);
-            res.status(500).json({ success: false, error: 'Failed to add book inventory' });
+            console.error("Error inserting book inventory:", err);
+            res
+              .status(500)
+              .json({ success: false, error: "Failed to add book inventory" });
             return;
           }
 
@@ -158,7 +175,7 @@ app.post('/api/addBook', (req, res) => {
   );
 });
 
-app.post('/api/confirmLoan', (req, res) => {
+app.post("/api/confirmLoan", (req, res) => {
   const { BookID, UserID, Role } = req.body; // Receive UserID and Role from the frontend
   console.log("Received BookID for loan confirmation:", BookID);
 
@@ -174,61 +191,77 @@ app.post('/api/confirmLoan', (req, res) => {
   `;
 
   // Determine the loan period based on the user's role
-  const loanPeriod = Role === 'Student' ? 7 : 14;
+  const loanPeriod = Role === "Student" ? 7 : 14;
 
   // Start a transaction
   pool.getConnection((err, connection) => {
     if (err) {
-      console.error('Error getting database connection:', err);
-      res.status(500).json({ success: false, error: 'Database connection error' });
+      console.error("Error getting database connection:", err);
+      res
+        .status(500)
+        .json({ success: false, error: "Database connection error" });
       return;
     }
 
     connection.beginTransaction((err) => {
       if (err) {
-        console.error('Error starting transaction:', err);
+        console.error("Error starting transaction:", err);
         connection.release();
-        res.status(500).json({ success: false, error: 'Transaction error' });
+        res.status(500).json({ success: false, error: "Transaction error" });
         return;
       }
 
       // Decrement AvailableCopies
       connection.query(decrementQuery, [BookID], (err, results) => {
         if (err || results.affectedRows === 0) {
-          console.error('Error decrementing AvailableCopies or no rows affected:', err);
+          console.error(
+            "Error decrementing AvailableCopies or no rows affected:",
+            err
+          );
           connection.rollback(() => connection.release());
-          res.status(400).json({ success: false, error: 'No available copies to loan' });
+          res
+            .status(400)
+            .json({ success: false, error: "No available copies to loan" });
           return;
         }
 
         // Insert into LOAN table
-        connection.query(insertLoanQuery, [UserID, BookID, loanPeriod], (err, results) => {
-          if (err) {
-            console.error('Error inserting into LOAN table:', err);
-            connection.rollback(() => connection.release());
-            res.status(500).json({ success: false, error: 'Failed to create loan record' });
-            return;
-          }
-
-          // Commit the transaction
-          connection.commit((err) => {
+        connection.query(
+          insertLoanQuery,
+          [UserID, BookID, loanPeriod],
+          (err, results) => {
             if (err) {
-              console.error('Error committing transaction:', err);
+              console.error("Error inserting into LOAN table:", err);
               connection.rollback(() => connection.release());
-              res.status(500).json({ success: false, error: 'Transaction commit error' });
+              res.status(500).json({
+                success: false,
+                error: "Failed to create loan record",
+              });
               return;
             }
 
-            connection.release();
-            res.json({ success: true });
-          });
-        });
+            // Commit the transaction
+            connection.commit((err) => {
+              if (err) {
+                console.error("Error committing transaction:", err);
+                connection.rollback(() => connection.release());
+                res
+                  .status(500)
+                  .json({ success: false, error: "Transaction commit error" });
+                return;
+              }
+
+              connection.release();
+              res.json({ success: true });
+            });
+          }
+        );
       });
     });
   });
 });
 
-app.post('/api/confirmHold', (req, res) => {
+app.post("/api/confirmHold", (req, res) => {
   const { UserID, ItemType, ItemID } = req.body;
 
   const query = `
@@ -238,8 +271,8 @@ app.post('/api/confirmHold', (req, res) => {
 
   pool.query(query, [UserID, ItemType, ItemID], (err, results) => {
     if (err) {
-      console.error('Error inserting hold:', err);
-      res.status(500).json({ success: false, error: 'Failed to place hold' });
+      console.error("Error inserting hold:", err);
+      res.status(500).json({ success: false, error: "Failed to place hold" });
       return;
     }
 
@@ -247,7 +280,7 @@ app.post('/api/confirmHold', (req, res) => {
   });
 });
 
-app.get('/api/loans/:userId', (req, res) => {
+app.get("/api/loans/:userId", (req, res) => {
   const { userId } = req.params;
 
   const query = `
@@ -269,17 +302,17 @@ app.get('/api/loans/:userId', (req, res) => {
 
   pool.query(query, [userId], (err, results) => {
     if (err) {
-      console.error('Error fetching loans:', err);
-      res.status(500).json({ success: false, error: 'Failed to fetch loans' });
+      console.error("Error fetching loans:", err);
+      res.status(500).json({ success: false, error: "Failed to fetch loans" });
       return;
     }
 
-    console.log('Loans fetched for user:', userId, results); // Log the results
+    console.log("Loans fetched for user:", userId, results); // Log the results
     res.json({ success: true, loans: results });
   });
 });
 
-app.get('/api/holds/:userId', (req, res) => {
+app.get("/api/holds/:userId", (req, res) => {
   const { userId } = req.params;
 
   const query = `
@@ -298,22 +331,22 @@ app.get('/api/holds/:userId', (req, res) => {
 
   pool.query(query, [userId], (err, results) => {
     if (err) {
-      console.error('Error fetching holds:', err);
-      res.status(500).json({ success: false, error: 'Failed to fetch holds' });
+      console.error("Error fetching holds:", err);
+      res.status(500).json({ success: false, error: "Failed to fetch holds" });
       return;
     }
 
     // Log the results being sent to the frontend
-    console.log('Holds fetched for user:', userId, results);
+    console.log("Holds fetched for user:", userId, results);
 
     res.json({ success: true, holds: results });
   });
 });
 
-app.post('/api/confirmReturn', (req, res) => {
+app.post("/api/confirmReturn", (req, res) => {
   const { LoanID } = req.body; // Receive the LoanID from the frontend
 
-  console.log('Received LoanID from frontend:', LoanID); // Log the LoanID received
+  console.log("Received LoanID from frontend:", LoanID); // Log the LoanID received
 
   // Query to update the loan's ReturnedAt field
   const updateLoanQuery = `
@@ -334,47 +367,62 @@ app.post('/api/confirmReturn', (req, res) => {
   // Execute both queries in sequence
   pool.getConnection((err, connection) => {
     if (err) {
-      console.error('Error getting database connection:', err);
-      res.status(500).json({ success: false, error: 'Database connection error' });
+      console.error("Error getting database connection:", err);
+      res
+        .status(500)
+        .json({ success: false, error: "Database connection error" });
       return;
     }
 
     connection.beginTransaction((err) => {
       if (err) {
-        console.error('Error starting transaction:', err);
+        console.error("Error starting transaction:", err);
         connection.release();
-        res.status(500).json({ success: false, error: 'Transaction error' });
+        res.status(500).json({ success: false, error: "Transaction error" });
         return;
       }
 
       // Update the loan's ReturnedAt field
       connection.query(updateLoanQuery, [LoanID], (err, results) => {
         if (err || results.affectedRows === 0) {
-          console.error('Error updating loan or no rows affected:', err);
+          console.error("Error updating loan or no rows affected:", err);
           connection.rollback(() => connection.release());
-          res.status(404).json({ success: false, error: 'Loan not found or already returned' });
+          res.status(404).json({
+            success: false,
+            error: "Loan not found or already returned",
+          });
           return;
         }
 
         // Increment AvailableCopies in BOOK_INVENTORY
         connection.query(incrementCopiesQuery, [LoanID], (err, results) => {
           if (err || results.affectedRows === 0) {
-            console.error('Error incrementing AvailableCopies or no rows affected:', err);
+            console.error(
+              "Error incrementing AvailableCopies or no rows affected:",
+              err
+            );
             connection.rollback(() => connection.release());
-            res.status(500).json({ success: false, error: 'Failed to update book inventory' });
+            res.status(500).json({
+              success: false,
+              error: "Failed to update book inventory",
+            });
             return;
           }
 
           // Commit the transaction
           connection.commit((err) => {
             if (err) {
-              console.error('Error committing transaction:', err);
+              console.error("Error committing transaction:", err);
               connection.rollback(() => connection.release());
-              res.status(500).json({ success: false, error: 'Transaction commit error' });
+              res
+                .status(500)
+                .json({ success: false, error: "Transaction commit error" });
               return;
             }
 
-            console.log('Loan returned and book inventory updated successfully');
+            console.log(
+              "Loan returned and book inventory updated successfully"
+            );
             connection.release();
             res.json({ success: true });
           });
@@ -387,4 +435,3 @@ app.post('/api/confirmReturn', (req, res) => {
 app.listen(5000, () => {
   console.log("server started on port 5000");
 });
-
