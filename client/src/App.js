@@ -292,10 +292,10 @@ function App() {
         
         {/* Navigation buttons */}
         <div className="nav-buttons">
-          <button className="nav-button">Browse & Borrow</button>
-          <button className="nav-button">Media</button>
-          <button className="nav-button">Electronics</button>
-          <button className="nav-button">Events</button>
+          <button className="nav-button">Browse & Borrow (WIP)</button>
+          <button className="nav-button">Media (WIP)</button>
+          <button className="nav-button">Electronics (WIP)</button>
+          <button className="nav-button">Events (WIP)</button>
         </div>
         
         {isLoggedIn && userData && (
