@@ -71,13 +71,13 @@ function App() {
 
   const navigateToBooks = async () => {
     try {
-      const response = await fetch('/api/books');
+      const response = await fetch(`/api/books/${userData.UserID}`); // Pass the UserID to the backend
       const data = await response.json();
-      console.log("Books received from backend:", data); // Log the data
+      console.log('Books received from backend:', data); // Log the data
       setBooks(data); // Store the books in state
       setCurrentScreen('books'); // Navigate to the books screen
     } catch (error) {
-      console.error("Error fetching books:", error);
+      console.error('Error fetching books:', error);
     }
   };
 
@@ -251,7 +251,7 @@ function App() {
 
       if (data.success) {
         alert(`The item "${selectedLoan.Title}" has been successfully returned.`);
-        setCurrentScreen('loans'); // Navigate back to the loans screen
+        setCurrentScreen('home'); // Navigate back to the home screen
       } else {
         alert('Failed to return the item: ' + data.error);
       }
@@ -385,29 +385,17 @@ function App() {
                   <td>{book.year}</td>
                   <td>{book.copies}</td>
                   <td>
-                    {book.copies > 0 ? (
-                      <button
-                        onClick={() => handleLoan(book)} // Pass the book object
-                        style={{
-                          backgroundColor: 'blue',
-                          color: 'white',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Loan
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => navigateToHold(book)} // Navigate to the hold page
-                        style={{
-                          backgroundColor: 'orange',
-                          color: 'white',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Hold
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleLoan(book)}
+                      disabled={book.isGrayedOut} // Disable the button if it should be grayed out
+                      style={{
+                        backgroundColor: book.isGrayedOut ? 'gray' : 'green', // Gray if grayed out, green otherwise
+                        color: 'white',
+                        cursor: book.isGrayedOut ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      Loan
+                    </button>
                   </td>
                 </tr>
               ))}

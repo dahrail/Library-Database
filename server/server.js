@@ -102,6 +102,55 @@ app.get('/api/books', (req, res) => {
   );
 });
 
+app.get('/api/books/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT 
+      B.BookID, 
+      B.Title, 
+      B.Author, 
+      B.Genre, 
+      B.PublicationYear, 
+      I.AvailableCopies,
+      CASE 
+        WHEN I.AvailableCopies = 0 THEN 1 -- Grayed out if no available copies
+        WHEN EXISTS (
+          SELECT 1 
+          FROM HOLD AS H 
+          WHERE H.ItemID = B.BookID 
+            AND H.ItemType = 'Book' 
+            AND H.HoldStatus = 'Active'
+            AND H.UserID != ? -- Grayed out if there is an active hold by another user
+        ) THEN 1
+        ELSE 0 -- Otherwise, the button is enabled
+      END AS IsGrayedOut
+    FROM BOOK AS B
+    LEFT JOIN BOOK_INVENTORY AS I ON B.BookID = I.BookID
+  `;
+
+  pool.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching books:', err);
+      res.status(500).json({ error: 'Internal server error' });
+      return;
+    }
+
+    const books = results.map(book => ({
+      bookID: book.BookID,
+      title: book.Title,
+      author: book.Author,
+      genre: book.Genre,
+      year: book.PublicationYear,
+      copies: book.AvailableCopies,
+      isGrayedOut: book.IsGrayedOut === 1 // Add a flag to indicate if the button should be grayed out
+    }));
+
+    console.log('Books sent to frontend:', books);
+    res.json(books);
+  });
+});
+
 app.post('/api/addBook', (req, res) => {
   const {
     BookID,
