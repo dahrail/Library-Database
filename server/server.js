@@ -164,7 +164,6 @@ app.get('/api/books/:userId', (req, res) => {
 
 app.post('/api/addBook', (req, res) => {
   const {
-    BookID,
     Title,
     Author,
     Genre,
@@ -173,49 +172,80 @@ app.post('/api/addBook', (req, res) => {
     Language,
     Format,
     ISBN,
-    BookInventoryID,
     TotalCopies,
     AvailableCopies,
-    ShelfLocation // Add ShelfLocation field
+    ShelfLocation
   } = req.body;
 
-  const bookQuery = `
-    INSERT INTO BOOK (BookID, Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  const inventoryQuery = `
-    INSERT INTO BOOK_INVENTORY (BookInventoryID, BookID, TotalCopies, AvailableCopies, ShelfLocation)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-
   // Insert into BOOK table
-  pool.query(
-    bookQuery,
-    [BookID, Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
-    (err, bookResults) => {
+  const bookQuery = `
+    INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  // Insert into BOOK_INVENTORY table
+  const inventoryQuery = `
+    INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation)
+    VALUES (LAST_INSERT_ID(), ?, ?, ?)
+  `;
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting database connection:', err);
+      res.status(500).json({ success: false, error: 'Database connection error' });
+      return;
+    }
+
+    connection.beginTransaction((err) => {
       if (err) {
-        console.error('Error inserting book:', err);
-        res.status(500).json({ success: false, error: 'Failed to add book' });
+        console.error('Error starting transaction:', err);
+        connection.release();
+        res.status(500).json({ success: false, error: 'Transaction error' });
         return;
       }
 
-      // Insert into BOOK_INVENTORY table
-      pool.query(
-        inventoryQuery,
-        [BookInventoryID, BookID, TotalCopies, AvailableCopies, ShelfLocation],
-        (err, inventoryResults) => {
+      // Insert into BOOK table
+      connection.query(
+        bookQuery,
+        [Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
+        (err, bookResults) => {
           if (err) {
-            console.error('Error inserting book inventory:', err);
-            res.status(500).json({ success: false, error: 'Failed to add book inventory' });
+            console.error('Error inserting book:', err);
+            connection.rollback(() => connection.release());
+            res.status(500).json({ success: false, error: 'Failed to add book' });
             return;
           }
 
-          res.json({ success: true });
+          // Insert into BOOK_INVENTORY table
+          connection.query(
+            inventoryQuery,
+            [TotalCopies, AvailableCopies, ShelfLocation],
+            (err, inventoryResults) => {
+              if (err) {
+                console.error('Error inserting book inventory:', err);
+                connection.rollback(() => connection.release());
+                res.status(500).json({ success: false, error: 'Failed to add book inventory' });
+                return;
+              }
+
+              // Commit the transaction
+              connection.commit((err) => {
+                if (err) {
+                  console.error('Error committing transaction:', err);
+                  connection.rollback(() => connection.release());
+                  res.status(500).json({ success: false, error: 'Transaction commit error' });
+                  return;
+                }
+
+                connection.release();
+                res.json({ success: true });
+              });
+            }
+          );
         }
       );
-    }
-  );
+    });
+  });
 });
 
 app.post('/api/confirmLoan', (req, res) => {
@@ -441,6 +471,35 @@ app.post('/api/confirmReturn', (req, res) => {
         });
       });
     });
+  });
+});
+
+app.get('/api/fines/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT 
+      L.ItemType, 
+      B.Title, 
+      B.Author, 
+      L.BorrowedAt, 
+      L.DueAT, 
+      F.Amount, 
+      F.PaymentStatus AS Status
+    FROM LOAN AS L
+    JOIN BOOK AS B ON L.ItemID = B.BookID
+    JOIN FINE AS F ON L.LoanID = F.LoanID
+    WHERE L.UserID = ?
+  `;
+
+  pool.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching fines:', err);
+      res.status(500).json({ success: false, error: 'Failed to fetch fines' });
+      return;
+    }
+
+    res.json({ success: true, fines: results });
   });
 });
 

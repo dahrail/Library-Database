@@ -35,6 +35,7 @@ function App() {
   const [loans, setLoans] = useState([]); // Store the list of loans
   const [holds, setHolds] = useState([]); // Store the list of holds
   const [selectedLoan, setSelectedLoan] = useState(null); // Store the selected loan
+  const [fines, setFines] = useState([]); // Store the list of fines
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -125,6 +126,23 @@ function App() {
     } catch (error) {
       console.error('Error fetching holds:', error);
       alert('An error occurred while fetching holds.');
+    }
+  };
+
+  const navigateToFines = async () => {
+    try {
+      const response = await fetch(`/api/fines/${userData.UserID}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setFines(data.fines); // Store the fines in state
+        setCurrentScreen('fines'); // Navigate to the fines screen
+      } else {
+        alert('Failed to fetch fines: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching fines:', error);
+      alert('An error occurred while fetching fines.');
     }
   };
 
@@ -355,7 +373,8 @@ function App() {
           <h2>Team 7 Library (Role: {userData.Role})</h2>
           <button onClick={navigateToBooks}>Books</button>
           <button onClick={navigateToLoans}>Loans</button>
-          <button onClick={navigateToHolds}>Holds</button> {/* Add Holds button */}
+          <button onClick={navigateToHolds}>Holds</button>
+          <button onClick={navigateToFines}>Fines</button> {/* Add Fines button */}
           {userData.Role === 'Admin' && (
             <button onClick={navigateToAddBook}>Add New Book</button>
           )}
@@ -446,15 +465,6 @@ function App() {
           <h2>Add New Book</h2>
           <form onSubmit={handleAddBook}>
             <div>
-              <label>BookID:</label>
-              <input
-                type="number"
-                value={newBook.BookID}
-                onChange={(e) => setNewBook({ ...newBook, BookID: e.target.value })}
-                required
-              />
-            </div>
-            <div>
               <label>Title:</label>
               <input
                 type="text"
@@ -517,15 +527,6 @@ function App() {
                 type="text"
                 value={newBook.ISBN}
                 onChange={(e) => setNewBook({ ...newBook, ISBN: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label>BookInventoryID:</label>
-              <input
-                type="number"
-                value={newBook.BookInventoryID}
-                onChange={(e) => setNewBook({ ...newBook, BookInventoryID: e.target.value })}
                 required
               />
             </div>
@@ -728,6 +729,43 @@ function App() {
           </p>
           <button onClick={() => setCurrentScreen('loans')}>Cancel</button>
           <button onClick={handleConfirmReturn}>Confirm Return</button>
+        </div>
+      )}
+
+      {currentScreen === 'fines' && (
+        <div className="content-container">
+          <h2>Your Fines</h2>
+          {fines.length === 0 ? (
+            <p>You have no fines.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Item Type</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Borrowed At</th>
+                  <th>Due At</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fines.map((fine, index) => (
+                  <tr key={index}>
+                    <td>{fine.ItemType}</td>
+                    <td>{fine.Title}</td>
+                    <td>{fine.Author}</td>
+                    <td>{new Date(fine.BorrowedAt).toLocaleString()}</td>
+                    <td>{new Date(fine.DueAT).toLocaleString()}</td>
+                    <td>${fine.Amount.toFixed(2)}</td>
+                    <td>{fine.Status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <button onClick={navigateToHome}>Back to Home</button>
         </div>
       )}
     </div>
