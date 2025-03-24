@@ -517,6 +517,34 @@ app.get('/api/dataReport', (req, res) => {
   });
 });
 
+app.get('/api/fineReport', (req, res) => {
+  const query = `
+    SELECT 
+      U.FirstName, 
+      U.LastName, 
+      B.Title, 
+      B.Author, 
+      DATE_FORMAT(L.BorrowedAt, '%Y-%m-%d %H:%i:%s') AS BorrowedAt, 
+      DATE_FORMAT(L.DueAT, '%Y-%m-%d %H:%i:%s') AS DueAt, 
+      F.Amount, 
+      F.PaymentStatus AS Status
+    FROM FINE AS F
+    JOIN LOAN AS L ON F.LoanID = L.LoanID
+    JOIN USER AS U ON L.UserID = U.UserID
+    JOIN BOOK AS B ON L.ItemID = B.BookID
+  `;
+
+  pool.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing fine report query:', err);
+      res.status(500).json({ success: false, error: 'Failed to fetch fine report' });
+      return;
+    }
+
+    res.json({ success: true, data: results });
+  });
+});
+
 app.listen(5000, () => {
   console.log("server started on port 5000");
 });

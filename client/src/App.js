@@ -29,7 +29,7 @@ function App() {
   const [holds, setHolds] = useState([]);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [fines, setFines] = useState([]);
-  const [reportData, setReportData] = useState(null);
+  const [reportData, setReportData] = useState(null); // State to store query results
 
   // Login handler
   const handleLogin = async (email, password) => {
@@ -309,49 +309,79 @@ function App() {
 
       {currentScreen === 'dataReport' && (
         <div className="content-container">
-          <h2>Data Report</h2>
-          <p>Click the button below to load the user data report.</p>
-          <button
-            onClick={async () => {
-              try {
-                const response = await fetch('/api/dataReport');
-                const data = await response.json();
+          <h2>Data Reports</h2>
+          <p>Select a report to view:</p>
 
-                if (data.success) {
-                  setReportData(data.data); // Store the query results in state
-                } else {
-                  alert('Failed to load data report: ' + data.error);
+          {/* Buttons for reports */}
+          <div className="button-group">
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/dataReport');
+                  const data = await response.json();
+
+                  if (data.success) {
+                    setReportData(data.data); // Store the query results in state
+                  } else {
+                    alert('Failed to load books report: ' + data.error);
+                  }
+                } catch (error) {
+                  console.error('Error loading books report:', error);
+                  alert('An error occurred while loading the books report.');
                 }
-              } catch (error) {
-                console.error('Error loading data report:', error);
-                alert('An error occurred while loading the data report.');
-              }
-            }}
-            className="btn-primary"
-          >
-            Load User Data Report
-          </button>
+              }}
+              className="btn-primary"
+            >
+              Load Books Report
+            </button>
 
-          {/* Display the query results */}
+            {/* Fines Report button (only for admins and faculty) */}
+            {(userData.Role === 'Admin' || userData.Role === 'Faculty') && (
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/fineReport');
+                    const data = await response.json();
+
+                    if (data.success) {
+                      setReportData(data.data); // Store the query results in state
+                    } else {
+                      alert('Failed to load fines report: ' + data.error);
+                    }
+                  } catch (error) {
+                    console.error('Error loading fines report:', error);
+                    alert('An error occurred while loading the fines report.');
+                  }
+                }}
+                className="btn-primary"
+              >
+                Load Fines Report
+              </button>
+            )}
+          </div>
+
+          {/* Display the selected report only if reportData is available */}
           {reportData && reportData.length > 0 && (
-            <table className="data-report-table">
-              <thead>
-                <tr>
-                  {Object.keys(reportData[0]).map((key, index) => (
-                    <th key={index}>{key}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {reportData.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {Object.values(row).map((value, colIndex) => (
-                      <td key={colIndex}>{value}</td>
+            <div className="table-container">
+              <table className="data-report-table">
+                <thead>
+                  <tr>
+                    {Object.keys(reportData[0]).map((key, index) => (
+                      <th key={index}>{key}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {reportData.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {Object.values(row).map((value, colIndex) => (
+                        <td key={colIndex}>{value}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
           <button onClick={navigateToHome} className="btn-back">Back to Home</button>
