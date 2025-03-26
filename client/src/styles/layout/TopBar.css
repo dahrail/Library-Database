@@ -27,7 +27,7 @@
   color: white;
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   -webkit-text-fill-color: white;
-  margin-left: -100px;
+  margin-left: 20px; /* Adjust this value to increase the margin */
 }
 
 .user-info {

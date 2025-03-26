@@ -11,26 +11,35 @@ const RegisterAsFaculty = ({ navigateToRegister }) => {
     PhoneNumber: ''
   });
 
+  const [phoneParts, setPhoneParts] = useState({ part1: '', part2: '', part3: '' });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    if (/^\d*$/.test(value) && value.length <= (name === 'part1' || name === 'part2' ? 3 : 4)) {
+      setPhoneParts((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const combinedPhoneNumber = parseInt(`${phoneParts.part1}${phoneParts.part2}${phoneParts.part3}`, 10); // Combine and convert to integer
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newUser, Role: 'Faculty' }) // Set Role to 'Faculty'
+        body: JSON.stringify({ ...newUser, PhoneNumber: combinedPhoneNumber, Role: 'Faculty' })
       });
 
       const data = await response.json();
 
       if (data.success) {
         alert('Faculty registration successful!');
-        navigateToRegister(); // Navigate back to the main register screen
+        navigateToRegister();
       } else {
         alert('Failed to register as faculty: ' + data.error);
       }
@@ -96,12 +105,40 @@ const RegisterAsFaculty = ({ navigateToRegister }) => {
         </div>
         <div>
           <label>Phone Number:</label>
-          <input
-            type="text"
-            name="PhoneNumber"
-            value={newUser.PhoneNumber}
-            onChange={handleChange}
-          />
+          <div style={{ display: 'flex', gap: '5px' }}>
+            <input
+              type="text"
+              name="part1"
+              value={phoneParts.part1}
+              onChange={handlePhoneChange}
+              required
+              placeholder="XXX"
+              maxLength="3"
+              style={{ width: '50px', textAlign: 'center' }} // Set width and center-align text
+            />
+            <span>-</span>
+            <input
+              type="text"
+              name="part2"
+              value={phoneParts.part2}
+              onChange={handlePhoneChange}
+              required
+              placeholder="XXX"
+              maxLength="3"
+              style={{ width: '50px', textAlign: 'center' }} // Set width and center-align text
+            />
+            <span>-</span>
+            <input
+              type="text"
+              name="part3"
+              value={phoneParts.part3}
+              onChange={handlePhoneChange}
+              required
+              placeholder="XXXX"
+              maxLength="4"
+              style={{ width: '65px', textAlign: 'center' }} // Slightly wider for 4 digits
+            />
+          </div>
         </div>
         <button type="submit">Confirm</button>
       </form>
