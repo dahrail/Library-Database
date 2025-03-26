@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../../styles/auth/Auth.css';
 
-const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) => {
+const RegisterAsFaculty = ({ navigateToRegister }) => {
   const [newUser, setNewUser] = useState({
     Username: '',
     Password: '',
@@ -13,26 +13,36 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewUser(prev => ({ ...prev, [name]: value }));
+    setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onRegister(newUser);
-  };
 
-  const handleFacultyRegister = () => {
-    const passcode = prompt('Enter the faculty registration passcode:');
-    if (passcode === '1234') {
-      navigateToRegisterAsFaculty(); // Navigate to the RegisterAsFaculty page
-    } else {
-      alert('Incorrect passcode. Please try again.');
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newUser, Role: 'Faculty' }) // Set Role to 'Faculty'
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Faculty registration successful!');
+        navigateToRegister(); // Navigate back to the main register screen
+      } else {
+        alert('Failed to register as faculty: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error registering as faculty:', error);
+      alert('An error occurred while registering as faculty.');
     }
   };
 
   return (
     <div className="content-container">
-      <h2>Register</h2>
+      <h2>Register as Faculty</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Username:</label>
@@ -95,10 +105,9 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
         </div>
         <button type="submit">Confirm</button>
       </form>
-      <button onClick={handleFacultyRegister}>Register as Faculty</button> {/* Add Faculty Register Button */}
-      <button onClick={navigateToLogin}>Back to Login</button>
+      <button onClick={navigateToRegister}>Back to Register</button>
     </div>
   );
 };
 
-export default Register;
+export default RegisterAsFaculty;

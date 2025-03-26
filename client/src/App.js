@@ -4,6 +4,7 @@ import './App.css';
 // Import components
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import RegisterAsFaculty from './components/auth/RegisterAsFaculty'; // Import the new component
 import Welcome from './components/home/Welcome';
 import Home from './components/home/Home';
 import BookList from './components/books/BookList';
@@ -60,6 +61,7 @@ function App() {
   const navigateToHome = () => setCurrentScreen('home');
   const navigateToLogin = () => setCurrentScreen('login');
   const navigateToRegister = () => setCurrentScreen('register');
+  const navigateToRegisterAsFaculty = () => setCurrentScreen('registerAsFaculty'); // Add navigation function
   const navigateToAddBook = () => setCurrentScreen('addBook');
   const navigateToDataReport = () => setCurrentScreen('dataReport');
 
@@ -225,7 +227,15 @@ function App() {
       )}
 
       {currentScreen === 'register' && (
-        <Register onRegister={handleRegister} navigateToLogin={navigateToLogin} />
+        <Register
+          onRegister={handleRegister}
+          navigateToLogin={navigateToLogin}
+          navigateToRegisterAsFaculty={navigateToRegisterAsFaculty} // Pass the navigation function
+        />
+      )}
+
+      {currentScreen === 'registerAsFaculty' && (
+        <RegisterAsFaculty navigateToRegister={navigateToRegister} />
       )}
 
       {currentScreen === 'welcome' && isLoggedIn && (
