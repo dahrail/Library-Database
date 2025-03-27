@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../styles/layout/TopBar.css';
 
-const TopBar = ({ isLoggedIn, userData, handleLogout }) => {
+const TopBar = ({ isLoggedIn, userData, handleLogout, navigateToBooks, navigateToBooksNotLoggedIn }) => {
   return (
     <div className="top-bar">
       <div className="top-bar-content">
@@ -9,7 +9,12 @@ const TopBar = ({ isLoggedIn, userData, handleLogout }) => {
         
         {/* Navigation buttons */}
         <div className="nav-buttons">
-          <button className="nav-button">Browse & Borrow (WIP)</button>
+          <button 
+            onClick={isLoggedIn ? navigateToBooks : navigateToBooksNotLoggedIn} // Conditional navigation
+            className="nav-button"
+          >
+            Browse & Borrow
+          </button>
           <button className="nav-button">Media (WIP)</button>
           <button className="nav-button">Electronics (WIP)</button>
           <button className="nav-button">Events (WIP)</button>

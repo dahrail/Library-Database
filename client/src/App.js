@@ -16,6 +16,7 @@ import ReturnConfirmation from './components/loans/ReturnConfirmation';
 import HoldList from './components/holds/HoldList';
 import FineList from './components/fines/FineList';
 import TopBar from './components/layout/TopBar';
+import BooksNotLoggedIn from './components/books/BooksNotLoggedIn'; // Import the new component
 
 // Import API service
 import API from './services/api';
@@ -64,6 +65,7 @@ function App() {
   const navigateToRegisterAsFaculty = () => setCurrentScreen('registerAsFaculty'); // Add navigation function
   const navigateToAddBook = () => setCurrentScreen('addBook');
   const navigateToDataReport = () => setCurrentScreen('dataReport');
+  const navigateToBooksNotLoggedIn = () => setCurrentScreen('booksNotLoggedIn'); // Add navigation function
 
   // Books navigation and handlers
   const navigateToBooks = async () => {
@@ -219,7 +221,13 @@ function App() {
   return (
     <div className="app-container">
       {/* Show TopBar on all screens */}
-      <TopBar isLoggedIn={isLoggedIn} userData={userData} handleLogout={handleLogout} />
+      <TopBar 
+        isLoggedIn={isLoggedIn} 
+        userData={userData} 
+        handleLogout={handleLogout} 
+        navigateToBooks={navigateToBooks} // Pass the navigateToBooks function
+        navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn} // Pass the navigateToBooksNotLoggedIn function
+      />
       
       {/* Render the appropriate screen based on currentScreen state */}
       {currentScreen === 'login' && (
@@ -261,6 +269,10 @@ function App() {
           navigateToHold={navigateToHold} 
           navigateToHome={navigateToHome} 
         />
+      )}
+
+      {currentScreen === 'booksNotLoggedIn' && (
+        <BooksNotLoggedIn navigateToLogin={navigateToLogin} />
       )}
 
       {currentScreen === 'loan' && selectedBook && (
