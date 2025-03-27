@@ -44,7 +44,7 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
     <div className="register-container">
       <form onSubmit={handleSubmit} className="register-form">
         <h2 className="register-title">Create Account</h2>
-        <p className="register-subtitle">Join BookFinder Library System</p>
+        <p className="register-subtitle">Join BookFinder</p>
         
         <div className="form-row">
           <div className="form-group">
