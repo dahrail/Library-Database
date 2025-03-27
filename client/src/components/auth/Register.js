@@ -27,7 +27,7 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const combinedPhoneNumber = parseInt(`${phoneParts.part1}${phoneParts.part2}${phoneParts.part3}`, 10); // Combine and convert to integer
+    const combinedPhoneNumber = parseInt(`${phoneParts.part1}${phoneParts.part2}${phoneParts.part3}`, 10);
     onRegister({ ...newUser, PhoneNumber: combinedPhoneNumber });
   };
 
@@ -41,62 +41,80 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
   };
 
   return (
-    <div className="content-container">
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            name="Username"
-            value={newUser.Username}
-            onChange={handleChange}
-            required
-          />
+    <div className="register-container">
+      <form onSubmit={handleSubmit} className="register-form">
+        <h2 className="register-title">Create Account</h2>
+        <p className="register-subtitle">Join BookFinder Library System</p>
+        
+        <div className="form-row">
+          <div className="form-group">
+            <label>First Name</label>
+            <input
+              type="text"
+              name="FirstName"
+              value={newUser.FirstName}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="Enter your first name"
+            />
+          </div>
+          <div className="form-group">
+            <label>Last Name</label>
+            <input
+              type="text"
+              name="LastName"
+              value={newUser.LastName}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="Enter your last name"
+            />
+          </div>
         </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            name="Password"
-            value={newUser.Password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>First Name:</label>
-          <input
-            type="text"
-            name="FirstName"
-            value={newUser.FirstName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Last Name:</label>
-          <input
-            type="text"
-            name="LastName"
-            value={newUser.LastName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Email:</label>
+
+        <div className="form-group">
+          <label>Email</label>
           <input
             type="email"
             name="Email"
             value={newUser.Email}
             onChange={handleChange}
             required
+            className="form-input"
+            placeholder="Enter your email"
           />
         </div>
-        <div>
-          <label>Phone Number:</label>
-          <div style={{ display: 'flex', gap: '5px' }}>
+
+        <div className="form-group">
+          <label>Username</label>
+          <input
+            type="text"
+            name="Username"
+            value={newUser.Username}
+            onChange={handleChange}
+            required
+            className="form-input"
+            placeholder="Choose a username"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            name="Password"
+            value={newUser.Password}
+            onChange={handleChange}
+            required
+            className="form-input"
+            placeholder="Create a password"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Phone Number</label>
+          <div className="phone-input-group">
             <input
               type="text"
               name="part1"
@@ -105,9 +123,9 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
               required
               placeholder="XXX"
               maxLength="3"
-              style={{ width: '50px', textAlign: 'center' }} // Set width and center-align text
+              className="phone-input"
             />
-            <span>-</span>
+            <span className="phone-separator">-</span>
             <input
               type="text"
               name="part2"
@@ -116,9 +134,9 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
               required
               placeholder="XXX"
               maxLength="3"
-              style={{ width: '50px', textAlign: 'center' }} // Set width and center-align text
+              className="phone-input"
             />
-            <span>-</span>
+            <span className="phone-separator">-</span>
             <input
               type="text"
               name="part3"
@@ -127,14 +145,24 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
               required
               placeholder="XXXX"
               maxLength="4"
-              style={{ width: '65px', textAlign: 'center' }} // Slightly wider for 4 digits
+              className="phone-input"
             />
           </div>
         </div>
-        <button type="submit">Confirm</button>
+
+        <div className="form-buttons">
+          <button type="submit" className="btn btn-primary">Register</button>
+        </div>
+        
+        <div className="form-links">
+          <button type="button" onClick={navigateToLogin} className="btn-link">
+            Already have an account? Login
+          </button>
+          <button type="button" onClick={handleFacultyRegister} className="btn-link faculty-link">
+            Register as Faculty
+          </button>
+        </div>
       </form>
-      <button onClick={handleFacultyRegister}>Register as Faculty</button>
-      <button onClick={navigateToLogin}>Back to Login</button>
     </div>
   );
 };
