@@ -1,8 +1,6 @@
-const express = require("express");
+const http = require("http");
 const nodemailer = require("nodemailer");
 const mysql = require("mysql2");
-const app = express();
-app.use(express.json());
 
 // Set up MySQL connection pool
 const pool = mysql.createPool({
@@ -75,6 +73,12 @@ const sendEmails = async () => {
 // Run sendEmails every minute
 setInterval(sendEmails, 60000); // Check for new emails every minute
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+// Create a simple HTTP server to allow accessing the email service 
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Email service running');
+});
+
+server.listen(3000, () => {
+  console.log("Email service running on port 3000");
 });
