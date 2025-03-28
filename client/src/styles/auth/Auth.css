@@ -272,3 +272,133 @@
     padding: 30px 15px; /* Increase side padding to prevent overflow */
   }
 }
+
+/* Apple-style Passcode Modal */
+.passcode-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+  backdrop-filter: blur(5px);
+}
+
+.passcode-modal {
+  background-color: white;
+  border-radius: 12px;
+  padding: 28px;
+  width: 85%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: scaleIn 0.3s ease-out;
+  transform-origin: center;
+}
+
+.passcode-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 6px 0;
+  text-align: center;
+}
+
+.passcode-modal-subtitle {
+  font-size: 14px;
+  color: #86868b;
+  margin: 0 0 24px 0;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.passcode-input-container {
+  margin-bottom: 24px;
+}
+
+.passcode-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 17px;
+  border: 1px solid #d2d2d7;
+  border-radius: 10px;
+  background-color: #f5f5f7;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.passcode-input:focus {
+  outline: none;
+  border-color: #0071e3;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+}
+
+.passcode-error {
+  color: #ff3b30;
+  font-size: 13px;
+  margin: 8px 0 0 0;
+  padding-left: 2px;
+}
+
+.passcode-modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.passcode-button {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.passcode-button-cancel {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.passcode-button-cancel:hover {
+  background-color: #e8e8ed;
+}
+
+.passcode-button-submit {
+  background-color: #0071e3;
+  color: white;
+}
+
+.passcode-button-submit:hover {
+  background-color: #0077ed;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .passcode-modal {
+    width: 92%;
+    padding: 22px;
+  }
+  
+  .passcode-button {
+    padding: 10px 15px;
+  }
+}

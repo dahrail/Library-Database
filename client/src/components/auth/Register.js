@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../styles/auth/Auth.css';
+import PasscodeModal from './PasscodeModal';
 
 const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) => {
   const [newUser, setNewUser] = useState({
@@ -12,6 +13,7 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
   });
 
   const [phoneParts, setPhoneParts] = useState({ part1: '', part2: '', part3: '' });
+  const [isPasscodeModalOpen, setIsPasscodeModalOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,12 +34,7 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
   };
 
   const handleFacultyRegister = () => {
-    const passcode = prompt('Enter the faculty registration passcode:');
-    if (passcode === '1234') {
-      navigateToRegisterAsFaculty();
-    } else {
-      alert('Incorrect passcode. Please try again.');
-    }
+    setIsPasscodeModalOpen(true);
   };
 
   return (
@@ -163,6 +160,15 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
           </button>
         </div>
       </form>
+
+      <PasscodeModal 
+        isOpen={isPasscodeModalOpen}
+        onClose={() => setIsPasscodeModalOpen(false)}
+        onSubmit={() => {
+          setIsPasscodeModalOpen(false);
+          navigateToRegisterAsFaculty();
+        }}
+      />
     </div>
   );
 };
