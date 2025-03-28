@@ -95,8 +95,8 @@ const addBook = async (req, res) => {
   try {
     const bookData = await parseRequestBody(req);
     console.log('Adding new book:', bookData.Title);
-    
-    const {
+  
+    const { 
       Title,
       Author,
       Genre,
@@ -109,85 +109,180 @@ const addBook = async (req, res) => {
       AvailableCopies,
       ShelfLocation
     } = bookData;
-
-    // Insert into BOOK table
-    const bookQuery = `
-      INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    // Insert into BOOK_INVENTORY table
-    const inventoryQuery = `
-      INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation)
-      VALUES (LAST_INSERT_ID(), ?, ?, ?)
-    `;
-
-    pool.getConnection((err, connection) => {
-      if (err) {
-        console.error('Error getting database connection:', err);
-        sendJsonResponse(res, 500, { success: false, error: 'Database connection error' });
-        return;
-      }
-
-      connection.beginTransaction((err) => {
+  
+    const query = 'INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    pool.query(query, [Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN], (err, results) => {
         if (err) {
-          console.error('Error starting transaction:', err);
-          connection.release();
-          sendJsonResponse(res, 500, { success: false, error: 'Transaction error' });
-          return;
+            console.error('Error adding book:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: false, error: 'Database error' }));
         }
-
-        // Insert into BOOK table
-        connection.query(
-          bookQuery,
-          [Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
-          (err, bookResults) => {
+        
+        const BookID = results.insertId;
+        const inventoryQuery = 'INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation) VALUES (?, ?, ?, ?)';
+        pool.query(inventoryQuery, [BookID, TotalCopies, AvailableCopies, ShelfLocation], (err, inventoryResults) => {
             if (err) {
-              console.error('Error inserting book:', err);
-              connection.rollback(() => connection.release());
-              sendJsonResponse(res, 500, { success: false, error: 'Failed to add book' });
-              return;
+                console.error('Error updating inventory:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ success: false, error: 'Failed to update inventory' }));
             }
-
-            // Insert into BOOK_INVENTORY table
-            connection.query(
-              inventoryQuery,
-              [TotalCopies, AvailableCopies, ShelfLocation],
-              (err, inventoryResults) => {
-                if (err) {
-                  console.error('Error inserting book inventory:', err);
-                  connection.rollback(() => connection.release());
-                  sendJsonResponse(res, 500, { success: false, error: 'Failed to add book inventory' });
-                  return;
-                }
-
-                // Commit the transaction
-                connection.commit((err) => {
-                  if (err) {
-                    console.error('Error committing transaction:', err);
-                    connection.rollback(() => connection.release());
-                    sendJsonResponse(res, 500, { success: false, error: 'Transaction commit error' });
-                    return;
-                  }
-
-                  connection.release();
-                  console.log('Book added successfully:', Title);
-                  sendJsonResponse(res, 200, { success: true });
-                });
-              }
-            );
-          }
-        );
-      });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, BookID }));
+        });
     });
   } catch (error) {
     console.error('Error in addBook:', error);
-    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, error: "Server error" }));
   }
 };
+
+//Delete book
+const deleteBook = async (req,res) =>{
+  try {
+    const { BookID } = await parseRequestBody(req);
+    pool.query('DELETE FROM BOOK_INVENTORY WHERE BookId = ?', [BookID], (err) => {
+      if (err){
+        console.error('Error delete inventory', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: false, error: 'Database error' }));
+      }
+      pool.query("DELETE FROM BOOK WHERE BookID = ?", [BookID], (err) => {
+        if (err){
+          console.error('Error deleting book', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ success: false, error: 'Failed to delete book' }))
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Book deleted successfully' }));
+      });
+    });
+  } catch (error) {
+    // If there's an error during the parsing or any other part
+    console.error('Error in deleteBook:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, error: 'Server error' }));
+  }
+};
+
+//updateBook
+const updateBook = async (req, res) => {
+  try {
+    const bookData = await parseRequestBody(req);
+    console.log('Updating book:', bookData.BookID);
+    
+    const { 
+      BookID, 
+      Title, 
+      Author, 
+      Genre, 
+      PublicationYear, 
+      Publisher, 
+      Language, 
+      Format, 
+      ISBN, 
+      TotalCopies, 
+      AvailableCopies, 
+      ShelfLocation
+    } = bookData;
+
+    // Initialize an array for the dynamic set of update fields and their values
+    let updateFields = [];
+    let queryParams = [];
+    
+    // Add fields to update only if the user provided new values
+    if (Title) {
+      updateFields.push('Title = ?');
+      queryParams.push(Title);
+    }
+    if (Author) {
+      updateFields.push('Author = ?');
+      queryParams.push(Author);
+    }
+    if (Genre) {
+      updateFields.push('Genre = ?');
+      queryParams.push(Genre);
+    }
+    if (PublicationYear) {
+      updateFields.push('PublicationYear = ?');
+      queryParams.push(PublicationYear);
+    }
+    if (Publisher) {
+      updateFields.push('Publisher = ?');
+      queryParams.push(Publisher);
+    }
+    if (Language) {
+      updateFields.push('Language = ?');
+      queryParams.push(Language);
+    }
+    if (Format) {
+      updateFields.push('Format = ?');
+      queryParams.push(Format);
+    }
+    if (ISBN) {
+      updateFields.push('ISBN = ?');
+      queryParams.push(ISBN);
+    }
+
+    // Construct the dynamic update query for the book details
+    const updateQuery = `UPDATE BOOK SET ${updateFields.join(', ')} WHERE BookID = ?`;
+    queryParams.push(BookID);  // Always include the BookID to target the correct book
+    
+    pool.query(updateQuery, queryParams, (err, results) => {
+      if (err) {
+        console.error('Error updating book:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: false, error: 'Database error' }));
+      }
+
+      // If there are inventory updates, handle them similarly
+      let inventoryUpdateFields = [];
+      let inventoryQueryParams = [];
+      
+      if (TotalCopies !== undefined) {
+        inventoryUpdateFields.push('TotalCopies = ?');
+        inventoryQueryParams.push(TotalCopies);
+      }
+      if (AvailableCopies !== undefined) {
+        inventoryUpdateFields.push('AvailableCopies = ?');
+        inventoryQueryParams.push(AvailableCopies);
+      }
+      if (ShelfLocation) {
+        inventoryUpdateFields.push('ShelfLocation = ?');
+        inventoryQueryParams.push(ShelfLocation);
+      }
+
+      if (inventoryUpdateFields.length > 0) {
+        const inventoryQuery = `UPDATE BOOK_INVENTORY SET ${inventoryUpdateFields.join(', ')} WHERE BookID = ?`;
+        inventoryQueryParams.push(BookID);
+
+        pool.query(inventoryQuery, inventoryQueryParams, (err, inventoryResults) => {
+          if (err) {
+            console.error('Error updating inventory:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: false, error: 'Failed to update inventory' }));
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true }));
+        });
+      } else {
+        // If no inventory update is needed, send a success response
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      }
+    });
+  } catch (error) {
+    console.error('Error in updateBook:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, error: 'Server error' }));
+  }
+};
+
 
 module.exports = {
   getAllBooks,
   getUserBooks,
-  addBook
+  addBook,
+  deleteBook,
+  updateBook
 };

@@ -43,7 +43,15 @@ const handleRequest = async (req, res) => {
     if (method === 'POST' && path === '/api/addBook') {
       return await bookRoutes.addBook(req, res);
     }
-    
+
+    if (method === 'DELETE' && path === '/api/deleteBook') {
+      return await bookRoutes.deleteBook(req, res);
+    }
+
+    if (method === 'PUT' && path === '/api/updateBook') {
+      return await bookRoutes.updateBook(req, res);
+    }
+
     // LOAN ROUTES
     if (method === 'GET' && path.match(/^\/api\/loans\/\d+$/)) {
       const userId = path.split('/').pop();
