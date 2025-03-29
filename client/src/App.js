@@ -433,7 +433,12 @@ function App() {
       )}
 
       {currentScreen === "rooms" && (
-        <RoomReservation userData={userData} navigateToHome={navigateToHome} />
+        <RoomReservation 
+          userData={userData} 
+          navigateToHome={navigateToHome} 
+          isLoggedIn={isLoggedIn}
+          navigateToLogin={navigateToLogin}
+        />
       )}
     </div>
   );
