@@ -91,102 +91,101 @@ const Events = ({ userData, navigateToHome }) => {
 
   return (
     <div className="events-container">
-      {/* Add header image section */}
+      {/* Hero Section with gradient background - matches other pages */}
       <div className="events-header">
-        <img 
-          src="https://www.provlib.org/wp-content/uploads/bb-plugin/cache/WorkshopClassRmwPeople-325-scaled-landscape-041e26d48d90f70cdee1e51d90f12669-5f7380b61fd12.jpg" 
-          alt="Library Events" 
-          className="events-header-image"
-        />
         <div className="events-header-overlay">
           <h2>Library Events</h2>
+          <p className="hero-subtitle">
+            Discover upcoming library events and activities
+          </p>
         </div>
       </div>
       
-      {/* Remove the standalone h2 since it's now in the header */}
-      
-      {/* Add Event button - only show for Admin users */}
-      {userData?.Role === 'Admin' && (
-        <div className="events-actions">
-          <button 
-            className="add-event-button"
-            onClick={() => setShowAddForm(!showAddForm)}
-          >
-            {showAddForm ? 'Cancel' : 'Add New Event'}
-          </button>
-        </div>
-      )}
-      
-      {/* Add Event Form */}
-      {showAddForm && (
-        <AddEventForm 
-          onSubmit={handleAddEvent} 
-          rooms={rooms}
-          onCancel={() => setShowAddForm(false)}
-        />
-      )}
-      
-      {loading && <p className="loading-message">Loading events...</p>}
-      
-      {error && (
-        <div className="error-message">
-          <p>{error}</p>
-          <p>Please try again later or contact support.</p>
-        </div>
-      )}
-      
-      {!loading && !error && events.length === 0 && (
-        <div className="no-events-message">
-          <p>No upcoming events at this time.</p>
-          {userData?.Role === 'Admin' && (
-            <p>Use the "Add New Event" button to create events.</p>
-          )}
-        </div>
-      )}
-      
-      {!loading && !error && events.length > 0 && (
-        <div className="events-grid">
-          {events.map(event => (
-            <div key={event.EventID} className="event-card">
-              <div className="event-header">
-                <h3>{event.EventName}</h3>
-                {event.Organizer && <p className="organizer">By: {event.Organizer}</p>}
+      {/* Content Section */}
+      <div className="events-section">
+        {/* Add Event button - only show for Admin users */}
+        {userData?.Role === 'Admin' && (
+          <div className="events-actions">
+            <button 
+              className="add-event-button"
+              onClick={() => setShowAddForm(!showAddForm)}
+            >
+              {showAddForm ? 'Cancel' : 'Add New Event'}
+            </button>
+          </div>
+        )}
+        
+        {/* Add Event Form */}
+        {showAddForm && (
+          <AddEventForm 
+            onSubmit={handleAddEvent} 
+            rooms={rooms}
+            onCancel={() => setShowAddForm(false)}
+          />
+        )}
+        
+        {loading && <p className="loading-message">Loading events...</p>}
+        
+        {error && (
+          <div className="error-message">
+            <p>{error}</p>
+            <p>Please try again later or contact support.</p>
+          </div>
+        )}
+        
+        {!loading && !error && events.length === 0 && (
+          <div className="no-events-message">
+            <p>No upcoming events at this time.</p>
+            {userData?.Role === 'Admin' && (
+              <p>Use the "Add New Event" button to create events.</p>
+            )}
+          </div>
+        )}
+        
+        {!loading && !error && events.length > 0 && (
+          <div className="events-grid">
+            {events.map(event => (
+              <div key={event.EventID} className="event-card">
+                <div className="event-header">
+                  <h3>{event.EventName}</h3>
+                  {event.Organizer && <p className="organizer">By: {event.Organizer}</p>}
+                </div>
+                
+                <div className="event-details">
+                  <div className="detail-item">
+                    <span className="detail-label">Date:</span>
+                    <span className="detail-value">
+                      {new Date(event.StartAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  
+                  <div className="detail-item">
+                    <span className="detail-label">Time:</span>
+                    <span className="detail-value">
+                      {new Date(event.StartAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                      {new Date(event.EndAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                  </div>
+                  
+                  <div className="detail-item">
+                    <span className="detail-label">Location:</span>
+                    <span className="detail-value">{event.RoomNumber}</span>
+                  </div>
+                  
+                  <div className="detail-item">
+                    <span className="detail-label">Capacity:</span>
+                    <span className="detail-value">
+                      {event.MaxAttendees} max
+                    </span>
+                  </div>
+                </div>
               </div>
-              
-              <div className="event-details">
-                <div className="detail-item">
-                  <span className="detail-label">Date:</span>
-                  <span className="detail-value">
-                    {new Date(event.StartAt).toLocaleDateString()}
-                  </span>
-                </div>
-                
-                <div className="detail-item">
-                  <span className="detail-label">Time:</span>
-                  <span className="detail-value">
-                    {new Date(event.StartAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
-                    {new Date(event.EndAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                  </span>
-                </div>
-                
-                <div className="detail-item">
-                  <span className="detail-label">Location:</span>
-                  <span className="detail-value">{event.RoomNumber}</span>
-                </div>
-                
-                <div className="detail-item">
-                  <span className="detail-label">Capacity:</span>
-                  <span className="detail-value">
-                    {event.MaxAttendees} max
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      
-      <button onClick={navigateToHome} className="btn-back">Back to Home</button>
+            ))}
+          </div>
+        )}
+        
+        <button onClick={navigateToHome} className="btn-back">Back to Home</button>
+      </div>
     </div>
   );
 };
