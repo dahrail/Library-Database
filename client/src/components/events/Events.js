@@ -91,7 +91,19 @@ const Events = ({ userData, navigateToHome }) => {
 
   return (
     <div className="events-container">
-      <h2>Library Events</h2>
+      {/* Add header image section */}
+      <div className="events-header">
+        <img 
+          src="https://www.provlib.org/wp-content/uploads/bb-plugin/cache/WorkshopClassRmwPeople-325-scaled-landscape-041e26d48d90f70cdee1e51d90f12669-5f7380b61fd12.jpg" 
+          alt="Library Events" 
+          className="events-header-image"
+        />
+        <div className="events-header-overlay">
+          <h2>Library Events</h2>
+        </div>
+      </div>
+      
+      {/* Remove the standalone h2 since it's now in the header */}
       
       {/* Add Event button - only show for Admin users */}
       {userData?.Role === 'Admin' && (

@@ -8,7 +8,9 @@ const TopBar = ({
   navigateToBooks, 
   navigateToMedia,
   navigateToLogin,
-  navigateToRegister // Make sure this prop is included
+  navigateToRegister,
+  navigateToRooms, // Add this
+  navigateToEvents  // Add this
 }) => {
   return (
     <div className="top-bar">

@@ -111,6 +111,19 @@ const handleRequest = async (req, res) => {
       return await roomRoutes.bookRoom(req, res);
     }
 
+    // EVENT ROUTES
+    if (method === "GET" && path === "/api/events") {
+      return eventRoutes.getAllEvents(req, res);
+    }
+
+    if (method === "POST" && path === "/api/events") {
+      return await eventRoutes.addEvent(req, res);
+    }
+
+    if (method === "POST" && path === "/api/events/register") {
+      return await eventRoutes.registerForEvent(req, res);
+    }
+
     // If we reach here, no route was matched
     console.log("No route matched for:", path);
     sendJsonResponse(res, 404, { error: "Not found" });
