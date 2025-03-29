@@ -17,6 +17,7 @@ import HoldList from "./components/holds/HoldList";
 import FineList from "./components/fines/FineList";
 import TopBar from "./components/layout/TopBar";
 import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; // Import the new component
+import RoomReservation from "./components/rooms/RoomReservation"; // Import the new component
 
 // Import API service
 import API from "./services/api";
@@ -68,6 +69,9 @@ function App() {
   const navigateToBooksNotLoggedIn = () => setCurrentScreen("booksNotLoggedIn"); // Add navigation function
   const navigateToMedia = () => setCurrentScreen("media");
   const navigateToElectronics = () => setCurrentScreen("electronics");
+  const navigateToRooms = () => {
+    setCurrentScreen("rooms");
+  };
 
   const navigateToDataReport = async () => {
     try {
@@ -310,6 +314,7 @@ function App() {
           navigateToMedia={navigateToMedia}
           navigateToElectronics={navigateToElectronics}
           navigateToLoans={navigateToLoans} // Pass the navigateToLoans function
+          navigateToRooms={navigateToRooms} // Pass the function
           navigateToHolds={navigateToHolds}
           navigateToFines={navigateToFines}
           navigateToAddBook={navigateToAddBook} // Pass the function
@@ -409,6 +414,10 @@ function App() {
             Back to Menu
           </button>
         </div>
+      )}
+
+      {currentScreen === "rooms" && (
+        <RoomReservation userData={userData} navigateToHome={navigateToHome} />
       )}
     </div>
   );
