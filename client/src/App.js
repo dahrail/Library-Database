@@ -56,14 +56,12 @@ function App() {
   const [fines, setFines] = useState([]);
   const [reportData, setReportData] = useState(null);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
+  const handleLogin = async (emailInput, passwordInput) => {
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: emailInput, password: passwordInput }),
       });
 
       const data = await response.json();
