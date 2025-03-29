@@ -9,7 +9,8 @@ const TopBar = ({
   navigateToBooksNotLoggedIn, 
   navigateToMedia,
   navigateToLogin,
-  navigateToRegister // Make sure this prop is included
+  navigateToRegister,
+  navigateToRooms // Add this prop
 }) => {
   return (
     <div className="top-bar">
@@ -35,6 +36,12 @@ const TopBar = ({
             className="nav-button"
           >
             Media
+          </button>
+          <button 
+            onClick={navigateToRooms}
+            className="nav-button"
+          >
+            Room Reservation
           </button>
           <button className="nav-button">Electronics (WIP)</button>
           <button className="nav-button">Events (WIP)</button>
