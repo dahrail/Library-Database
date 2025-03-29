@@ -1,14 +1,31 @@
-<<<<<<< Updated upstream
 import React, { useState, useEffect } from 'react';
-import './App.css'; // Make sure CSS is imported
+import './App.css';
+
+// Import components
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import RegisterAsFaculty from "./components/auth/RegisterAsFaculty";
+import Welcome from "./components/home/Welcome";
+import Home from "./components/home/Home";
+import BookList from "./components/books/BookList";
+import BookLoan from "./components/books/BookLoan";
+import BookHold from "./components/books/BookHold";
+import AddBook from "./components/books/AddBook";
+import LoanList from "./components/loans/LoanList";
+import ReturnConfirmation from "./components/loans/ReturnConfirmation";
+import HoldList from "./components/holds/HoldList";
+import FineList from "./components/fines/FineList";
+import TopBar from "./components/layout/TopBar";
+import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn";
+import LandingPage from "./components/home/LandingPage";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userData, setUserData] = useState(null); // Store logged-in user's details
-  const [currentScreen, setCurrentScreen] = useState('login'); // Track the current screen ('login', 'welcome', 'home', 'books')
-  const [books, setBooks] = useState([]); // Store the list of books
+  const [userData, setUserData] = useState(null);
+  const [currentScreen, setCurrentScreen] = useState('landing');
+  const [books, setBooks] = useState([]);
   const [newBook, setNewBook] = useState({
     BookID: '',
     Title: '',
@@ -22,7 +39,7 @@ function App() {
     BookInventoryID: '',
     TotalCopies: '',
     AvailableCopies: '',
-    ShelfLocation: '' // Add ShelfLocation field
+    ShelfLocation: ''
   });
   const [newUser, setNewUser] = useState({
     Username: '',
@@ -32,50 +49,15 @@ function App() {
     Email: '',
     PhoneNumber: ''
   });
-  const [selectedBook, setSelectedBook] = useState(null); // Store the selected book
-  const [loans, setLoans] = useState([]); // Store the list of loans
-  const [holds, setHolds] = useState([]); // Store the list of holds
-  const [selectedLoan, setSelectedLoan] = useState(null); // Store the selected loan
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-=======
-import React, { useState } from "react";
-import "./App.css";
-
-// Import components
-import Login from "./components/auth/Login";
-import Register from "./components/auth/Register";
-import RegisterAsFaculty from "./components/auth/RegisterAsFaculty"; // Import the new component
-import Welcome from "./components/home/Welcome";
-import Home from "./components/home/Home";
-import BookList from "./components/books/BookList";
-import BookLoan from "./components/books/BookLoan";
-import BookHold from "./components/books/BookHold";
-import AddBook from "./components/books/AddBook";
-import LoanList from "./components/loans/LoanList";
-import ReturnConfirmation from "./components/loans/ReturnConfirmation";
-import HoldList from "./components/holds/HoldList";
-import FineList from "./components/fines/FineList";
-import TopBar from "./components/layout/TopBar";
-import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; // Import the new component
-import LandingPage from "./components/home/LandingPage"; // Import the new LandingPage component
-
-// Import API service
-import API from "./services/api";
-
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState(null);
-  const [currentScreen, setCurrentScreen] = useState("landing"); // Change initial screen to landing
-  const [books, setBooks] = useState([]);
   const [selectedBook, setSelectedBook] = useState(null);
-  const [loans, setLoans] = React.useState([]); // Initialize loans as an empty array
+  const [loans, setLoans] = useState([]);
   const [holds, setHolds] = useState([]);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [fines, setFines] = useState([]);
-  const [reportData, setReportData] = useState(null); // State to store data report results
->>>>>>> Stashed changes
+  const [reportData, setReportData] = useState(null);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
     try {
       const response = await fetch('/api/login', {
@@ -84,50 +66,12 @@ function App() {
         body: JSON.stringify({ email, password }),
       });
 
-<<<<<<< Updated upstream
-=======
-      if (data.success) {
-        setIsLoggedIn(true);
-        setUserData(data.user);
-        setCurrentScreen("welcome");
-      } else {
-        alert(data.error || "Invalid email or password");
-      }
-    } catch (error) {
-      console.error("Error during login:", error);
-      alert("An error occurred while logging in.");
-    }
-  };
-
-  // Logout handler
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserData(null);
-    setCurrentScreen("login");
-  };
-
-  // Navigation functions
-  const navigateToHome = () => setCurrentScreen("home");
-  const navigateToLogin = () => setCurrentScreen("login");
-  const navigateToRegister = () => setCurrentScreen("register");
-  const navigateToRegisterAsFaculty = () =>
-    setCurrentScreen("registerAsFaculty"); // Add navigation function
-  const navigateToAddBook = () => setCurrentScreen("addBook");
-  const navigateToBooksNotLoggedIn = () => setCurrentScreen("booksNotLoggedIn"); // Add navigation function
-  const navigateToMedia = () => setCurrentScreen("media");
-  const navigateToElectronics = () => setCurrentScreen("electronics");
-  const navigateToLanding = () => setCurrentScreen("landing");
-
-  const navigateToDataReport = async () => {
-    try {
-      const response = await fetch("/api/dataReport"); // Fetch data from the backend
->>>>>>> Stashed changes
       const data = await response.json();
 
       if (data.success) {
-        setIsLoggedIn(true); // Set login state to true
-        setUserData(data.user); // Store user details, including UserID
-        setCurrentScreen('welcome'); // Navigate to the welcome screen
+        setIsLoggedIn(true);
+        setUserData(data.user);
+        setCurrentScreen('welcome');
       } else {
         alert(data.error || 'Invalid email or password');
       }
@@ -137,37 +81,40 @@ function App() {
     }
   };
 
-  const navigateToHome = () => {
-    setCurrentScreen('home'); // Navigate to the home screen
+  // Logout handler
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserData(null);
+    setCurrentScreen('login');
   };
 
-  const navigateToWelcome = () => {
-    setCurrentScreen('welcome'); // Navigate back to the welcome screen
-  };
+  // Navigation functions
+  const navigateToHome = () => setCurrentScreen('home');
+  const navigateToLogin = () => setCurrentScreen('login');
+  const navigateToRegister = () => setCurrentScreen('register');
+  const navigateToRegisterAsFaculty = () => setCurrentScreen('registerAsFaculty');
+  const navigateToAddBook = () => setCurrentScreen('addBook');
+  const navigateToBooksNotLoggedIn = () => setCurrentScreen('booksNotLoggedIn');
+  const navigateToMedia = () => setCurrentScreen('media');
+  const navigateToElectronics = () => setCurrentScreen('electronics');
+  const navigateToLanding = () => setCurrentScreen('landing');
+  const navigateToWelcome = () => setCurrentScreen('welcome');
 
   const navigateToBooks = async () => {
     try {
       const response = await fetch('/api/books');
       const data = await response.json();
-      console.log("Books received from backend:", data); // Log the data
-      setBooks(data); // Store the books in state
-      setCurrentScreen('books'); // Navigate to the books screen
+      console.log("Books received from backend:", data);
+      setBooks(data);
+      setCurrentScreen('books');
     } catch (error) {
       console.error("Error fetching books:", error);
     }
   };
 
   const handleLoan = (book) => {
-    setSelectedBook(book); // Store the selected book
-    setCurrentScreen('loan'); // Navigate to the loan screen
-  };
-
-  const navigateToAddBook = () => {
-    setCurrentScreen('addBook'); // Navigate to the add book screen
-  };
-
-  const navigateToRegister = () => {
-    setCurrentScreen('register'); // Navigate to the register screen
+    setSelectedBook(book);
+    setCurrentScreen('loan');
   };
 
   const navigateToLoans = async () => {
@@ -176,8 +123,8 @@ function App() {
       const data = await response.json();
 
       if (data.success) {
-        setLoans(data.loans); // Store the loans in state
-        setCurrentScreen('loans'); // Navigate to the loans screen
+        setLoans(data.loans);
+        setCurrentScreen('loans');
       } else {
         alert('Failed to fetch loans: ' + data.error);
       }
@@ -193,8 +140,8 @@ function App() {
       const data = await response.json();
 
       if (data.success) {
-        setHolds(data.holds); // Store the holds in state
-        setCurrentScreen('holds'); // Navigate to the holds screen
+        setHolds(data.holds);
+        setCurrentScreen('holds');
       } else {
         alert('Failed to fetch holds: ' + data.error);
       }
@@ -218,7 +165,7 @@ function App() {
 
       if (data.success) {
         alert('Book added successfully!');
-        setCurrentScreen('home'); // Navigate back to the home screen
+        setCurrentScreen('home');
       } else {
         alert('Failed to add book: ' + data.error);
       }
@@ -240,8 +187,8 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           ...newUser, 
-          PhoneNumber: fullPhoneNumber, // Send the combined phone number
-          Role: 'Student' // Add Role as 'Student'
+          PhoneNumber: fullPhoneNumber,
+          Role: 'Student'
         })
       });
 
@@ -249,7 +196,7 @@ function App() {
 
       if (data.success) {
         alert('Registration successful!');
-        setCurrentScreen('login'); // Navigate back to the login screen
+        setCurrentScreen('login');
       } else {
         alert('Failed to register: ' + data.error);
       }
@@ -260,16 +207,17 @@ function App() {
   };
 
   const handleConfirmLoan = async () => {
-    console.log("Confirming loan for BookID:", selectedBook.bookID); // Log the BookID
-    console.log("UserID being sent:", userData.UserID); // Log the UserID
+    console.log("Confirming loan for BookID:", selectedBook.bookID);
+    console.log("UserID being sent:", userData.UserID);
+    
     try {
       const response = await fetch('/api/confirmLoan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           BookID: selectedBook.bookID,
-          UserID: userData.UserID, // Send the UserID
-          Role: userData.Role // Send the Role
+          UserID: userData.UserID,
+          Role: userData.Role
         })
       });
 
@@ -277,7 +225,7 @@ function App() {
 
       if (data.success) {
         alert('Loan confirmed successfully!');
-        setCurrentScreen('home'); // Navigate back to the home screen
+        setCurrentScreen('home');
       } else {
         alert('Failed to confirm loan: ' + data.error);
       }
@@ -288,8 +236,8 @@ function App() {
   };
 
   const navigateToHold = (book) => {
-    setSelectedBook(book); // Store the selected book
-    setCurrentScreen('hold'); // Navigate to the hold screen
+    setSelectedBook(book);
+    setCurrentScreen('hold');
   };
 
   const handleConfirmHold = async () => {
@@ -298,9 +246,9 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          UserID: userData.UserID, // Send UserID from userData
-          ItemType: 'Book', // Set ItemType to "Book"
-          ItemID: selectedBook.bookID, // Send the selected BookID
+          UserID: userData.UserID,
+          ItemType: 'Book',
+          ItemID: selectedBook.bookID,
         }),
       });
   
@@ -308,7 +256,7 @@ function App() {
   
       if (data.success) {
         alert('Hold placed successfully!');
-        setCurrentScreen('books'); // Navigate back to the books screen
+        setCurrentScreen('books');
       } else {
         alert('Failed to place hold: ' + data.error);
       }
@@ -319,28 +267,28 @@ function App() {
   };
 
   const navigateToReturnConfirmation = (loan) => {
-    console.log('Navigating to ReturnConfirmation with loan:', loan); // Log the loan object
-    setSelectedLoan(loan); // Store the selected loan, including LoanID
-    setCurrentScreen('returnConfirmation'); // Navigate to the return confirmation screen
+    console.log('Navigating to ReturnConfirmation with loan:', loan);
+    setSelectedLoan(loan);
+    setCurrentScreen('returnConfirmation');
   };
 
   const handleConfirmReturn = async () => {
     try {
-      console.log('Sending LoanID to backend:', selectedLoan.LoanID); // Log the LoanID being sent
+      console.log('Sending LoanID to backend:', selectedLoan.LoanID);
 
       const response = await fetch('/api/confirmReturn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ LoanID: selectedLoan.LoanID }) // Send the LoanID to the backend
+        body: JSON.stringify({ LoanID: selectedLoan.LoanID })
       });
 
       const data = await response.json();
 
-      console.log('Response from backend:', data); // Log the response from the backend
+      console.log('Response from backend:', data);
 
       if (data.success) {
         alert(`The item "${selectedLoan.Title}" has been successfully returned.`);
-        setCurrentScreen('loans'); // Navigate back to the loans screen
+        setCurrentScreen('loans');
       } else {
         alert('Failed to return the item: ' + data.error);
       }
@@ -351,74 +299,14 @@ function App() {
   };
 
   return (
-<<<<<<< Updated upstream
-    <div>
-      {currentScreen === 'login' && (
-        <div className="login-container">
-          <form onSubmit={handleLogin} className="login-form">
-            <h2 className="login-title">Library Login</h2>
-            <div className="form-group">
-              <label>Email:</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="form-input"
-                placeholder="Enter your email"
-              />
-            </div>
-            <div className="form-group">
-              <label>Password:</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="form-input"
-                placeholder="Enter your password"
-              />
-            </div>
-            <div className="form-buttons">
-              <button type="submit" className="btn btn-primary">Login</button>
-              <button type="button" onClick={navigateToRegister} className="btn btn-secondary">Register</button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {currentScreen === 'welcome' && isLoggedIn && (
-        <div>
-          <h2>Welcome!</h2>
-          <p>
-            You are logged in as <strong>{userData.FirstName}</strong> with role{' '}
-            <strong>{userData.Role}</strong>.
-          </p>
-          <button onClick={navigateToHome}>Home</button>
-        </div>
-      )}
-
-      {currentScreen === 'home' && (
-        <div>
-          <h2>Team 7 Library (Role: {userData.Role})</h2>
-          <button onClick={navigateToBooks}>Books</button>
-          <button onClick={navigateToLoans}>Loans</button>
-          <button onClick={navigateToHolds}>Holds</button>
-          {userData.Role === 'Admin' && (
-            <button onClick={navigateToAddBook}>Add New Book</button>
-          )}
-        </div>
-=======
     <div className="app-container">
       {/* Show TopBar on all screens */}
       <TopBar
         isLoggedIn={isLoggedIn}
         userData={userData}
         handleLogout={handleLogout}
-        navigateToBooks={navigateToBooks} // Pass the navigateToBooks function
-        navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn} // Pass the navigateToBooksNotLoggedIn function
-        navigateToLogin={() => setCurrentScreen("login")} // Add login navigation
-        navigateToRegister={() => setCurrentScreen("register")} // Add register navigation
+        navigateToBooks={navigateToBooks}
+        navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn}
       />
 
       {/* Render the appropriate screen based on currentScreen state */}
@@ -451,7 +339,6 @@ function App() {
           navigateToRegister={navigateToRegister}
           navigateToLanding={navigateToLanding}
         />
->>>>>>> Stashed changes
       )}
 
       {currentScreen === 'books' && (
@@ -479,7 +366,7 @@ function App() {
                   <td>
                     {book.copies > 0 ? (
                       <button
-                        onClick={() => handleLoan(book)} // Pass the book object
+                        onClick={() => handleLoan(book)}
                         style={{
                           backgroundColor: 'blue',
                           color: 'white',
@@ -490,7 +377,7 @@ function App() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => navigateToHold(book)} // Navigate to the hold page
+                        onClick={() => navigateToHold(book)}
                         style={{
                           backgroundColor: 'orange',
                           color: 'white',
@@ -518,7 +405,7 @@ function App() {
             <strong>{userData.Role === 'Student' ? '7 days' : '14 days'}</strong>.
           </p>
           <button onClick={() => setCurrentScreen('books')}>Back to Books</button>
-          <button onClick={handleConfirmLoan}>Confirm</button> {/* Add Confirm button */}
+          <button onClick={handleConfirmLoan}>Confirm</button>
         </div>
       )}
 
@@ -643,89 +530,26 @@ function App() {
         </div>
       )}
 
-      {currentScreen === 'register' && (
+      {currentScreen === 'welcome' && isLoggedIn && (
         <div>
-          <h2>Register</h2>
-          <form onSubmit={handleRegister}>
-            <div>
-              <label>Username:</label>
-              <input
-                type="text"
-                value={newUser.Username}
-                onChange={(e) => setNewUser({ ...newUser, Username: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label>Password:</label>
-              <input
-                type="password"
-                value={newUser.Password}
-                onChange={(e) => setNewUser({ ...newUser, Password: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label>First Name:</label>
-              <input
-                type="text"
-                value={newUser.FirstName}
-                onChange={(e) => setNewUser({ ...newUser, FirstName: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label>Last Name:</label>
-              <input
-                type="text"
-                value={newUser.LastName}
-                onChange={(e) => setNewUser({ ...newUser, LastName: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label>Email:</label>
-              <input
-                type="email"
-                value={newUser.Email}
-                onChange={(e) => setNewUser({ ...newUser, Email: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label>Phone Number:</label>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  maxLength="3"
-                  value={newUser.PhonePart1 || ''}
-                  onChange={(e) => setNewUser({ ...newUser, PhonePart1: e.target.value })}
-                  required
-                  style={{ width: '50px', marginRight: '5px' }}
-                />
-                -
-                <input
-                  type="text"
-                  maxLength="3"
-                  value={newUser.PhonePart2 || ''}
-                  onChange={(e) => setNewUser({ ...newUser, PhonePart2: e.target.value })}
-                  required
-                  style={{ width: '50px', margin: '0 5px' }}
-                />
-                -
-                <input
-                  type="text"
-                  maxLength="4"
-                  value={newUser.PhonePart3 || ''}
-                  onChange={(e) => setNewUser({ ...newUser, PhonePart3: e.target.value })}
-                  required
-                  style={{ width: '70px', marginLeft: '5px' }}
-                />
-              </div>
-            </div>
-            <button type="submit">Confirm</button>
-          </form>
-          <button onClick={() => setCurrentScreen('login')}>Back to Login</button>
+          <h2>Welcome!</h2>
+          <p>
+            You are logged in as <strong>{userData.FirstName}</strong> with role{' '}
+            <strong>{userData.Role}</strong>.
+          </p>
+          <button onClick={navigateToHome}>Home</button>
+        </div>
+      )}
+
+      {currentScreen === 'home' && (
+        <div>
+          <h2>Team 7 Library (Role: {userData.Role})</h2>
+          <button onClick={navigateToBooks}>Books</button>
+          <button onClick={navigateToLoans}>Loans</button>
+          <button onClick={navigateToHolds}>Holds</button>
+          {userData.Role === 'Admin' && (
+            <button onClick={navigateToAddBook}>Add New Book</button>
+          )}
         </div>
       )}
 
@@ -745,7 +569,7 @@ function App() {
                   <th>Author</th>
                   <th>Borrowed At</th>
                   <th>Due At</th>
-                  <th>Returned At</th> {/* New column for ReturnedAt */}
+                  <th>Returned At</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -761,15 +585,15 @@ function App() {
                     <td>{new Date(loan.DueAT).toLocaleString()}</td>
                     <td>
                       {loan.ReturnedAt
-                        ? new Date(loan.ReturnedAt).toLocaleString() // Display the datetime if ReturnedAt is not null
-                        : 'Yet to be returned'} {/* Display "Yet to be returned" if null */}
+                        ? new Date(loan.ReturnedAt).toLocaleString()
+                        : 'Yet to be returned'}
                     </td>
                     <td>
                       <button
                         onClick={() => navigateToReturnConfirmation(loan)}
-                        disabled={!!loan.ReturnedAt} // Disable the button if ReturnedAt is not null
+                        disabled={!!loan.ReturnedAt}
                         style={{
-                          backgroundColor: loan.ReturnedAt ? 'gray' : 'red', // Gray if returned, red otherwise
+                          backgroundColor: loan.ReturnedAt ? 'gray' : 'red',
                           color: 'white',
                           cursor: loan.ReturnedAt ? 'not-allowed' : 'pointer',
                           border: 'none',
@@ -795,7 +619,7 @@ function App() {
           <p>You are placing a hold for the book: <strong>{selectedBook.title}</strong></p>
           <p>We will notify you when the book becomes available.</p>
           <button onClick={() => setCurrentScreen('books')}>Back to Books</button>
-          <button onClick={handleConfirmHold}>Confirm</button> {/* Add Confirm button */}
+          <button onClick={handleConfirmHold}>Confirm</button>
         </div>
       )}
 
@@ -813,7 +637,7 @@ function App() {
                   <th>Title</th>
                   <th>Author</th>
                   <th>Requested At</th>
-                  <th>Hold Status</th> {/* Add HoldStatus column */}
+                  <th>Hold Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -823,7 +647,7 @@ function App() {
                     <td>{hold.LastName}</td>
                     <td>{hold.Title}</td>
                     <td>{hold.Author}</td>
-                    <td>{new Date(hold.RequestAT).toLocaleString()}</td> {/* Correctly parse and format the date */}
+                    <td>{new Date(hold.RequestAT).toLocaleString()}</td>
                     <td>{hold.HoldStatus}</td>
                   </tr>
                 ))}
@@ -840,8 +664,8 @@ function App() {
           <p>
             Are you sure you want to return the item: <strong>{selectedLoan.Title}</strong> by <strong>{selectedLoan.Author}</strong>?
           </p>
-          <button onClick={() => setCurrentScreen('loans')}>Cancel</button> {/* Cancel button first */}
-          <button onClick={handleConfirmReturn}>Confirm Return</button> {/* Confirm button second */}
+          <button onClick={() => setCurrentScreen('loans')}>Cancel</button>
+          <button onClick={handleConfirmReturn}>Confirm Return</button>
         </div>
       )}
     </div>
