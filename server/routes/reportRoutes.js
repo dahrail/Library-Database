@@ -1,28 +1,34 @@
-const pool = require('../config/db');
-const { sendJsonResponse } = require('../utils/requestUtils');
+const pool = require("../config/db");
+const { sendJsonResponse } = require("../utils/requestUtils");
 
-// Get data report
 const getDataReport = (req, res) => {
-  console.log('Fetching data report');
-  
-  const query = 'SELECT * FROM USER';
+  const query = `
+    SELECT 
+      U.UserID, U.FirstName, U.LastName, 
+      B.BookID, B.Title, B.Author, 
+      L.LoanID, L.BorrowedAt, L.DueAT 
+    FROM USER AS U
+    LEFT JOIN LOAN AS L ON U.UserID = L.UserID
+    LEFT JOIN BOOK AS B ON L.ItemID = B.BookID
+  `;
 
   pool.query(query, (err, results) => {
     if (err) {
-      console.error('Error executing data report query:', err);
-      sendJsonResponse(res, 500, { success: false, error: 'Failed to fetch data report' });
+      console.error("Error fetching data report:", err);
+      sendJsonResponse(res, 500, {
+        success: false,
+        error: "Failed to fetch data report",
+      });
       return;
     }
 
-    console.log(`Data report generated with ${results.length} records`);
     sendJsonResponse(res, 200, { success: true, data: results });
   });
 };
 
-// Get fine report
 const getFineReport = (req, res) => {
-  console.log('Fetching fine report');
-  
+  console.log("Fetching fine report");
+
   const query = `
     SELECT 
       U.FirstName, 
@@ -41,8 +47,11 @@ const getFineReport = (req, res) => {
 
   pool.query(query, (err, results) => {
     if (err) {
-      console.error('Error executing fine report query:', err);
-      sendJsonResponse(res, 500, { success: false, error: 'Failed to fetch fine report' });
+      console.error("Error executing fine report query:", err);
+      sendJsonResponse(res, 500, {
+        success: false,
+        error: "Failed to fetch fine report",
+      });
       return;
     }
 
@@ -53,5 +62,5 @@ const getFineReport = (req, res) => {
 
 module.exports = {
   getDataReport,
-  getFineReport
+  getFineReport,
 };

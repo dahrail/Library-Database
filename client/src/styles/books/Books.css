@@ -29,6 +29,13 @@
   background-color: #f8f9fa;
 }
 
+.book-image {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
 /* Add book form styles */
 .add-book-form {
   max-width: 800px;

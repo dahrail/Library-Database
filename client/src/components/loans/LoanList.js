@@ -1,7 +1,19 @@
-import React from 'react';
-import '../../styles/loans/Loans.css';
+import React from "react";
+import "../../styles/loans/Loans.css";
 
-const LoanList = ({ loans, navigateToReturnConfirmation, navigateToHome }) => {
+const LoanList = ({ loans, handleReturn, navigateToHome }) => {
+  if (!Array.isArray(loans)) {
+    return (
+      <div className="content-container">
+        <h2>Your Loans</h2>
+        <p>Unable to display loans. Please try again later.</p>
+        <button onClick={navigateToHome} className="btn-back">
+          Back to Home
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="content-container">
       <h2>Your Loans</h2>
@@ -11,9 +23,6 @@ const LoanList = ({ loans, navigateToReturnConfirmation, navigateToHome }) => {
         <table className="loans-table">
           <thead>
             <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Item Type</th>
               <th>Title</th>
               <th>Author</th>
               <th>Borrowed At</th>
@@ -24,20 +33,17 @@ const LoanList = ({ loans, navigateToReturnConfirmation, navigateToHome }) => {
           <tbody>
             {loans.map((loan, index) => (
               <tr key={index}>
-                <td>{loan.FirstName}</td>
-                <td>{loan.LastName}</td>
-                <td>{loan.ItemType}</td>
                 <td>{loan.Title}</td>
                 <td>{loan.Author}</td>
                 <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
                 <td>{new Date(loan.DueAT).toLocaleString()}</td>
                 <td>
                   <button
-                    onClick={() => navigateToReturnConfirmation(loan)}
-                    className={loan.ReturnedAt ? 'btn-disabled' : 'btn-return'}
+                    onClick={() => handleReturn(loan)}
+                    className={loan.ReturnedAt ? "btn-disabled" : "btn-return"}
                     disabled={!!loan.ReturnedAt}
                   >
-                    Return
+                    {loan.ReturnedAt ? "Returned" : "Return"}
                   </button>
                 </td>
               </tr>
@@ -45,7 +51,9 @@ const LoanList = ({ loans, navigateToReturnConfirmation, navigateToHome }) => {
           </tbody>
         </table>
       )}
-      <button onClick={navigateToHome} className="btn-back">Back to Home</button>
+      <button onClick={navigateToHome} className="btn-back">
+        Back to Home
+      </button>
     </div>
   );
 };
