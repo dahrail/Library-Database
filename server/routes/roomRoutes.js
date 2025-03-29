@@ -1,6 +1,5 @@
 const pool = require("../config/db");
 const { parseRequestBody, sendJsonResponse } = require("../utils/requestUtils");
-const roomRoutes = require("./roomRoutes");
 
 pool.query("SELECT 1", (err) => {
   if (err) {
@@ -180,56 +179,4 @@ const reserveRoom = async (req, res) => {
   }
 };
 
-// Handle reserve room
-const handleReserveRoom = async (RoomID) => {
-  try {
-    const duration = userData?.Role === "Faculty" ? 180 : 90; // Faculty: 3 hours, Others: 1.5 hours
-    console.log("Reserving room with data:", {
-      RoomID,
-      UserID: userData.UserID,
-      Duration: duration,
-    });
-    const response = await fetch("/api/reserveRoom", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        RoomID,
-        UserID: userData.UserID,
-        Duration: duration,
-      }),
-    });
-    const data = await response.json();
-    console.log("Response data:", data); // Debugging log
-    if (data.success) {
-      alert("Room reserved successfully!");
-
-      // Refresh the room list
-      const updatedRooms = await fetch("/api/rooms").then((res) => res.json());
-      setRooms(updatedRooms.rooms);
-    } else {
-      alert("Failed to reserve room: " + data.error);
-    }
-  } catch (error) {
-    console.error("Error reserving room:", error);
-    alert("An error occurred while reserving the room.");
-  }
-};
-
-// Update the button to call handleReserveRoom with the specific RoomID
-{
-  rooms.map((room) => (
-    <div key={room.RoomID}>
-      <p>
-        {room.RoomName} (Capacity: {room.Capacity})
-      </p>
-      <p>Status: {room.IsAvailable ? "Available" : "Reserved"}</p>
-      {room.IsAvailable && (
-        <button onClick={() => handleReserveRoom(room.RoomID)}>
-          Reserve Room
-        </button>
-      )}
-    </div>
-  ));
-}
-
-module.exports = { getRooms, addRoom, reserveRoom };
+module.exports = { getRooms, addRoom, borrowRoom, reserveRoom };
