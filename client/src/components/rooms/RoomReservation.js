@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./RoomReservation.css"; // Import the CSS file for styling
 
 const RoomReservation = ({ userData, navigateToHome }) => {
   const [rooms, setRooms] = useState([]);
@@ -8,8 +9,6 @@ const RoomReservation = ({ userData, navigateToHome }) => {
     Capacity: "",
     Notes: "",
   });
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [bookingDuration, setBookingDuration] = useState("");
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -25,113 +24,143 @@ const RoomReservation = ({ userData, navigateToHome }) => {
   }, []);
 
   const handleAddRoom = async () => {
-    const response = await fetch("/api/addRoom", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newRoom),
-    });
-    const data = await response.json();
-    if (data.success) {
-      alert("Room added successfully!");
-      setNewRoom({ RoomNumber: "", RoomName: "", Capacity: "", Notes: "" });
-      const updatedRooms = await fetch("/api/rooms").then((res) => res.json());
-      setRooms(updatedRooms.rooms);
-    } else {
-      alert("Failed to add room: " + data.error);
+    try {
+      const response = await fetch("/api/addRoom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRoom),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert("Room added successfully!");
+        setNewRoom({ RoomNumber: "", RoomName: "", Capacity: "", Notes: "" });
+
+        // Refresh the room list
+        const updatedRooms = await fetch("/api/rooms").then((res) =>
+          res.json()
+        );
+        setRooms(updatedRooms.rooms);
+      } else {
+        alert("Failed to add room: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error adding room:", error);
+      alert("An error occurred while adding the room.");
     }
   };
 
-  const handleBookRoom = async () => {
-    const response = await fetch("/api/bookRoom", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        RoomID: selectedRoom,
-        UserID: userData.UserID,
-        Duration: bookingDuration,
-      }),
-    });
-    const data = await response.json();
-    if (data.success) {
-      alert("Room booked successfully!");
-      setSelectedRoom(null);
-      setBookingDuration("");
-    } else {
-      alert("Failed to book room: " + data.error);
+  const handleReserveRoom = async (RoomID) => {
+    try {
+      const duration = userData?.Role === "Faculty" ? 180 : 90; // Faculty: 3 hours, Others: 1.5 hours
+      const response = await fetch("/api/reserveRoom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          RoomID,
+          UserID: userData.UserID,
+          Duration: duration,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert("Room reserved successfully!");
+
+        // Refresh the room list
+        const updatedRooms = await fetch("/api/rooms").then((res) =>
+          res.json()
+        );
+        setRooms(updatedRooms.rooms);
+      } else {
+        alert("Failed to reserve room: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error reserving room:", error);
+      alert("An error occurred while reserving the room.");
     }
   };
 
   return (
-    <div className="content-container">
-      <h2>Room Reservations</h2>
+    <div className="page-wrapper">
+      <div className="room-reservation-container">
+        <h2 className="title">Room Reservations</h2>
 
-      {userData?.Role === "Admin" && (
-        <div>
-          <h3>Add a New Room</h3>
-          <input
-            type="text"
-            placeholder="Room Number"
-            value={newRoom.RoomNumber}
-            onChange={(e) =>
-              setNewRoom({ ...newRoom, RoomNumber: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Room Name"
-            value={newRoom.RoomName}
-            onChange={(e) =>
-              setNewRoom({ ...newRoom, RoomName: e.target.value })
-            }
-          />
-          <input
-            type="number"
-            placeholder="Capacity"
-            value={newRoom.Capacity}
-            onChange={(e) =>
-              setNewRoom({ ...newRoom, Capacity: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Notes"
-            value={newRoom.Notes}
-            onChange={(e) => setNewRoom({ ...newRoom, Notes: e.target.value })}
-          />
-          <button onClick={handleAddRoom}>Add Room</button>
-        </div>
-      )}
-
-      <div>
-        <h3>Available Rooms</h3>
-        {rooms.map((room) => (
-          <div key={room.RoomID}>
-            <p>
-              {room.RoomName} (Capacity: {room.Capacity})
-            </p>
-            <p>Status: {room.isAvailable ? "Available" : "Not Available"}</p>
-            {room.isAvailable && userData?.Role !== "Admin" && (
-              <div>
-                <select
-                  value={bookingDuration}
-                  onChange={(e) => setBookingDuration(e.target.value)}
-                >
-                  <option value="">Select Duration</option>
-                  <option value="1">1 Hour</option>
-                  {userData?.Role === "Faculty" && (
-                    <option value="3">3 Hours</option>
-                  )}
-                </select>
-                <button onClick={() => setSelectedRoom(room.RoomID)}>
-                  Book Room
-                </button>
-              </div>
-            )}
+        {/* Admin Section to Add Rooms */}
+        {userData?.Role === "Admin" && (
+          <div className="add-room-container">
+            <h3 className="subtitle">Add a New Room</h3>
+            <input
+              type="text"
+              placeholder="Room Number"
+              value={newRoom.RoomNumber}
+              onChange={(e) =>
+                setNewRoom({ ...newRoom, RoomNumber: e.target.value })
+              }
+              className="input-field"
+            />
+            <input
+              type="text"
+              placeholder="Room Name"
+              value={newRoom.RoomName}
+              onChange={(e) =>
+                setNewRoom({ ...newRoom, RoomName: e.target.value })
+              }
+              className="input-field"
+            />
+            <input
+              type="number"
+              placeholder="Capacity"
+              value={newRoom.Capacity}
+              onChange={(e) =>
+                setNewRoom({ ...newRoom, Capacity: e.target.value })
+              }
+              className="input-field"
+            />
+            <input
+              type="text"
+              placeholder="Notes"
+              value={newRoom.Notes}
+              onChange={(e) =>
+                setNewRoom({ ...newRoom, Notes: e.target.value })
+              }
+              className="input-field"
+            />
+            <button onClick={handleAddRoom} className="add-room-button">
+              Add Room
+            </button>
           </div>
-        ))}
-      </div>
+        )}
 
-      <button onClick={navigateToHome}>Back to Menu</button>
+        {/* Room List */}
+        <div className="rooms-container">
+          <h3 className="subtitle">Available Rooms</h3>
+          {rooms.map((room) => (
+            <div key={room.RoomID} className="room-card">
+              <p className="room-name">
+                <strong>{room.RoomName}</strong> (Capacity: {room.Capacity})
+              </p>
+              <p
+                className={`room-status ${
+                  room.IsAvailable ? "available" : "reserved"
+                }`}
+              >
+                Status: {room.IsAvailable ? "Available" : "Reserved"}
+              </p>
+              {room.IsAvailable && (
+                <button
+                  className="reserve-button"
+                  onClick={() => handleReserveRoom(room.RoomID)}
+                >
+                  Reserve Room
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <button onClick={navigateToHome} className="back-button">
+          Back to Menu
+        </button>
+      </div>
     </div>
   );
 };

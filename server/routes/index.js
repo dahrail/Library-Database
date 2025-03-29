@@ -105,6 +105,14 @@ const handleRequest = async (req, res) => {
       return await roomRoutes.bookRoom(req, res);
     }
 
+    if (method === "POST" && path === "/api/borrowRoom") {
+      return await roomRoutes.borrowRoom(req, res);
+    }
+
+    if (method === "POST" && path === "/api/reserveRoom") {
+      return await roomRoutes.reserveRoom(req, res);
+    }
+
     // If we reach here, no route was matched
     console.log("No route matched for:", path);
     sendJsonResponse(res, 404, { error: "Not found" });

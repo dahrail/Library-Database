@@ -59,7 +59,6 @@ const confirmLoan = async (req, res) => {
     // Determine the loan period based on the user's role
     const loanPeriod = Role === "Student" ? 7 : 14;
 
-    // Start a transaction
     pool.getConnection((err, connection) => {
       if (err) {
         console.error("Error getting database connection:", err);

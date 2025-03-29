@@ -60,7 +60,35 @@ const getFineReport = (req, res) => {
   });
 };
 
+const addRoom = async (req, res) => {
+  try {
+    const { RoomNumber, RoomName, Capacity, Notes } = await parseRequestBody(
+      req
+    );
+    console.log("Request body:", { RoomNumber, RoomName, Capacity, Notes }); // Debugging log
+    const query = `
+      INSERT INTO ROOMS (RoomNumber, RoomName, Capacity, Notes)
+      VALUES (?, ?, ?, ?)
+    `;
+    pool.query(query, [RoomNumber, RoomName, Capacity, Notes], (err) => {
+      if (err) {
+        console.error("Error adding room:", err); // Debugging log
+        sendJsonResponse(res, 500, {
+          success: false,
+          error: "Failed to add room",
+        });
+        return;
+      }
+      sendJsonResponse(res, 200, { success: true });
+    });
+  } catch (error) {
+    console.error("Error in addRoom:", error); // Debugging log
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+  }
+};
+
 module.exports = {
   getDataReport,
   getFineReport,
+  addRoom,
 };
