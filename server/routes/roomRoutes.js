@@ -113,7 +113,17 @@ const borrowRoom = async (req, res) => {
 // Reserve a room
 const reserveRoom = async (req, res) => {
   try {
-    const { RoomID, UserID, Duration } = await parseRequestBody(req);
+    const { RoomID, UserID, Duration } = req.body;
+
+    if (!RoomID || !UserID || !Duration) {
+      console.error("Missing required fields in request body:", req.body);
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({ success: false, error: "Invalid request body" })
+      );
+      return;
+    }
+
     console.log("Reserving room:", { RoomID, UserID, Duration });
 
     const checkQuery = `
@@ -122,10 +132,10 @@ const reserveRoom = async (req, res) => {
     pool.query(checkQuery, [RoomID], (err, results) => {
       if (err || results.length === 0) {
         console.error("Room is not available or error occurred:", err);
-        sendJsonResponse(res, 400, {
-          success: false,
-          error: "Room is not available",
-        });
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({ success: false, error: "Room is not available" })
+        );
         return;
       }
 
@@ -135,10 +145,10 @@ const reserveRoom = async (req, res) => {
       pool.query(reserveQuery, [RoomID], (err) => {
         if (err) {
           console.error("Error reserving room:", err);
-          sendJsonResponse(res, 500, {
-            success: false,
-            error: "Failed to reserve room",
-          });
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({ success: false, error: "Failed to reserve room" })
+          );
           return;
         }
 
@@ -149,33 +159,25 @@ const reserveRoom = async (req, res) => {
         pool.query(reservationQuery, [RoomID, UserID, Duration], (err) => {
           if (err) {
             console.error("Error creating reservation record:", err);
-            sendJsonResponse(res, 500, {
-              success: false,
-              error: "Failed to reserve room",
-            });
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                success: false,
+                error: "Failed to reserve room",
+              })
+            );
             return;
           }
 
-          setTimeout(() => {
-            const releaseQuery = `
-              UPDATE ROOMS SET IsAvailable = 1 WHERE RoomID = ?
-            `;
-            pool.query(releaseQuery, [RoomID], (err) => {
-              if (err) {
-                console.error("Error releasing room:", err);
-              } else {
-                console.log(`Room ${RoomID} is now available.`);
-              }
-            });
-          }, Duration * 60 * 1000);
-
-          sendJsonResponse(res, 200, { success: true });
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ success: true }));
         });
       });
     });
   } catch (error) {
     console.error("Error in reserveRoom:", error);
-    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ success: false, error: "Server error" }));
   }
 };
 

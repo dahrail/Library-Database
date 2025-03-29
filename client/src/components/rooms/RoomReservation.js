@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin }) => {
+const RoomReservation = ({
+  userData,
+  navigateToHome,
+  isLoggedIn,
+  navigateToLogin,
+}) => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,11 +29,11 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
         if (data.success) {
           setRooms(data.rooms);
         } else {
-          setError(data.error || 'Failed to fetch rooms');
+          setError(data.error || "Failed to fetch rooms");
         }
       } catch (err) {
-        console.error('Error fetching rooms:', err);
-        setError('An error occurred while fetching rooms');
+        console.error("Error fetching rooms:", err);
+        setError("An error occurred while fetching rooms");
       } finally {
         setLoading(false);
       }
@@ -40,28 +45,30 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
   useEffect(() => {
     if (rooms.length > 0) {
       let items = [...rooms];
-      
+
       if (selectedCategory !== "all") {
         if (selectedCategory === "small") {
-          items = items.filter(room => room.Capacity <= 4);
+          items = items.filter((room) => room.Capacity <= 4);
         } else if (selectedCategory === "medium") {
-          items = items.filter(room => room.Capacity > 4 && room.Capacity <= 10);
+          items = items.filter(
+            (room) => room.Capacity > 4 && room.Capacity <= 10
+          );
         } else if (selectedCategory === "large") {
-          items = items.filter(room => room.Capacity > 10);
+          items = items.filter((room) => room.Capacity > 10);
         }
       }
-      
+
       setDisplayedRooms(items);
-      
+
       // Only apply animation on initial render or category change
       if (!initialRenderRef.current) {
         // Add a class to the container to trigger a CSS animation
-        const container = document.querySelector('#rooms-grid');
+        const container = document.querySelector("#rooms-grid");
         if (container) {
-          container.classList.remove('fade-in-items');
+          container.classList.remove("fade-in-items");
           // Force a reflow to restart animation
           void container.offsetWidth;
-          container.classList.add('fade-in-items');
+          container.classList.add("fade-in-items");
         }
       } else {
         initialRenderRef.current = false;
@@ -71,7 +78,7 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
 
   // Add CSS styles for animations to document head
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.innerHTML = `
       @keyframes fadeInUp {
         from {
@@ -109,7 +116,7 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
       }
     `;
     document.head.appendChild(style);
-    
+
     return () => {
       document.head.removeChild(style);
     };
@@ -121,7 +128,7 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
         alert("Please fill in all required fields");
         return;
       }
-      
+
       const response = await fetch("/api/addRoom", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -153,8 +160,14 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
         navigateToLogin();
         return;
       }
-      
+
       const duration = userData?.Role === "Faculty" ? 180 : 90; // Faculty: 3 hours, Others: 1.5 hours
+      console.log("Sending reservation request:", {
+        RoomID: roomId,
+        UserID: userData.UserID,
+        Duration: duration,
+      });
+
       const response = await fetch("/api/reserveRoom", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,6 +178,8 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
         }),
       });
       const data = await response.json();
+      console.log("Response from backend:", data);
+
       if (data.success) {
         alert("Room reserved successfully!");
 
@@ -190,7 +205,8 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
       maxWidth: "100%",
       margin: "0 auto",
       backgroundColor: "#ffffff",
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      fontFamily:
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       color: "#1d1d1f",
       overflowX: "hidden",
     },
@@ -434,22 +450,21 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
         <p style={styles.heroSubtitle}>
           Reserve private rooms for individual or group study sessions
         </p>
-        
+
         {/* Add login prompt for users who aren't logged in */}
         {!isLoggedIn && (
-          <p style={{
-            ...styles.heroSubtitle, 
-            fontSize: "18px",
-            marginTop: "30px",
-            opacity: "0",
-            transform: "translateY(20px)",
-            animation: "fadeInUp 1s forwards 0.6s"
-          }}>
+          <p
+            style={{
+              ...styles.heroSubtitle,
+              fontSize: "18px",
+              marginTop: "30px",
+              opacity: "0",
+              transform: "translateY(20px)",
+              animation: "fadeInUp 1s forwards 0.6s",
+            }}
+          >
             Please{" "}
-            <span 
-              onClick={navigateToLogin} 
-              style={styles.loginLink}
-            >
+            <span onClick={navigateToLogin} style={styles.loginLink}>
               log in
             </span>{" "}
             to reserve rooms
@@ -461,25 +476,41 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
       <div style={styles.navContainer}>
         <div style={styles.nav}>
           <button
-            style={selectedCategory === "all" ? {...styles.navButton, ...styles.activeNavButton} : styles.navButton}
+            style={
+              selectedCategory === "all"
+                ? { ...styles.navButton, ...styles.activeNavButton }
+                : styles.navButton
+            }
             onClick={() => setSelectedCategory("all")}
           >
             All Rooms
           </button>
           <button
-            style={selectedCategory === "small" ? {...styles.navButton, ...styles.activeNavButton} : styles.navButton}
+            style={
+              selectedCategory === "small"
+                ? { ...styles.navButton, ...styles.activeNavButton }
+                : styles.navButton
+            }
             onClick={() => setSelectedCategory("small")}
           >
             Small (1-4 People)
           </button>
           <button
-            style={selectedCategory === "medium" ? {...styles.navButton, ...styles.activeNavButton} : styles.navButton}
+            style={
+              selectedCategory === "medium"
+                ? { ...styles.navButton, ...styles.activeNavButton }
+                : styles.navButton
+            }
             onClick={() => setSelectedCategory("medium")}
           >
             Medium (5-10 People)
           </button>
           <button
-            style={selectedCategory === "large" ? {...styles.navButton, ...styles.activeNavButton} : styles.navButton}
+            style={
+              selectedCategory === "large"
+                ? { ...styles.navButton, ...styles.activeNavButton }
+                : styles.navButton
+            }
             onClick={() => setSelectedCategory("large")}
           >
             Large (10+ People)
@@ -498,21 +529,27 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
                 type="text"
                 placeholder="Room Number"
                 value={newRoom.RoomNumber}
-                onChange={(e) => setNewRoom({ ...newRoom, RoomNumber: e.target.value })}
+                onChange={(e) =>
+                  setNewRoom({ ...newRoom, RoomNumber: e.target.value })
+                }
                 style={styles.inputField}
               />
               <input
                 type="text"
                 placeholder="Room Name"
                 value={newRoom.RoomName}
-                onChange={(e) => setNewRoom({ ...newRoom, RoomName: e.target.value })}
+                onChange={(e) =>
+                  setNewRoom({ ...newRoom, RoomName: e.target.value })
+                }
                 style={styles.inputField}
               />
               <input
                 type="number"
                 placeholder="Capacity"
                 value={newRoom.Capacity}
-                onChange={(e) => setNewRoom({ ...newRoom, Capacity: e.target.value })}
+                onChange={(e) =>
+                  setNewRoom({ ...newRoom, Capacity: e.target.value })
+                }
                 style={styles.inputField}
               />
             </div>
@@ -520,7 +557,9 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
               type="text"
               placeholder="Notes (Features, Equipment, etc.)"
               value={newRoom.Notes}
-              onChange={(e) => setNewRoom({ ...newRoom, Notes: e.target.value })}
+              onChange={(e) =>
+                setNewRoom({ ...newRoom, Notes: e.target.value })
+              }
               style={styles.inputField}
             />
             <button onClick={handleAddRoom} style={styles.addButton}>
@@ -536,7 +575,7 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
             <p style={styles.loadingText}>Loading rooms...</p>
           </div>
         ) : error ? (
-          <div style={{ textAlign: 'center', padding: '50px 0', color: 'red' }}>
+          <div style={{ textAlign: "center", padding: "50px 0", color: "red" }}>
             {error}
           </div>
         ) : (
@@ -547,46 +586,59 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
                 className="room-card"
                 style={styles.card}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-10px)';
-                  e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.12)';
+                  e.currentTarget.style.transform = "translateY(-10px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 40px rgba(0, 0, 0, 0.12)";
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.transform = '';
-                  e.currentTarget.style.boxShadow = '';
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.boxShadow = "";
                 }}
               >
                 <div style={styles.cardContent}>
                   <h3 style={styles.cardTitle}>{room.RoomName}</h3>
                   <p style={styles.cardInfo}>Room Number: {room.RoomNumber}</p>
-                  <p style={styles.cardInfo}>Capacity: {room.Capacity} people</p>
-                  {room.Notes && <p style={styles.cardInfo}>Notes: {room.Notes}</p>}
-                  
-                  <div style={{
-                    ...styles.cardStatus,
-                    ...(room.IsAvailable ? styles.statusAvailable : styles.statusReserved)
-                  }}>
+                  <p style={styles.cardInfo}>
+                    Capacity: {room.Capacity} people
+                  </p>
+                  {room.Notes && (
+                    <p style={styles.cardInfo}>Notes: {room.Notes}</p>
+                  )}
+
+                  <div
+                    style={{
+                      ...styles.cardStatus,
+                      ...(room.IsAvailable
+                        ? styles.statusAvailable
+                        : styles.statusReserved),
+                    }}
+                  >
                     {room.IsAvailable ? "Available" : "Currently Reserved"}
                   </div>
-                  
+
                   {/* Show appropriate button based on login status and room availability */}
                   {isLoggedIn ? (
                     room.IsAvailable ? (
-                      <button 
+                      <button
                         style={styles.button}
                         onClick={() => handleReserveRoom(room.RoomID)}
                       >
                         Reserve Room
                       </button>
                     ) : (
-                      <button 
-                        style={{...styles.button, backgroundColor: '#cccccc', cursor: 'not-allowed'}}
+                      <button
+                        style={{
+                          ...styles.button,
+                          backgroundColor: "#cccccc",
+                          cursor: "not-allowed",
+                        }}
                         disabled
                       >
                         Currently Reserved
                       </button>
                     )
                   ) : (
-                    <button 
+                    <button
                       style={styles.disabledButton}
                       onClick={navigateToLogin}
                     >
@@ -604,20 +656,14 @@ const RoomReservation = ({ userData, navigateToHome, isLoggedIn, navigateToLogin
           <div style={{ textAlign: "center", margin: "40px 0" }}>
             <p style={styles.loginMessage}>
               Want to reserve a study room?{" "}
-              <span 
-                onClick={navigateToLogin} 
-                style={styles.loginLink}
-              >
+              <span onClick={navigateToLogin} style={styles.loginLink}>
                 Log in to your account
               </span>
             </p>
           </div>
         )}
 
-        <button 
-          style={styles.backButton}
-          onClick={navigateToHome}
-        >
+        <button style={styles.backButton} onClick={navigateToHome}>
           Back to Home
         </button>
       </div>
