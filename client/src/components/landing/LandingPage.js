@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import '../../styles/landing/LandingPage.css';
+import '../../styles/animations/ScrollAnimations.css';
 
 const LandingPage = ({ 
   navigateToBooks, 
@@ -23,15 +24,44 @@ const LandingPage = ({
     `;
     document.head.appendChild(style);
     
+    // Set up intersection observer for scroll animations
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // Add 'is-visible' class when element is in view
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            // Once the animation is done, we can stop observing
+            // observer.unobserve(entry.target);
+          } else {
+            // Optional: Remove the class when out of view for re-animation when scrolling back up
+            entry.target.classList.remove('is-visible');
+          }
+        });
+      },
+      {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: 0.15, // Trigger when 15% of the element is visible
+      }
+    );
+    
+    // Observe all elements with scroll-animate class
+    document.querySelectorAll('.scroll-animate').forEach((el) => {
+      observer.observe(el);
+    });
+    
+    // Clean up
     return () => {
       document.head.removeChild(style);
+      observer.disconnect();
     };
   }, []);
 
   return (
     <div className="landing-container">
       {/* Hero Section */}
-      <section className="hero-section">
+      <section className="hero-section parallax-bg">
         <div className="hero-content">
           <h1>Welcome to BookFinder</h1>
           <p className="hero-subtitle">Your University Library Portal</p>
@@ -48,28 +78,28 @@ const LandingPage = ({
 
       {/* Feature Highlights */}
       <section className="features-section">
-        <h2 className="section-title">Library Services</h2>
+        <h2 className="section-title scroll-animate from-bottom">Library Services</h2>
         
         <div className="features-grid">
-          <div className="feature-card" onClick={navigateToBooks}>
+          <div className="feature-card scroll-animate from-left delay-100" onClick={navigateToBooks}>
             <div className="feature-icon book-icon"></div>
             <h3>Extensive Book Collection</h3>
             <p>Browse thousands of books across all genres and subjects</p>
           </div>
           
-          <div className="feature-card" onClick={navigateToMedia}>
+          <div className="feature-card scroll-animate from-bottom delay-200" onClick={navigateToMedia}>
             <div className="feature-icon media-icon"></div>
             <h3>Digital Media</h3>
             <p>Access our collection of music, movies, and more</p>
           </div>
           
-          <div className="feature-card" onClick={navigateToRooms}>
+          <div className="feature-card scroll-animate from-right delay-300" onClick={navigateToRooms}>
             <div className="feature-icon room-icon"></div>
             <h3>Study Spaces</h3>
             <p>Reserve private rooms and collaborative spaces</p>
           </div>
           
-          <div className="feature-card" onClick={navigateToEvents}>
+          <div className="feature-card scroll-animate from-bottom delay-400" onClick={navigateToEvents}>
             <div className="feature-icon event-icon"></div>
             <h3>Events & Workshops</h3>
             <p>Join our community events and learning sessions</p>
@@ -78,30 +108,35 @@ const LandingPage = ({
       </section>
 
       {/* Promotional Section */}
-      <section className="promo-section">
+      <section className="promo-section sticky-section">
         <div className="promo-content">
-          <h2>Discover Something New</h2>
-          <p>Our curated collections are updated regularly with the latest publications</p>
-          <button onClick={navigateToBooks} className="promo-button">
+          <h2 className="scroll-animate fade-in">Discover Something New</h2>
+          <p className="scroll-animate fade-in delay-200">Our curated collections are updated regularly with the latest publications</p>
+          <button onClick={navigateToBooks} className="promo-button scroll-animate scale-in delay-400">
             Start Browsing
           </button>
         </div>
-        <div className="promo-image"></div>
+        <div className="promo-image scroll-animate from-right"></div>
       </section>
 
       {/* Quick Info Section */}
       <section className="info-section">
-        <div className="info-card">
-          <h3>24/7 Digital Access</h3>
-          <p>Access our digital resources anytime, anywhere</p>
+        <div className="info-card scroll-animate from-left">
+          <h3>Opening Hours</h3>
+          <p>Monday - Friday: 8:00 AM - 10:00 PM</p>
+          <p>Saturday - Sunday: 10:00 AM - 8:00 PM</p>
         </div>
-        <div className="info-card">
-          <h3>Easy Borrowing</h3>
-          <p>Simple checkout process with flexible return options</p>
+        
+        <div className="info-card scroll-animate from-bottom delay-200">
+          <h3>Contact Us</h3>
+          <p>Email: library@university.edu</p>
+          <p>Phone: (555) 123-4567</p>
         </div>
-        <div className="info-card">
-          <h3>Expert Assistance</h3>
-          <p>Get help from our knowledgeable library staff</p>
+        
+        <div className="info-card scroll-animate from-right delay-300">
+          <h3>Location</h3>
+          <p>Main Campus, Building C</p>
+          <p>123 University Avenue</p>
         </div>
       </section>
 

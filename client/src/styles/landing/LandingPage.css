@@ -4,12 +4,13 @@
   overflow-x: hidden;
   margin: 0;
   padding: 0;
+  scroll-behavior: smooth;
 }
 
 /* Hero Section */
 .hero-section {
   background: linear-gradient(to bottom, #000000, #212121);
-  height: 80vh;
+  height: 100vh; /* Full viewport height */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,10 +18,13 @@
   color: white;
   padding: 0 20px;
   animation: fadeIn 1s ease-out;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-content {
   max-width: 800px;
+  z-index: 2;
 }
 
 .hero-section h1 {
@@ -85,9 +89,13 @@
 
 /* Features Section */
 .features-section {
-  padding: 100px 20px;
+  padding: 120px 20px;
   background-color: #f5f5f7;
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .section-title {
@@ -144,12 +152,12 @@
 }
 
 .room-icon::before {
-  content: "🏢";
+  content: "🏛️";
   font-size: 40px;
 }
 
 .event-icon::before {
-  content: "📅";
+  content: "🎭";
   font-size: 40px;
 }
 
@@ -162,45 +170,52 @@
 
 .feature-card p {
   font-size: 16px;
-  color: #86868b;
+  color: #6e6e73;
+  margin: 0;
   line-height: 1.5;
 }
 
 /* Promotional Section */
 .promo-section {
+  height: 100vh;
   display: flex;
   align-items: center;
-  min-height: 500px;
-  background-color: white;
+  justify-content: space-between;
+  padding: 0;
+  background-color: #000;
+  color: white;
+  overflow: hidden;
 }
 
 .promo-content {
   flex: 1;
-  padding: 60px;
+  padding: 0 60px;
+  max-width: 500px;
+  margin-left: 8%;
 }
 
-.promo-content h2 {
-  font-size: 42px;
+.promo-section h2 {
+  font-size: 48px;
   font-weight: 600;
   margin-bottom: 20px;
   letter-spacing: -0.02em;
 }
 
-.promo-content p {
+.promo-section p {
   font-size: 18px;
-  color: #86868b;
   line-height: 1.6;
   margin-bottom: 40px;
+  opacity: 0.9;
 }
 
 .promo-button {
-  background-color: #0071e3;
-  color: white;
-  border: none;
   padding: 16px 32px;
   border-radius: 30px;
   font-size: 18px;
   font-weight: 500;
+  background-color: #0071e3;
+  color: white;
+  border: none;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -213,49 +228,44 @@
 .promo-image {
   flex: 1;
   height: 100%;
-  min-height: 500px;
-  background-color: #000000;
-  background-image: linear-gradient(135deg, #0071e3 0%, #21D4FD 100%);
+  background-image: linear-gradient(to right, #2c3e50, #4ca1af);
   background-size: cover;
   background-position: center;
+  transition: transform 0.5s ease-out;
 }
 
 /* Info Section */
 .info-section {
   display: flex;
-  justify-content: space-between;
-  padding: 100px 20px;
-  background-color: #f5f5f7;
-  max-width: 1200px;
-  margin: 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 30px;
+  padding: 100px 20px;
+  background-color: #fff;
 }
 
 .info-card {
-  flex: 1;
-  text-align: center;
-  padding: 40px 20px;
-  background-color: white;
-  border-radius: 18px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background-color: #f5f5f7;
+  border-radius: 12px;
+  padding: 30px;
+  width: 300px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
 }
 
 .info-card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-5px);
 }
 
 .info-card h3 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 22px;
   margin-bottom: 15px;
   color: #1d1d1f;
 }
 
 .info-card p {
-  font-size: 16px;
-  color: #86868b;
-  line-height: 1.5;
+  margin: 8px 0;
+  color: #6e6e73;
 }
 
 /* Footer */
@@ -288,32 +298,32 @@
 
 @media (max-width: 768px) {
   .hero-section h1 {
-    font-size: 42px;
+    font-size: 40px;
   }
-
+  
   .hero-subtitle {
     font-size: 22px;
   }
-
+  
   .hero-cta {
     flex-direction: column;
     align-items: center;
   }
-
-  .cta-button {
-    width: 100%;
-    max-width: 300px;
+  
+  .promo-section {
+    flex-direction: column;
+    text-align: center;
+    height: auto;
+    padding: 60px 20px;
   }
-
-  .section-title {
-    font-size: 32px;
-  }
-
+  
   .promo-content {
-    padding: 40px 20px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
   }
-
-  .promo-content h2 {
-    font-size: 32px;
+  
+  .promo-image {
+    width: 100%;
+    height: 300px;
   }
 }
