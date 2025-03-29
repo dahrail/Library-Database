@@ -8,8 +8,7 @@ const TopBar = ({
   navigateToBooks, 
   navigateToMedia,
   navigateToLogin,
-  navigateToRegister,
-  navigateToRooms
+  navigateToRegister // Make sure this prop is included
 }) => {
   return (
     <div className="top-bar">
@@ -43,7 +42,14 @@ const TopBar = ({
             Room Reservation
           </button>
           <button className="nav-button">Electronics (WIP)</button>
-          <button className="nav-button">Events (WIP)</button>
+          {isLoggedIn && (
+            <button 
+              onClick={navigateToEvents}
+              className="nav-button"
+            >
+              Events
+            </button>
+          )}
         </div>
         
         {isLoggedIn && userData ? (

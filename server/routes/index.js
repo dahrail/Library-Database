@@ -7,6 +7,7 @@ const holdRoutes = require("./holdRoutes");
 const fineRoutes = require("./fineRoutes");
 const reportRoutes = require("./reportRoutes");
 const roomRoutes = require("./roomRoutes");
+const eventRoutes = require("./eventRoutes"); // Import the event routes
 
 // Main request handler
 const handleRequest = async (req, res) => {
@@ -108,14 +109,6 @@ const handleRequest = async (req, res) => {
 
     if (method === "POST" && path === "/api/bookRoom") {
       return await roomRoutes.bookRoom(req, res);
-    }
-
-    if (method === "POST" && path === "/api/borrowRoom") {
-      return await roomRoutes.borrowRoom(req, res);
-    }
-
-    if (method === "POST" && path === "/api/reserveRoom") {
-      return await roomRoutes.reserveRoom(req, res);
     }
 
     // If we reach here, no route was matched
