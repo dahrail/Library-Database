@@ -285,6 +285,7 @@ function App() {
         navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn} // Pass the navigateToBooksNotLoggedIn function
         navigateToMedia={navigateToMedia} // Add this line to pass the function
         navigateToLogin={navigateToLogin} // Add this line to pass the navigateToLogin function
+        navigateToRegister={navigateToRegister} // Make sure this prop is included
       />
 
       {/* Render the appropriate screen based on currentScreen state */}
