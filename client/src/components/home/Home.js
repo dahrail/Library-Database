@@ -6,32 +6,15 @@ const Home = ({
   navigateToBooks,
   navigateToMedia,
   navigateToElectronics,
-  navigateToLoans, // Add navigation for loans
+  navigateToLoans,
   navigateToRooms,
   navigateToDataReport,
-  navigateToEvents, // Add navigation for events
+  navigateToEvents,
 }) => {
   const isAdmin = userData?.Role === "Admin"; // Check if the user is an Admin
 
-  const backgroundStyle = {
-    backgroundImage: "url('/images/modernBackground.jpg')", // Correct absolute path
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    width: "100vw", // Full width of the viewport
-    height: "100vh", // Full height of the viewport
-    position: "absolute", // Ensure it covers the entire screen
-    top: 0,
-    left: 0,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: "20px",
-    overflowY: "auto",
-  };
-
   return (
-    <div style={backgroundStyle}>
+    <div className="home-container">
       <h2 className="gradient-text">Welcome to BookFinder</h2>
       <p className="gradient-text">
         Explore our collection of books, electronics, media, and more!

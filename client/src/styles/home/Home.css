@@ -2,9 +2,8 @@
 .home-container {
   text-align: center;
   padding: 30px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 80px auto 0;
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -12,16 +11,20 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* Menu container grid layout */
 .menu-container {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(300px, 1fr)
+  ); /* 3 items per row */
+  gap: 30px; /* Spacing between items */
   margin-top: 30px;
+  justify-content: center;
 }
 
+/* Menu item styles */
 .menu-item {
-  width: 250px;
-  height: 300px;
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -29,6 +32,7 @@
   transition: transform 0.3s, box-shadow 0.3s;
   text-align: center;
   overflow: hidden;
+  padding: 20px;
 }
 
 .menu-item:hover {
@@ -36,34 +40,26 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
+/* Menu item image */
 .menu-image {
   width: 100%;
-  height: 70%;
+  height: 200px;
   object-fit: cover;
-  border-bottom: 2px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 15px;
 }
 
-/* Multicolored gradient text */
+/* Menu item title */
 .menu-item h3 {
-  font-size: 20px; /* Adjust font size */
-  font-weight: bold; /* Make the text bold */
-  background: linear-gradient(
-    to right,
-    purple,
-    pink,
-    orange
-  ); /* Multicolored gradient */
-  -webkit-background-clip: text; /* Clip the background to the text */
-  -webkit-text-fill-color: transparent; /* Make the text itself transparent */
-  text-align: center; /* Center the text */
-  transition: all 0.3s ease; /* Smooth transition for hover effect */
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  transition: color 0.3s ease;
 }
 
-/* Hover effect: Single color with glow */
 .menu-item h3:hover {
-  -webkit-text-fill-color: purple; /* Single color on hover */
-  background: none; /* Remove gradient */
-  text-shadow: 0 0 10px purple, 0 0 20px purple; /* Add glow effect */
+  color: #007bff;
 }
 
 /* Welcome screen styles */
@@ -104,27 +100,22 @@
   text-align: center; /* Center the text */
 }
 
-/* Unique Data Report Button */
+/* Data report button */
 .data-report-button {
   display: block;
-  margin: 30px auto; /* Center the button */
-  padding: 15px 30px; /* Larger padding for a prominent button */
-  font-size: 18px; /* Larger font size */
-  font-weight: bold;
+  margin: 40px auto;
+  padding: 15px 30px;
+  background-color: #007bff;
   color: white;
-  background: linear-gradient(
-    to right,
-    #ff7e5f,
-    #feb47b
-  ); /* Gradient background */
   border: none;
-  border-radius: 8px; /* Rounded corners */
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
-  transition: transform 0.3s, box-shadow 0.3s; /* Smooth hover effect */
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .data-report-button:hover {
-  transform: translateY(-3px); /* Slight lift on hover */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Stronger shadow on hover */
+  background-color: #0056b3;
+  transform: translateY(-3px);
 }
