@@ -237,17 +237,17 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
     },
     disabledButton: {
       display: "inline-block",
-      backgroundColor: "#8e8e93",
+      backgroundColor: "#000000", // Change to black instead of blue
       color: "#ffffff",
       border: "none",
       borderRadius: "8px",
       padding: "12px 22px",
       fontSize: "17px",
       fontWeight: "500",
-      cursor: "default",
+      cursor: "pointer", // Change cursor to pointer
       marginTop: "15px",
       textAlign: "center",
-      opacity: "0.7",
+      opacity: "0.9",
     },
   };
 
@@ -498,7 +498,8 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
                     <div>
                       <button 
                         style={styles.disabledButton}
-                        disabled={true}
+                        onClick={navigateToLogin} // Add onClick handler to navigate to login
+                        disabled={false} // Remove disabled attribute
                       >
                         Login to Borrow
                       </button>
