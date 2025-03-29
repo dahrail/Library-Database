@@ -282,6 +282,7 @@ function App() {
         navigateToBooks={navigateToBooks} // Pass the navigateToBooks function
         navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn} // Pass the navigateToBooksNotLoggedIn function
         navigateToMedia={navigateToMedia} // Add this line to pass the function
+        navigateToLogin={navigateToLogin} // Add this line to pass the navigateToLogin function
       />
 
       {/* Render the appropriate screen based on currentScreen state */}

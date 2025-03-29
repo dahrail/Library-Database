@@ -1,11 +1,25 @@
 import React from 'react';
 import '../../styles/layout/TopBar.css';
 
-const TopBar = ({ isLoggedIn, userData, handleLogout, navigateToBooks, navigateToBooksNotLoggedIn, navigateToMedia }) => {
+const TopBar = ({ 
+  isLoggedIn, 
+  userData, 
+  handleLogout, 
+  navigateToBooks, 
+  navigateToBooksNotLoggedIn, 
+  navigateToMedia,
+  navigateToLogin // Add this prop
+}) => {
   return (
     <div className="top-bar">
       <div className="top-bar-content">
-        <div className="logo">BookFinder</div>
+        <div 
+          className="logo" 
+          onClick={navigateToLogin} 
+          style={{ cursor: 'pointer' }}
+        >
+          BookFinder
+        </div>
         
         {/* Navigation buttons */}
         <div className="nav-buttons">
