@@ -65,7 +65,7 @@ const TopBar = ({
               Login
             </button>
             <button 
-              className="register-button"
+              className="login-button"
               onClick={navigateToRegister}
             >
               Register
