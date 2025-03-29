@@ -9,7 +9,8 @@ const TopBar = ({
   navigateToMedia,
   navigateToLogin,
   navigateToRegister,
-  navigateToRooms
+  navigateToRooms,
+  navigateToEvents
 }) => {
   return (
     <div className="top-bar">
@@ -21,53 +22,34 @@ const TopBar = ({
         >
           BookFinder
         </div>
-        
-        {/* Navigation buttons */}
         <div className="nav-buttons">
-          <button 
-            onClick={navigateToBooks}
-            className="nav-button"
-          >
+          <button onClick={navigateToBooks} className="nav-button">
             Browse & Borrow
           </button>
-          <button 
-            onClick={navigateToMedia}
-            className="nav-button"
-          >
+          <button onClick={navigateToMedia} className="nav-button">
             Media
           </button>
-          <button 
-            onClick={navigateToRooms}
-            className="nav-button"
-          >
+          <button onClick={navigateToRooms} className="nav-button">
             Room Reservation
           </button>
           <button className="nav-button">Electronics (WIP)</button>
-          <button className="nav-button">Events (WIP)</button>
+          <button onClick={navigateToEvents} className="nav-button">
+            Events
+          </button>
         </div>
-        
         {isLoggedIn && userData ? (
           <div className="user-info">
             <span>Hello, {userData.FirstName}</span>
-            <button 
-              className="logout-button"
-              onClick={handleLogout}
-            >
+            <button className="logout-button" onClick={handleLogout}>
               Logout
             </button>
           </div>
         ) : (
           <div className="auth-buttons">
-            <button 
-              className="login-button"
-              onClick={navigateToLogin}
-            >
+            <button className="login-button" onClick={navigateToLogin}>
               Login
             </button>
-            <button 
-              className="login-button"
-              onClick={navigateToRegister}
-            >
+            <button className="login-button" onClick={navigateToRegister}>
               Register
             </button>
           </div>
