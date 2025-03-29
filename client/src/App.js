@@ -59,7 +59,7 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserData(null);
-    setCurrentScreen("login");
+    setCurrentScreen("landing");
   };
 
   // Navigation functions
