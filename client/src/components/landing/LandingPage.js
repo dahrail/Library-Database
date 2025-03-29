@@ -112,7 +112,13 @@ const LandingPage = ({
         <div className="promo-content">
           <h2 className="scroll-animate fade-in">Discover Something New</h2>
           <p className="scroll-animate fade-in delay-200">Our curated collections are updated regularly with the latest publications</p>
-          <button onClick={navigateToBooks} className="promo-button scroll-animate scale-in delay-400">
+          <button 
+            onClick={() => {
+              window.scrollTo(0, 0);
+              navigateToBooks();
+            }} 
+            className="promo-button scroll-animate scale-in delay-400"
+          >
             Start Browsing
           </button>
         </div>
