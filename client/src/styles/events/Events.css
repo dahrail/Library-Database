@@ -97,7 +97,7 @@
 }
 
 .event-header {
-  background-color: #3498db;
+  background-color: #000000; /* changed from #3498db */
   color: white;
   padding: 20px;
 }
