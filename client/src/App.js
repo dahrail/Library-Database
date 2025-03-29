@@ -307,6 +307,8 @@ function App() {
         handleLogout={handleLogout}
         navigateToBooks={navigateToBooks}
         navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn}
+        navigateToLogin={navigateToLogin}
+        navigateToRegister={navigateToRegister}
       />
 
       {/* Render the appropriate screen based on currentScreen state */}
