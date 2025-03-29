@@ -3,7 +3,6 @@ import React from "react";
 const BookList = ({
   books,
   handleLoan,
-  handleReturn,
   navigateToHome,
   userData,
   navigateToAddBook,
@@ -66,6 +65,14 @@ const BookList = ({
     color: "white", // White text
   };
 
+  const handleLoanClick = (book) => {
+    if (book.userHasHold || book.otherUserHasHold) {
+      alert(`Placing order for hold on book: "${book.title}".`);
+    } else {
+      alert(`Checking out a loan for book: "${book.title}".`);
+    }
+  };
+
   return (
     <div style={backgroundStyle}>
       <h2 style={{ color: "white" }}>Available Books</h2>
@@ -100,32 +107,19 @@ const BookList = ({
               <div className="button-group">
                 {/* Loan Button */}
                 <button
-                  onClick={() => handleLoan(book)}
-                  disabled={
-                    book.copies === 0 ||
-                    book.userHasHold ||
-                    book.otherUserHasHold
-                  }
-                  className={
-                    book.copies === 0
-                      ? "btn-disabled"
-                      : book.userHasHold || book.otherUserHasHold
-                      ? "btn-hold"
-                      : "btn-loan"
-                  }
+                  onClick={() => handleLoanClick(book)}
+                  disabled={book.copies === 0}
+                  style={{
+                    ...buttonStyle,
+                    backgroundColor:
+                      book.userHasHold || book.otherUserHasHold
+                        ? "#f7d774"
+                        : "#007bff", // Yellow if on hold, blue otherwise
+                    color: "white",
+                  }}
                 >
                   {book.userHasHold || book.otherUserHasHold ? "Hold" : "Loan"}
                 </button>
-
-                {/* Return Button */}
-                {book.isLoaned && (
-                  <button
-                    onClick={() => handleReturn(book)}
-                    className="btn-return"
-                  >
-                    Return
-                  </button>
-                )}
               </div>
             </div>
           );
