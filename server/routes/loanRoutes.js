@@ -234,8 +234,65 @@ const confirmReturn = async (req, res) => {
   }
 };
 
+// Route to handle borrowing a media item
+const borrowMedia = async (req, res) => {
+  try {
+    const { UserID, ItemID } = await parseRequestBody(req);
+    // Start a transaction using a connection from the pool
+    const connection = await pool.promise().getConnection();
+    try {
+      await connection.beginTransaction();
+
+      // Decrement AvailableCopies in MEDIA_INVENTORY for the borrowed media item
+      const updateQuery = `
+        UPDATE MEDIA_INVENTORY
+        SET AvailableCopies = AvailableCopies - 1
+        WHERE MediaID = ? AND AvailableCopies > 0
+      `;
+      const [updateResult] = await connection.query(updateQuery, [ItemID]);
+      console.log("Media inventory update result:", updateResult); // <-- added logging
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        connection.release();
+        return sendJsonResponse(res, 400, { success: false, error: "No available copies for media item." });
+      }
+
+      // Determine loan period based on user role
+      const roleQuery = `SELECT Role FROM USER WHERE UserID = ?`;
+      const [user] = await connection.query(roleQuery, [UserID]);
+      const role = user[0]?.Role || "Student";
+      const loanPeriod = role === "Student" ? 7 : 14;
+
+      // Insert loan record with ItemType always 'Media'
+      const insertQuery = `
+        INSERT INTO LOAN (UserID, ItemType, ItemID, BorrowedAt, DueAt)
+        VALUES (?, 'Media', ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY))
+      `;
+      const [loanResult] = await connection.query(insertQuery, [UserID, ItemID, loanPeriod]);
+      if (loanResult.affectedRows === 0) {
+        await connection.rollback();
+        connection.release();
+        return sendJsonResponse(res, 400, { success: false, error: "Failed to borrow media item." });
+      }
+
+      await connection.commit();
+      connection.release();
+      sendJsonResponse(res, 200, { success: true });
+    } catch (transError) {
+      await connection.rollback();
+      connection.release();
+      console.error("Transaction error borrowing media item:", transError);
+      sendJsonResponse(res, 500, { success: false, error: "Internal server error." });
+    }
+  } catch (error) {
+    console.error("Error borrowing media item:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Internal server error." });
+  }
+};
+
 module.exports = {
   getUserLoans,
   confirmLoan,
   confirmReturn,
+  borrowMedia,
 };

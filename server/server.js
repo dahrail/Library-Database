@@ -1,6 +1,7 @@
 const http = require('http');
 const { setCorsHeaders } = require('./utils/requestUtils');
 const handleRequest = require('./routes/index');
+const mediaRoutes = require('./routes/mediaRoutes');
 
 // Create the HTTP server with the new request handler
 const server = http.createServer(async (req, res) => {
@@ -14,7 +15,13 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Process the request with our new handler
+  // Handle media routes
+  if (req.url === '/api/media' && req.method === 'GET') {
+    mediaRoutes.getAllMedia(req, res);
+    return;
+  }
+
+  // Process the request with our main handler
   await handleRequest(req, res);
 });
 

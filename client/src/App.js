@@ -419,10 +419,11 @@ function App() {
       )}
 
       {currentScreen === "media" && (
-        <Media
-          navigateToHome={navigateToHome}
-          isLoggedIn={isLoggedIn}
+        <Media 
+          navigateToHome={navigateToHome} 
+          isLoggedIn={isLoggedIn} 
           navigateToLogin={navigateToLogin}
+          userData={userData} // Pass the userData
         />
       )}
 
