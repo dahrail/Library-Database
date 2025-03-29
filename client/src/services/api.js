@@ -138,6 +138,62 @@ const API = {
       throw error;
     }
   },
+
+  // Events API calls
+  getEvents: async () => {
+    try {
+      const response = await fetch('/api/events');
+      
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch events');
+      }
+      return data.events || [];
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      throw error;
+    }
+  },
+
+  addEvent: async (eventData) => {
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding event:', error);
+      throw error;
+    }
+  },
+  
+  registerForEvent: async (userId, eventId) => {
+    try {
+      const response = await fetch('/api/events/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ UserID: userId, EventID: eventId }),
+      });
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error registering for event:', error);
+      throw error;
+    }
+  },
 };
 
 export default API;

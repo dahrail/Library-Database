@@ -9,6 +9,7 @@ const Home = ({
   navigateToLoans, // Add navigation for loans
   navigateToRooms,
   navigateToDataReport,
+  navigateToEvents, // Add navigation for events
 }) => {
   const isAdmin = userData?.Role === "Admin"; // Check if the user is an Admin
 
@@ -59,6 +60,10 @@ const Home = ({
         <div className="menu-item" onClick={navigateToRooms}>
           <img src="/images/rooms.jpg" alt="Rooms" className="menu-image" />
           <h3>Rooms</h3>
+        </div>
+        <div className="menu-item" onClick={navigateToEvents}>
+          <img src="/images/events.jpg" alt="Events" className="menu-image" />
+          <h3>Events</h3>
         </div>
       </div>
 

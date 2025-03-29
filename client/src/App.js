@@ -19,6 +19,7 @@ import TopBar from "./components/layout/TopBar";
 import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; // Import the new component
 import Media from "./components/media/Media"; // Import the Media component
 import RoomReservation from "./components/rooms/RoomReservation"; // Import the RoomReservation component
+import Events from "./components/events/Events"; // Import the Events component
 
 // Import API service
 import API from "./services/api";
@@ -86,6 +87,15 @@ function App() {
     } catch (error) {
       console.error("Error loading data report:", error);
       alert("An error occurred while loading the data report.");
+    }
+  };
+
+  const navigateToEvents = () => {
+    try {
+      setCurrentScreen("events");
+    } catch (error) {
+      console.error("Error navigating to events:", error);
+      alert("An error occurred while navigating to events.");
     }
   };
 
@@ -286,6 +296,7 @@ function App() {
         navigateToMedia={navigateToMedia} // Add this line to pass the function
         navigateToLogin={navigateToLogin} // Add this line to pass the navigateToLogin function
         navigateToRegister={navigateToRegister} // Make sure this prop is included
+        navigateToEvents={navigateToEvents} // Pass the navigateToEvents function
       />
 
       {/* Render the appropriate screen based on currentScreen state */}
@@ -321,6 +332,7 @@ function App() {
           navigateToAddBook={navigateToAddBook} // Pass the function
           navigateToDataReport={navigateToDataReport} // Pass the function
           navigateToRooms={navigateToRooms} // Pass the function
+          navigateToEvents={navigateToEvents} // Pass the function
         />
       )}
 
@@ -428,6 +440,10 @@ function App() {
 
       {currentScreen === "rooms" && (
         <RoomReservation userData={userData} navigateToHome={navigateToHome} />
+      )}
+
+      {currentScreen === "events" && (
+        <Events navigateToHome={navigateToHome} userData={userData} />
       )}
     </div>
   );
