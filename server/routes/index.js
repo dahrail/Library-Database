@@ -9,6 +9,22 @@ const reportRoutes = require("./reportRoutes");
 const roomRoutes = require("./roomRoutes");
 const eventRoutes = require("./eventRoutes"); // Import the event routes
 
+const parseRequestBody = async (req) => {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+    req.on("end", () => {
+      try {
+        resolve(JSON.parse(body));
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+};
+
 // Main request handler
 const handleRequest = async (req, res) => {
   // Parse the URL and get the pathname
@@ -109,6 +125,12 @@ const handleRequest = async (req, res) => {
 
     if (method === "POST" && path === "/api/bookRoom") {
       return await roomRoutes.bookRoom(req, res);
+    }
+
+    if (method === "POST" && path === "/api/reserveRoom") {
+      const body = await parseRequestBody(req); // Parse the JSON body
+      req.body = body; // Attach the parsed body to the request object
+      return await roomRoutes.reserveRoom(req, res);
     }
 
     // EVENT ROUTES
