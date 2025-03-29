@@ -21,6 +21,9 @@ const getAllBooks = (req, res) => {
         genre: book.Genre,
         year: book.PublicationYear,
         copies: book.AvailableCopies,
+        isLoaned: false, // Default values for non-logged in users
+        userHasHold: false,
+        otherUserHasHold: false,
       }));
 
       console.log(`Sending ${books.length} books to frontend`);

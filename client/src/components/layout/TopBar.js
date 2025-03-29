@@ -6,11 +6,10 @@ const TopBar = ({
   userData, 
   handleLogout, 
   navigateToBooks, 
-  navigateToBooksNotLoggedIn, 
   navigateToMedia,
   navigateToLogin,
   navigateToRegister,
-  navigateToRooms // Add this prop
+  navigateToRooms
 }) => {
   return (
     <div className="top-bar">
@@ -26,7 +25,7 @@ const TopBar = ({
         {/* Navigation buttons */}
         <div className="nav-buttons">
           <button 
-            onClick={isLoggedIn ? navigateToBooks : navigateToBooksNotLoggedIn}
+            onClick={navigateToBooks}
             className="nav-button"
           >
             Browse & Borrow

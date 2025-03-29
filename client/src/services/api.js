@@ -33,7 +33,9 @@ const API = {
   // Books API calls
   getBooks: async (userId) => {
     try {
-      const response = await fetch(`/api/books/${userId}`);
+      // If userId is provided, fetch user-specific book info
+      const endpoint = userId ? `/api/books/${userId}` : '/api/books';
+      const response = await fetch(endpoint);
       return await response.json();
     } catch (error) {
       console.error("Error fetching books:", error);

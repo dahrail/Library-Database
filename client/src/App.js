@@ -92,8 +92,15 @@ function App() {
   // Books navigation and handlers
   const navigateToBooks = async () => {
     try {
-      const data = await API.getBooks(userData.UserID);
-      setBooks(data);
+      // If user is logged in, fetch books with user-specific info
+      if (isLoggedIn && userData) {
+        const data = await API.getBooks(userData.UserID);
+        setBooks(data);
+      } else {
+        // If not logged in, fetch books without user-specific info
+        const data = await API.getBooks();
+        setBooks(data);
+      }
       setCurrentScreen("books");
     } catch (error) {
       console.error("Error fetching books:", error);
@@ -281,8 +288,7 @@ function App() {
         isLoggedIn={isLoggedIn}
         userData={userData}
         handleLogout={handleLogout}
-        navigateToBooks={navigateToBooks} // Pass the navigateToBooks function
-        navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn} // Pass the navigateToBooksNotLoggedIn function
+        navigateToBooks={navigateToBooks} // Always pass navigateToBooks
         navigateToMedia={navigateToMedia} // Add this line to pass the function
         navigateToLogin={navigateToLogin} // Add this line to pass the navigateToLogin function
         navigateToRegister={navigateToRegister} // Make sure this prop is included
@@ -332,12 +338,10 @@ function App() {
           handleReturn={handleReturn}
           navigateToHome={navigateToHome}
           userData={userData} // Pass userData to check for admin role
+          isLoggedIn={isLoggedIn} // Pass isLoggedIn state
           navigateToAddBook={navigateToAddBook} // Pass the navigateToAddBook function
+          navigateToLogin={navigateToLogin} // Pass navigateToLogin for non-logged-in users
         />
-      )}
-
-      {currentScreen === "booksNotLoggedIn" && (
-        <BooksNotLoggedIn navigateToLogin={navigateToLogin} />
       )}
 
       {currentScreen === "loan" && selectedBook && (
