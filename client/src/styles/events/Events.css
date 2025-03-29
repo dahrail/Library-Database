@@ -127,7 +127,7 @@
 }
 
 .event-header {
-  background-color: var(--secondary-color);
+  background-color: #000000;
   color: white;
   padding: 24px;
 }
