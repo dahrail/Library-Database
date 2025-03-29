@@ -1,62 +1,75 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
-  // Sample data for different media types
-  const [mediaItems] = useState({
-    music: [
-      { id: 1, title: "Abbey Road", artist: "The Beatles", year: 1969, type: "Album", imageUrl: "https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg" },
-      { id: 2, title: "Thriller", artist: "Michael Jackson", year: 1982, type: "Album", imageUrl: "https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png" },
-      { id: 3, title: "Back in Black", artist: "AC/DC", year: 1980, type: "Album", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9/92/ACDC_Back_in_Black.png" },
-      { id: 4, title: "The Dark Side of the Moon", artist: "Pink Floyd", year: 1973, type: "Album", imageUrl: "https://upload.wikimedia.org/wikipedia/en/3/3b/Dark_Side_of_the_Moon.png" },
-      { id: 5, title: "OK Computer", artist: "Radiohead", year: 1997, type: "Album", imageUrl: "https://upload.wikimedia.org/wikipedia/en/b/ba/Radioheadokcomputer.png" },
-      { id: 6, title: "Blue", artist: "Joni Mitchell", year: 1971, type: "Album", imageUrl: "https://upload.wikimedia.org/wikipedia/en/e/e1/Joni_Mitchell_-_Blue.png" },
-    ],
-    movies: [
-      { id: 7, title: "The Shawshank Redemption", director: "Frank Darabont", year: 1994, genre: "Drama", imageUrl: "https://upload.wikimedia.org/wikipedia/en/8/81/ShawshankRedemptionMoviePoster.jpg" },
-      { id: 8, title: "The Godfather", director: "Francis Ford Coppola", year: 1972, genre: "Crime/Drama", imageUrl: "https://upload.wikimedia.org/wikipedia/en/1/1c/Godfather_ver1.jpg" },
-      { id: 9, title: "Pulp Fiction", director: "Quentin Tarantino", year: 1994, genre: "Crime/Drama", imageUrl: "https://upload.wikimedia.org/wikipedia/en/3/3b/Pulp_Fiction_%281994%29_poster.jpg" },
-      { id: 10, title: "The Dark Knight", director: "Christopher Nolan", year: 2008, genre: "Action/Drama", imageUrl: "https://upload.wikimedia.org/wikipedia/en/1/1c/The_Dark_Knight_%282008_film%29.jpg" },
-      { id: 11, title: "Inception", director: "Christopher Nolan", year: 2010, genre: "Sci-Fi/Action", imageUrl: "https://upload.wikimedia.org/wikipedia/en/2/2e/Inception_%282010%29_theatrical_poster.jpg" },
-      { id: 12, title: "Parasite", director: "Bong Joon-ho", year: 2019, genre: "Thriller/Drama", imageUrl: "https://upload.wikimedia.org/wikipedia/en/5/53/Parasite_%282019_film%29.png" },
-    ],
-    videoGames: [
-      { id: 13, title: "The Legend of Zelda: Breath of the Wild", platform: "Nintendo Switch", year: 2017, genre: "Action/Adventure", imageUrl: "https://upload.wikimedia.org/wikipedia/en/c/c6/The_Legend_of_Zelda_Breath_of_the_Wild.jpg" },
-      { id: 14, title: "Red Dead Redemption 2", platform: "Multiple", year: 2018, genre: "Action/Adventure", imageUrl: "https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg" },
-      { id: 15, title: "The Witcher 3: Wild Hunt", platform: "Multiple", year: 2015, genre: "RPG", imageUrl: "https://upload.wikimedia.org/wikipedia/en/0/0c/Witcher_3_cover_art.jpg" },
-      { id: 16, title: "God of War", platform: "PlayStation", year: 2018, genre: "Action/Adventure", imageUrl: "https://upload.wikimedia.org/wikipedia/en/a/a7/God_of_War_4_cover.jpg" },
-      { id: 17, title: "Elden Ring", platform: "Multiple", year: 2022, genre: "Action/RPG", imageUrl: "https://upload.wikimedia.org/wikipedia/en/b/b9/Elden_Ring_Box_art.jpg" },
-      { id: 18, title: "Hades", platform: "Multiple", year: 2020, genre: "Roguelike/Action", imageUrl: "https://upload.wikimedia.org/wikipedia/en/c/cc/Hades_cover_art.jpg" },
-    ]
-  });
-
+// Update the Media component to accept userData as a prop
+const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData }) => {
+  // State for media items from database
+  const [mediaItems, setMediaItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [displayedItems, setDisplayedItems] = useState([]);
-  // Remove the animateItems state which causes re-renders
   const initialRenderRef = useRef(true);
 
-  useEffect(() => {
-    // Combine all media items when "all" is selected, or filter by category
-    let items = [];
-    if (selectedCategory === "all") {
-      items = [...mediaItems.music, ...mediaItems.movies, ...mediaItems.videoGames];
-    } else {
-      items = mediaItems[selectedCategory];
-    }
-    
-    setDisplayedItems(items);
-    
-    // Only apply animation on initial render or category change
-    if (!initialRenderRef.current) {
-      // Add a class to the container to trigger a CSS animation
-      const container = document.querySelector('#media-grid');
-      if (container) {
-        container.classList.remove('fade-in-items');
-        // Force a reflow to restart animation
-        void container.offsetWidth;
-        container.classList.add('fade-in-items');
+  // Define fetchMediaItems outside of useEffect so it can be used elsewhere
+  const fetchMediaItems = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/media');
+      const data = await response.json();
+
+      if (data.success) {
+        setMediaItems(data.media);
+      } else {
+        setError(data.error || 'Failed to fetch media items');
       }
-    } else {
-      initialRenderRef.current = false;
+    } catch (err) {
+      console.error('Error fetching media items:', err);
+      setError('An error occurred while fetching media items');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch media data from database
+  useEffect(() => {
+    fetchMediaItems();
+  }, []);
+
+  // Filter media items by category
+  useEffect(() => {
+    if (mediaItems.length > 0) {
+      let items = [...mediaItems];
+      
+      if (selectedCategory !== "all") {
+        // Map UI categories to database enum values
+        const categoryMap = {
+          "music": "Music",
+          "movies": "Movie", // This is working correctly
+          "videogames": "VideoGame" // Updated to match the enum value in your database
+        };
+        
+        const dbCategory = categoryMap[selectedCategory];
+        items = items.filter(item => 
+          item.Type && item.Type === dbCategory
+        );
+      }
+      
+      setDisplayedItems(items);
+      
+      // Only apply animation on initial render or category change
+      if (!initialRenderRef.current) {
+        // Add a class to the container to trigger a CSS animation
+        const container = document.querySelector('#media-grid');
+        if (container) {
+          container.classList.remove('fade-in-items');
+          // Force a reflow to restart animation
+          void container.offsetWidth;
+          container.classList.add('fade-in-items');
+        }
+      } else {
+        initialRenderRef.current = false;
+      }
     }
   }, [selectedCategory, mediaItems]);
 
@@ -314,8 +327,9 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
       ...prev,
       [id]: 'error'
     }));
-    e.target.onerror = null;
-    e.target.src = "https://via.placeholder.com/300x450?text=Image+Not+Found";
+    e.target.onerror = null; // Prevent any further error handling
+    // Use a data URI instead of an image file to prevent infinite loops
+    e.target.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgMzAwIDQ1MCIgZmlsbD0ibm9uZSI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiNmMGYwZjAiLz4KICA8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI0IiBmaWxsPSIjOTk5Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+Cjwvc3ZnPg==";
   };
 
   // Enhance styling for image container
@@ -364,6 +378,58 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
       document.head.removeChild(styleElement);
     };
   }, []);
+
+  // Map of Wikipedia image URLs for media items
+  const wikipediaImageUrls = {
+    "Abbey Road": "https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg",
+    "Thriller": "https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png",
+    "Back in Black": "https://upload.wikimedia.org/wikipedia/commons/9/92/ACDC_Back_in_Black.png",
+    "The Dark Side of the Moon": "https://upload.wikimedia.org/wikipedia/en/3/3b/Dark_Side_of_the_Moon.png",
+    "OK Computer": "https://upload.wikimedia.org/wikipedia/en/b/ba/Radioheadokcomputer.png",
+    "Blue": "https://upload.wikimedia.org/wikipedia/en/e/e1/Bluealbumcover.jpg",
+    "The Shawshank Redemption": "https://upload.wikimedia.org/wikipedia/en/8/81/ShawshankRedemptionMoviePoster.jpg",
+    "The Godfather": "https://upload.wikimedia.org/wikipedia/en/1/1c/Godfather_ver1.jpg",
+    "Pulp Fiction": "https://upload.wikimedia.org/wikipedia/en/3/3b/Pulp_Fiction_%281994%29_poster.jpg",
+    "The Dark Knight": "https://upload.wikimedia.org/wikipedia/en/1/1c/The_Dark_Knight_%282008_film%29.jpg",
+    "Inception": "https://upload.wikimedia.org/wikipedia/en/2/2e/Inception_%282010%29_theatrical_poster.jpg",
+    "Parasite": "https://upload.wikimedia.org/wikipedia/en/5/53/Parasite_%282019_film%29.png",
+    "The Legend of Zelda: Breath of the Wild": "https://upload.wikimedia.org/wikipedia/en/c/c6/The_Legend_of_Zelda_Breath_of_the_Wild.jpg",
+    "Red Dead Redemption 2": "https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg",
+    "The Witcher 3: Wild Hunt": "https://upload.wikimedia.org/wikipedia/en/0/0c/Witcher_3_cover_art.jpg",
+    "God of War": "https://upload.wikimedia.org/wikipedia/en/a/a7/God_of_War_4_cover.jpg",
+    "Elden Ring": "https://upload.wikimedia.org/wikipedia/en/b/b9/Elden_Ring_Box_art.jpg",
+    "Hades": "https://upload.wikimedia.org/wikipedia/en/c/cc/Hades_cover_art.jpg"
+  };
+
+  // Function to handle borrowing a media item
+  const handleBorrow = async (mediaItem) => {
+    try {
+      const response = await fetch('/api/loans', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          UserID: userData.UserID, // Use the actual user ID from props
+          ItemType: mediaItem.Type,
+          ItemID: mediaItem.MediaID,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`Successfully borrowed "${mediaItem.Title}".`);
+        // Refresh the media items to update available copies
+        fetchMediaItems(); // Now this is defined properly
+      } else {
+        alert(`Failed to borrow "${mediaItem.Title}": ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error borrowing media item:', error);
+      alert('An error occurred while borrowing the media item.');
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -417,9 +483,10 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
           >
             Movies
           </button>
+          {/* Optional: You can remove or hide this button until your database supports video games */}
           <button
-            style={selectedCategory === "videoGames" ? {...styles.navButton, ...styles.activeNavButton} : styles.navButton}
-            onClick={() => setSelectedCategory("videoGames")}
+            style={selectedCategory === "videogames" ? {...styles.navButton, ...styles.activeNavButton} : styles.navButton}
+            onClick={() => setSelectedCategory("videogames")}
           >
             Video Games
           </button>
@@ -428,14 +495,20 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
 
       {/* Content Section */}
       <div style={styles.contentSection}>
-        <div id="media-grid" className="fade-in-items" style={styles.grid}>
-          {displayedItems.map((item, index) => {
-            // Determine the category of this item
-            const category = item.artist ? "music" : (item.director ? "movies" : "videoGames");
-            
-            return (
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <div style={additionalStyles.loadingSpinner}></div>
+            <p style={{ marginTop: '20px' }}>Loading media items...</p>
+          </div>
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: '50px 0', color: 'red' }}>
+            {error}
+          </div>
+        ) : (
+          <div id="media-grid" className="fade-in-items" style={styles.grid}>
+            {displayedItems.map((item) => (
               <div
-                key={item.id}
+                key={item.MediaID}
                 className="media-card"
                 style={styles.card}
                 onMouseOver={(e) => {
@@ -449,57 +522,39 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
               >
                 <div style={additionalStyles.imageContainer}>
                   {/* Show loading spinner until image loads */}
-                  {imageLoadingStatus[item.id] !== 'loaded' && imageLoadingStatus[item.id] !== 'error' && (
+                  {imageLoadingStatus[item.MediaID] !== 'loaded' && imageLoadingStatus[item.MediaID] !== 'error' && (
                     <div style={additionalStyles.loadingOverlay}>
                       <div style={additionalStyles.loadingSpinner}></div>
                     </div>
                   )}
                   
                   <img
-                    src={item.imageUrl}
-                    alt={item.title}
+                    src={wikipediaImageUrls[item.Title] || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgMzAwIDQ1MCIgZmlsbD0ibm9uZSI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiNmMGYwZjAiLz4KICA8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI0IiBmaWxsPSIjOTk5Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+Cjwvc3ZnPg=="}
+                    alt={item.Title}
                     style={styles.cardImage}
-                    onLoad={() => handleImageLoad(item.id)}
-                    onError={(e) => handleImageError(item.id, e)}
+                    onLoad={() => handleImageLoad(item.MediaID)}
+                    onError={(e) => handleImageError(item.MediaID, e)}
                   />
                 </div>
                 <div style={styles.cardContent}>
-                  <h3 style={styles.cardTitle}>{item.title}</h3>
+                  <h3 style={styles.cardTitle}>{item.Title}</h3>
+                  <p style={styles.cardInfo}>Author: {item.Author}</p>
+                  <p style={styles.cardInfo}>Genre: {item.Genre}</p>
+                  <p style={styles.cardInfo}>Year: {item.PublicationYear}</p>
                   
-                  {/* Display different info based on media type */}
-                  {category === "music" && (
-                    <>
-                      <p style={styles.cardInfo}>Artist: {item.artist}</p>
-                      <p style={styles.cardInfo}>Year: {item.year}</p>
-                      <p style={styles.cardInfo}>Type: {item.type}</p>
-                    </>
-                  )}
-                  
-                  {category === "movies" && (
-                    <>
-                      <p style={styles.cardInfo}>Director: {item.director}</p>
-                      <p style={styles.cardInfo}>Year: {item.year}</p>
-                      <p style={styles.cardInfo}>Genre: {item.genre}</p>
-                    </>
-                  )}
-                  
-                  {category === "videoGames" && (
-                    <>
-                      <p style={styles.cardInfo}>Platform: {item.platform}</p>
-                      <p style={styles.cardInfo}>Year: {item.year}</p>
-                      <p style={styles.cardInfo}>Genre: {item.genre}</p>
-                    </>
-                  )}
-                  
-                  {/* Conditional button rendering based on login status */}
+                  {/* Conditional button rendering based on login status and availability */}
                   {isLoggedIn ? (
-                    <button style={styles.button}>Borrow</button>
+                    item.AvailableCopies > 0 ? (
+                      <button style={styles.button} onClick={() => handleBorrow(item)}>Borrow</button>
+                    ) : (
+                      <button style={{...styles.button, backgroundColor: '#f7d774', color: '#000'}}>Hold</button>
+                    )
                   ) : (
                     <div>
                       <button 
                         style={styles.disabledButton}
-                        onClick={navigateToLogin} // Add onClick handler to navigate to login
-                        disabled={false} // Remove disabled attribute
+                        onClick={navigateToLogin}
+                        disabled={false}
                       >
                         Login to Borrow
                       </button>
@@ -507,9 +562,9 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin }) => {
                   )}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Login message at the bottom for users who aren't logged in */}
         {!isLoggedIn && (

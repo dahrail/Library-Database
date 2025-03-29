@@ -67,6 +67,11 @@ const handleRequest = async (req, res) => {
       return await loanRoutes.confirmReturn(req, res);
     }
 
+    // Add the new route for borrowing media
+    if (method === "POST" && path === "/api/loans") {
+      return await loanRoutes.borrowMedia(req, res);
+    }
+
     // HOLD ROUTES
     if (method === "GET" && path.match(/^\/api\/holds\/\d+$/)) {
       const userId = path.split("/").pop();
