@@ -8,6 +8,12 @@ const LandingPage = ({
   navigateToRooms, 
   navigateToEvents 
 }) => {
+  // Add scroll-to-top wrappers for navigation
+  const handleNavigateToBooks = () => { window.scrollTo(0,0); navigateToBooks(); };
+  const handleNavigateToMedia = () => { window.scrollTo(0,0); navigateToMedia(); };
+  const handleNavigateToRooms = () => { window.scrollTo(0,0); navigateToRooms(); };
+  const handleNavigateToEvents = () => { window.scrollTo(0,0); navigateToEvents(); };
+
   // Add animation styles on component mount
   useEffect(() => {
     const style = document.createElement('style');
@@ -66,10 +72,10 @@ const LandingPage = ({
           <h1>Welcome to BookFinder</h1>
           <p className="hero-subtitle">Your University Library Portal</p>
           <div className="hero-cta">
-            <button onClick={navigateToBooks} className="cta-button primary">
+            <button onClick={handleNavigateToBooks} className="cta-button primary">
               Explore Books
             </button>
-            <button onClick={navigateToMedia} className="cta-button secondary">
+            <button onClick={handleNavigateToMedia} className="cta-button secondary">
               Discover Media
             </button>
           </div>
@@ -81,25 +87,25 @@ const LandingPage = ({
         <h2 className="section-title scroll-animate from-bottom">Library Services</h2>
         
         <div className="features-grid">
-          <div className="feature-card scroll-animate from-left delay-100" onClick={navigateToBooks}>
+          <div className="feature-card scroll-animate from-left delay-100" onClick={handleNavigateToBooks}>
             <div className="feature-icon book-icon"></div>
             <h3>Extensive Book Collection</h3>
             <p>Browse thousands of books across all genres and subjects</p>
           </div>
           
-          <div className="feature-card scroll-animate from-bottom delay-200" onClick={navigateToMedia}>
+          <div className="feature-card scroll-animate from-bottom delay-200" onClick={handleNavigateToMedia}>
             <div className="feature-icon media-icon"></div>
             <h3>Digital Media</h3>
             <p>Access our collection of music, movies, and more</p>
           </div>
           
-          <div className="feature-card scroll-animate from-right delay-300" onClick={navigateToRooms}>
+          <div className="feature-card scroll-animate from-right delay-300" onClick={handleNavigateToRooms}>
             <div className="feature-icon room-icon"></div>
             <h3>Study Spaces</h3>
             <p>Reserve private rooms and collaborative spaces</p>
           </div>
           
-          <div className="feature-card scroll-animate from-bottom delay-400" onClick={navigateToEvents}>
+          <div className="feature-card scroll-animate from-bottom delay-400" onClick={handleNavigateToEvents}>
             <div className="feature-icon event-icon"></div>
             <h3>Events & Workshops</h3>
             <p>Join our community events and learning sessions</p>
@@ -113,10 +119,7 @@ const LandingPage = ({
           <h2 className="scroll-animate fade-in">Discover Something New</h2>
           <p className="scroll-animate fade-in delay-200">Our curated collections are updated regularly with the latest publications</p>
           <button 
-            onClick={() => {
-              window.scrollTo(0, 0);
-              navigateToBooks();
-            }} 
+            onClick={handleNavigateToBooks} 
             className="promo-button scroll-animate scale-in delay-400"
           >
             Start Browsing

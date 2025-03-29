@@ -63,19 +63,49 @@ function App() {
   };
 
   // Navigation functions
-  const navigateToHome = () => setCurrentScreen("home");
-  const navigateToLogin = () => setCurrentScreen("login");
-  const navigateToRegister = () => setCurrentScreen("register");
-  const navigateToRegisterAsFaculty = () =>
-    setCurrentScreen("registerAsFaculty"); // Add navigation function
-  const navigateToAddBook = () => setCurrentScreen("addBook");
-  const navigateToBooksNotLoggedIn = () => setCurrentScreen("booksNotLoggedIn"); // Add navigation function
-  const navigateToMedia = () => setCurrentScreen("media");
-  const navigateToElectronics = () => setCurrentScreen("electronics"); // Add this line
-  const navigateToRooms = () => setCurrentScreen("rooms"); // Add navigation function
-  const navigateToLanding = () => setCurrentScreen("landing"); // Add this function
+  const navigateToHome = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("home");
+  };
+  const navigateToLogin = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("login");
+  };
+  const navigateToRegister = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("register");
+  };
+  const navigateToRegisterAsFaculty = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("registerAsFaculty");
+  };
+  const navigateToAddBook = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("addBook");
+  };
+  const navigateToBooksNotLoggedIn = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("booksNotLoggedIn");
+  };
+  const navigateToMedia = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("media");
+  };
+  const navigateToElectronics = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("electronics");
+  };
+  const navigateToRooms = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("rooms");
+  };
+  const navigateToLanding = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("landing");
+  };
 
   const navigateToDataReport = async () => {
+    window.scrollTo(0, 0);
     try {
       const response = await fetch("/api/dataReport"); // Fetch data from the backend
       const data = await response.json();
@@ -93,6 +123,7 @@ function App() {
   };
 
   const navigateToEvents = () => {
+    window.scrollTo(0, 0);
     try {
       setCurrentScreen("events");
     } catch (error) {
@@ -103,6 +134,7 @@ function App() {
 
   // Books navigation and handlers
   const navigateToBooks = async () => {
+    window.scrollTo(0, 0);
     try {
       // If user is logged in, fetch books with user-specific info
       if (isLoggedIn && userData) {
@@ -150,6 +182,7 @@ function App() {
 
   // Loans navigation and handlers
   const navigateToLoans = async () => {
+    window.scrollTo(0, 0);
     try {
       const data = await API.getLoans(userData.UserID);
       if (data.success && Array.isArray(data.loans)) {
@@ -167,6 +200,7 @@ function App() {
   };
 
   const navigateToReturnConfirmation = (loan) => {
+    window.scrollTo(0, 0);
     console.log("Navigating to return confirmation with loan:", loan); // Debugging line
     setSelectedLoan(loan);
     setCurrentScreen("returnConfirmation");
@@ -174,6 +208,7 @@ function App() {
 
   // Holds navigation
   const navigateToHolds = async () => {
+    window.scrollTo(0, 0);
     try {
       const data = await API.getHolds(userData.UserID);
       if (data.success) {
@@ -190,6 +225,7 @@ function App() {
 
   // Fines navigation
   const navigateToFines = async () => {
+    window.scrollTo(0, 0);
     try {
       const data = await API.getFines(userData.UserID);
       if (data.success) {
