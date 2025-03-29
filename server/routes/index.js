@@ -112,7 +112,7 @@ const handleRequest = async (req, res) => {
     }
 
     // EVENT ROUTES
-    if (method === "GET" && path === "/api/events") {
+    if (method === "GET" && path.match(/^\/api\/events\/?$/)) {
       return eventRoutes.getAllEvents(req, res);
     }
 
