@@ -9,8 +9,7 @@ const TopBar = ({
   navigateToMedia,
   navigateToLogin,
   navigateToRegister,
-  navigateToRooms, // Add this
-  navigateToEvents  // Add this
+  navigateToRooms
 }) => {
   return (
     <div className="top-bar">
@@ -44,14 +43,7 @@ const TopBar = ({
             Room Reservation
           </button>
           <button className="nav-button">Electronics (WIP)</button>
-          {isLoggedIn && (
-            <button 
-              onClick={navigateToEvents}
-              className="nav-button"
-            >
-              Events
-            </button>
-          )}
+          <button className="nav-button">Events (WIP)</button>
         </div>
         
         {isLoggedIn && userData ? (
