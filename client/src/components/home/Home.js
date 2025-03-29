@@ -6,8 +6,9 @@ const Home = ({
   navigateToBooks,
   navigateToMedia,
   navigateToElectronics,
-  navigateToLoans,
-  navigateToDataReport, // Add the navigation function for the data report
+  navigateToLoans, // Add navigation for loans
+  navigateToRooms,
+  navigateToDataReport,
 }) => {
   const isAdmin = userData?.Role === "Admin"; // Check if the user is an Admin
 
@@ -25,14 +26,14 @@ const Home = ({
     justifyContent: "flex-start",
     alignItems: "center",
     padding: "20px",
-    overflowY: "auto", // Allow scrolling if content overflows
+    overflowY: "auto",
   };
 
   return (
     <div style={backgroundStyle}>
       <h2 className="gradient-text">Welcome to BookFinder</h2>
       <p className="gradient-text">
-        Explore our collection of books, electronics, and media!
+        Explore our collection of books, electronics, media, and more!
       </p>
       <div className="menu-container">
         <div className="menu-item" onClick={navigateToBooks}>
@@ -55,9 +56,12 @@ const Home = ({
           <img src="/images/loans.jpg" alt="Loans" className="menu-image" />
           <h3>Loans</h3>
         </div>
+        <div className="menu-item" onClick={navigateToRooms}>
+          <img src="/images/rooms.jpg" alt="Rooms" className="menu-image" />
+          <h3>Rooms</h3>
+        </div>
       </div>
 
-      {/* Unique Data Report Button for Admins */}
       {isAdmin && (
         <button onClick={navigateToDataReport} className="data-report-button">
           View Data Report

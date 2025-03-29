@@ -18,6 +18,7 @@ import FineList from "./components/fines/FineList";
 import TopBar from "./components/layout/TopBar";
 import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; // Import the new component
 import Media from "./components/media/Media"; // Import the Media component
+import RoomReservation from "./components/rooms/RoomReservation"; // Import the RoomReservation component
 
 // Import API service
 import API from "./services/api";
@@ -69,6 +70,7 @@ function App() {
   const navigateToBooksNotLoggedIn = () => setCurrentScreen("booksNotLoggedIn"); // Add navigation function
   const navigateToMedia = () => setCurrentScreen("media");
   const navigateToElectronics = () => setCurrentScreen("electronics"); // Add this line
+  const navigateToRooms = () => setCurrentScreen("rooms"); // Add navigation function
 
   const navigateToDataReport = async () => {
     try {
@@ -311,11 +313,12 @@ function App() {
           navigateToBooks={navigateToBooks}
           navigateToMedia={navigateToMedia}
           navigateToElectronics={navigateToElectronics}
-          navigateToLoans={navigateToLoans} // Pass the navigateToLoans function
+          navigateToLoans={navigateToLoans} // Pass the function
           navigateToHolds={navigateToHolds}
           navigateToFines={navigateToFines}
           navigateToAddBook={navigateToAddBook} // Pass the function
           navigateToDataReport={navigateToDataReport} // Pass the function
+          navigateToRooms={navigateToRooms} // Pass the function
         />
       )}
 
@@ -419,6 +422,10 @@ function App() {
           isLoggedIn={isLoggedIn}
           navigateToLogin={navigateToLogin}
         />
+      )}
+
+      {currentScreen === "rooms" && (
+        <RoomReservation userData={userData} navigateToHome={navigateToHome} />
       )}
     </div>
   );
