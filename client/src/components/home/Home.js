@@ -53,7 +53,16 @@ const Home = ({
       {/* Hero Section */}
       <div className="hero-section">
         <h1 className="hero-title">Welcome to BookFinder</h1>
-        <p className="hero-subtitle">
+        {/* Added inline styles to ensure subtitle visibility */}
+        <p className="hero-subtitle" style={{
+          color: "white", 
+          opacity: 1,
+          fontSize: "24px",
+          marginTop: "20px",
+          fontWeight: "400",
+          position: "relative",
+          zIndex: 10
+        }}>
           Explore our collection of books, electronics, media, and more!
         </p>
       </div>
