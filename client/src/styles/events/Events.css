@@ -44,10 +44,11 @@
   font-size: 24px;
   font-weight: 400;
   max-width: 600px;
-  margin: 20px 0 0 0;
+  margin: 20px auto 0;
   opacity: 0;
   transform: translateY(20px);
   animation: fadeInUp 1s forwards 0.3s;
+  text-align: center;
 }
 
 /* Content section */
