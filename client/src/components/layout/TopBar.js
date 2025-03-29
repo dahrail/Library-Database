@@ -1,7 +1,15 @@
 import React from 'react';
 import '../../styles/layout/TopBar.css';
 
-const TopBar = ({ isLoggedIn, userData, handleLogout, navigateToBooks, navigateToBooksNotLoggedIn }) => {
+const TopBar = ({ 
+  isLoggedIn, 
+  userData, 
+  handleLogout, 
+  navigateToBooks, 
+  navigateToBooksNotLoggedIn,
+  navigateToLogin,
+  navigateToRegister 
+}) => {
   return (
     <div className="top-bar">
       <div className="top-bar-content">
@@ -21,7 +29,7 @@ const TopBar = ({ isLoggedIn, userData, handleLogout, navigateToBooks, navigateT
           <button className="nav-button">Events (WIP)</button>
         </div>
         
-        {isLoggedIn && userData && (
+        {isLoggedIn && userData ? (
           <div className="user-info">
             <span>Hello, {userData.FirstName}</span>
             <button 
@@ -29,6 +37,21 @@ const TopBar = ({ isLoggedIn, userData, handleLogout, navigateToBooks, navigateT
               onClick={handleLogout}
             >
               Logout
+            </button>
+          </div>
+        ) : (
+          <div className="auth-buttons">
+            <button 
+              className="login-button"
+              onClick={navigateToLogin}
+            >
+              Login
+            </button>
+            <button 
+              className="register-button"
+              onClick={navigateToRegister}
+            >
+              Register
             </button>
           </div>
         )}
