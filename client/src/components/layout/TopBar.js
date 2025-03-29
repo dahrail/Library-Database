@@ -10,14 +10,15 @@ const TopBar = ({
   navigateToLogin,
   navigateToRegister,
   navigateToRooms,
-  navigateToEvents
+  navigateToEvents,
+  navigateToLanding // Add this prop
 }) => {
   return (
     <div className="top-bar">
       <div className="top-bar-content">
         <div 
           className="logo" 
-          onClick={navigateToLogin} 
+          onClick={navigateToLanding} // Change to navigateToLanding
           style={{ cursor: 'pointer' }}
         >
           BookFinder

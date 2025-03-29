@@ -20,6 +20,7 @@ import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; // Import th
 import Media from "./components/media/Media"; // Import the Media component
 import RoomReservation from "./components/rooms/RoomReservation"; // Import the RoomReservation component
 import Events from "./components/events/Events"; // Import the Events component
+import LandingPage from "./components/landing/LandingPage"; // Import the new LandingPage component
 
 // Import API service
 import API from "./services/api";
@@ -27,7 +28,7 @@ import API from "./services/api";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [currentScreen, setCurrentScreen] = useState("login");
+  const [currentScreen, setCurrentScreen] = useState("landing"); // Change initial screen to landing
   const [books, setBooks] = useState([]);
   const [selectedBook, setSelectedBook] = useState(null);
   const [loans, setLoans] = React.useState([]); // Initialize loans as an empty array
@@ -72,6 +73,7 @@ function App() {
   const navigateToMedia = () => setCurrentScreen("media");
   const navigateToElectronics = () => setCurrentScreen("electronics"); // Add this line
   const navigateToRooms = () => setCurrentScreen("rooms"); // Add navigation function
+  const navigateToLanding = () => setCurrentScreen("landing"); // Add this function
 
   const navigateToDataReport = async () => {
     try {
@@ -304,9 +306,19 @@ function App() {
         navigateToRegister={navigateToRegister} // Make sure this prop is included
         navigateToRooms={navigateToRooms} // Pass this function to TopBar
         navigateToEvents={navigateToEvents} // <-- added prop
+        navigateToLanding={navigateToLanding} // Add this prop
       />
 
       {/* Render the appropriate screen based on currentScreen state */}
+      {currentScreen === "landing" && (
+        <LandingPage
+          navigateToBooks={navigateToBooks}
+          navigateToMedia={navigateToMedia}
+          navigateToRooms={navigateToRooms}
+          navigateToEvents={navigateToEvents}
+        />
+      )}
+
       {currentScreen === "login" && (
         <Login onLogin={handleLogin} navigateToRegister={navigateToRegister} />
       )}
