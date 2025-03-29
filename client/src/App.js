@@ -17,6 +17,7 @@ import HoldList from "./components/holds/HoldList";
 import FineList from "./components/fines/FineList";
 import TopBar from "./components/layout/TopBar";
 import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; // Import the new component
+import Media from "./components/media/Media"; // Import the Media component
 
 // Import API service
 import API from "./services/api";
@@ -67,7 +68,7 @@ function App() {
   const navigateToAddBook = () => setCurrentScreen("addBook");
   const navigateToBooksNotLoggedIn = () => setCurrentScreen("booksNotLoggedIn"); // Add navigation function
   const navigateToMedia = () => setCurrentScreen("media");
-  const navigateToElectronics = () => setCurrentScreen("electronics");
+  const navigateToElectronics = () => setCurrentScreen("electronics"); // Add this line
 
   const navigateToDataReport = async () => {
     try {
@@ -280,6 +281,7 @@ function App() {
         handleLogout={handleLogout}
         navigateToBooks={navigateToBooks} // Pass the navigateToBooks function
         navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn} // Pass the navigateToBooksNotLoggedIn function
+        navigateToMedia={navigateToMedia} // Add this line to pass the function
       />
 
       {/* Render the appropriate screen based on currentScreen state */}
@@ -409,6 +411,14 @@ function App() {
             Back to Menu
           </button>
         </div>
+      )}
+
+      {currentScreen === "media" && (
+        <Media
+          navigateToHome={navigateToHome}
+          isLoggedIn={isLoggedIn}
+          navigateToLogin={navigateToLogin}
+        />
       )}
     </div>
   );
