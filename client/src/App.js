@@ -303,6 +303,7 @@ function App() {
         navigateToLogin={navigateToLogin} // Add this line to pass the navigateToLogin function
         navigateToRegister={navigateToRegister} // Make sure this prop is included
         navigateToRooms={navigateToRooms} // Pass this function to TopBar
+        navigateToEvents={navigateToEvents} // <-- added prop
       />
 
       {/* Render the appropriate screen based on currentScreen state */}

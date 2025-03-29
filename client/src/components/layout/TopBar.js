@@ -33,7 +33,14 @@ const TopBar = ({
             Room Reservation
           </button>
           <button className="nav-button">Electronics (WIP)</button>
-          <button onClick={navigateToEvents} className="nav-button">
+          <button 
+            className="nav-button" 
+            onClick={ () => { 
+              if (navigateToEvents) { 
+                navigateToEvents(); 
+              } 
+            } }
+          >
             Events
           </button>
         </div>
