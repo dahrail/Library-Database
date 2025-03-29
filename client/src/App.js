@@ -45,7 +45,8 @@ function App() {
       if (data.success) {
         setIsLoggedIn(true);
         setUserData(data.user);
-        setCurrentScreen("welcome");
+        // Redirect directly to homepage (Library services)
+        setCurrentScreen("home");
       } else {
         alert(data.error || "Invalid email or password");
       }
@@ -369,10 +370,6 @@ function App() {
 
       {currentScreen === "registerAsFaculty" && (
         <RegisterAsFaculty navigateToRegister={navigateToRegister} />
-      )}
-
-      {currentScreen === "welcome" && isLoggedIn && (
-        <Welcome userData={userData} navigateToHome={navigateToHome} />
       )}
 
       {currentScreen === "home" && (

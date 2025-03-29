@@ -53,6 +53,9 @@ const Home = ({
       {/* Hero Section */}
       <div className="hero-section">
         <h1 className="hero-title">Welcome to BookFinder</h1>
+        <p>
+          You are logged in as {userData.FirstName} with role {userData.Role}
+        </p>
         {/* Added inline styles to ensure subtitle visibility */}
         <p className="hero-subtitle" style={{
           color: "white", 
