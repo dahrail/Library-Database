@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect } from 'react';
 import './App.css'; // Make sure CSS is imported
 
@@ -38,6 +39,43 @@ function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+=======
+import React, { useState } from "react";
+import "./App.css";
+
+// Import components
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import RegisterAsFaculty from "./components/auth/RegisterAsFaculty"; // Import the new component
+import Welcome from "./components/home/Welcome";
+import Home from "./components/home/Home";
+import BookList from "./components/books/BookList";
+import BookLoan from "./components/books/BookLoan";
+import BookHold from "./components/books/BookHold";
+import AddBook from "./components/books/AddBook";
+import LoanList from "./components/loans/LoanList";
+import ReturnConfirmation from "./components/loans/ReturnConfirmation";
+import HoldList from "./components/holds/HoldList";
+import FineList from "./components/fines/FineList";
+import TopBar from "./components/layout/TopBar";
+import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; // Import the new component
+import LandingPage from "./components/home/LandingPage"; // Import the new LandingPage component
+
+// Import API service
+import API from "./services/api";
+
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [currentScreen, setCurrentScreen] = useState("landing"); // Change initial screen to landing
+  const [books, setBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [loans, setLoans] = React.useState([]); // Initialize loans as an empty array
+  const [holds, setHolds] = useState([]);
+  const [selectedLoan, setSelectedLoan] = useState(null);
+  const [fines, setFines] = useState([]);
+  const [reportData, setReportData] = useState(null); // State to store data report results
+>>>>>>> Stashed changes
 
     try {
       const response = await fetch('/api/login', {
@@ -46,6 +84,44 @@ function App() {
         body: JSON.stringify({ email, password }),
       });
 
+<<<<<<< Updated upstream
+=======
+      if (data.success) {
+        setIsLoggedIn(true);
+        setUserData(data.user);
+        setCurrentScreen("welcome");
+      } else {
+        alert(data.error || "Invalid email or password");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("An error occurred while logging in.");
+    }
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserData(null);
+    setCurrentScreen("login");
+  };
+
+  // Navigation functions
+  const navigateToHome = () => setCurrentScreen("home");
+  const navigateToLogin = () => setCurrentScreen("login");
+  const navigateToRegister = () => setCurrentScreen("register");
+  const navigateToRegisterAsFaculty = () =>
+    setCurrentScreen("registerAsFaculty"); // Add navigation function
+  const navigateToAddBook = () => setCurrentScreen("addBook");
+  const navigateToBooksNotLoggedIn = () => setCurrentScreen("booksNotLoggedIn"); // Add navigation function
+  const navigateToMedia = () => setCurrentScreen("media");
+  const navigateToElectronics = () => setCurrentScreen("electronics");
+  const navigateToLanding = () => setCurrentScreen("landing");
+
+  const navigateToDataReport = async () => {
+    try {
+      const response = await fetch("/api/dataReport"); // Fetch data from the backend
+>>>>>>> Stashed changes
       const data = await response.json();
 
       if (data.success) {
@@ -275,6 +351,7 @@ function App() {
   };
 
   return (
+<<<<<<< Updated upstream
     <div>
       {currentScreen === 'login' && (
         <div className="login-container">
@@ -331,6 +408,50 @@ function App() {
             <button onClick={navigateToAddBook}>Add New Book</button>
           )}
         </div>
+=======
+    <div className="app-container">
+      {/* Show TopBar on all screens */}
+      <TopBar
+        isLoggedIn={isLoggedIn}
+        userData={userData}
+        handleLogout={handleLogout}
+        navigateToBooks={navigateToBooks} // Pass the navigateToBooks function
+        navigateToBooksNotLoggedIn={navigateToBooksNotLoggedIn} // Pass the navigateToBooksNotLoggedIn function
+        navigateToLogin={() => setCurrentScreen("login")} // Add login navigation
+        navigateToRegister={() => setCurrentScreen("register")} // Add register navigation
+      />
+
+      {/* Render the appropriate screen based on currentScreen state */}
+      {currentScreen === "landing" && (
+        <LandingPage
+          navigateToLogin={() => setCurrentScreen("login")}
+          navigateToRegister={() => setCurrentScreen("register")}
+        />
+      )}
+
+      {currentScreen === "login" && (
+        <Login 
+          onLogin={handleLogin} 
+          navigateToRegister={navigateToRegister}
+          navigateToLanding={navigateToLanding}
+        />
+      )}
+
+      {currentScreen === "register" && (
+        <Register
+          onRegister={handleRegister}
+          navigateToLogin={navigateToLogin}
+          navigateToRegisterAsFaculty={navigateToRegisterAsFaculty}
+          navigateToLanding={navigateToLanding}
+        />
+      )}
+
+      {currentScreen === "registerAsFaculty" && (
+        <RegisterAsFaculty 
+          navigateToRegister={navigateToRegister}
+          navigateToLanding={navigateToLanding}
+        />
+>>>>>>> Stashed changes
       )}
 
       {currentScreen === 'books' && (
