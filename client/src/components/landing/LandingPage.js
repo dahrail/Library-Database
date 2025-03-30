@@ -151,7 +151,7 @@ const LandingPage = ({
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>© 2023 BookFinder - University Library Portal</p>
+        <p>© 2025 BookFinder - University Library Portal</p>
       </footer>
     </div>
   );
