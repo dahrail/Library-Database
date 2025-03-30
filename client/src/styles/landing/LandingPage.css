@@ -228,10 +228,23 @@
 .promo-image {
   flex: 1;
   height: 100%;
-  background-image: linear-gradient(to right, #2c3e50, #4ca1af);
+  background-image: url('https://media.architecturaldigest.com/photos/651c2eaa5af8a7a66fff3eb5/master/w_1600%2Cc_limit/GettyImages-458128417.jpg'); /* Replace with your image path */
   background-size: cover;
   background-position: center;
+  position: relative;
   transition: transform 0.5s ease-out;
+}
+
+/* Optional: Add a dark overlay to ensure text readability if placed over the image */
+.promo-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3); /* Adjust opacity as needed */
+  z-index: 1;
 }
 
 /* Info Section */
