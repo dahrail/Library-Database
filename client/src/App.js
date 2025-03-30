@@ -37,6 +37,12 @@ function App() {
   const [fines, setFines] = useState([]);
   const [reportData, setReportData] = useState(null); // State to store data report results
   const [bookGenres, setBookGenres] = useState(['all']); // Add a new state for book genres
+  
+  // Add state variables for initial categories
+  const [initialBookCategory, setInitialBookCategory] = useState(null);
+  const [initialMediaCategory, setInitialMediaCategory] = useState(null);
+  const [initialRoomCategory, setInitialRoomCategory] = useState(null);
+  const [initialEventCategory, setInitialEventCategory] = useState(null);
 
   // Login handler
   const handleLogin = async (email, password) => {
@@ -113,24 +119,15 @@ function App() {
         const genres = ['all', ...new Set(data.map(book => book.genre).filter(Boolean))];
         setBookGenres(genres);
       }
-      setCurrentScreen("books");
       
-      // If a category is specified, set it in the BookList component
+      // Set the initial category if provided, ensure it's a string
       if (category) {
-        // We'll pass this to the component through a ref or state
-        // This could be implemented by having the BookList component
-        // check for this initial category
-        setTimeout(() => {
-          // This is a workaround - in a real implementation you might
-          // use a ref or additional state to pass this to the component
-          const categoryButtons = document.querySelectorAll(".book-category-button");
-          categoryButtons.forEach(button => {
-            if (button.textContent.toLowerCase() === category.toLowerCase()) {
-              button.click();
-            }
-          });
-        }, 100);
+        setInitialBookCategory(String(category));
+      } else {
+        setInitialBookCategory('all');
       }
+      
+      setCurrentScreen("books");
     } catch (error) {
       console.error("Error fetching books:", error);
       alert("An error occurred while fetching books.");
@@ -140,52 +137,22 @@ function App() {
   // Media navigation with optional category parameter
   const navigateToMedia = (category) => {
     window.scrollTo(0, 0);
+    setInitialMediaCategory(category || 'all');
     setCurrentScreen("media");
-    
-    // Similar approach to pass the category to the Media component
-    if (category) {
-      setTimeout(() => {
-        // This simulates clicking the category button in the Media component
-        const categoryButtons = document.querySelectorAll(".media-category-button");
-        categoryButtons.forEach(button => {
-          if (button.textContent.toLowerCase().includes(category.toLowerCase())) {
-            button.click();
-          }
-        });
-      }, 100);
-    }
   };
 
   // Room reservation navigation with optional category parameter
   const navigateToRooms = (category) => {
     window.scrollTo(0, 0);
+    setInitialRoomCategory(category || 'all');
     setCurrentScreen("rooms");
-    
-    // Similar approach to pass the category to the RoomReservation component
-    if (category) {
-      setTimeout(() => {
-        // This simulates clicking the category button in the RoomReservation component
-        const categoryButtons = document.querySelectorAll(".room-category-button");
-        categoryButtons.forEach(button => {
-          if (button.textContent.toLowerCase().includes(category.toLowerCase())) {
-            button.click();
-          }
-        });
-      }, 100);
-    }
   };
 
   // Events navigation with optional category parameter
   const navigateToEvents = (category) => {
     window.scrollTo(0, 0);
+    setInitialEventCategory(category || 'all');
     setCurrentScreen("events");
-    
-    // For future implementation of event filtering by category
-    if (category) {
-      // Store the category for the Events component to use
-      // This would need to be implemented in the Events component
-      console.log(`Navigating to events with category: ${category}`);
-    }
   };
 
   const navigateToElectronics = () => {
@@ -462,6 +429,7 @@ function App() {
           isLoggedIn={isLoggedIn} // Pass isLoggedIn state
           navigateToAddBook={navigateToAddBook} // Pass the navigateToAddBook function
           navigateToLogin={navigateToLogin} // Pass navigateToLogin for non-logged-in users
+          initialCategory={initialBookCategory} // Pass the initial category
         />
       )}
 
@@ -550,6 +518,7 @@ function App() {
           isLoggedIn={isLoggedIn} 
           navigateToLogin={navigateToLogin}
           userData={userData} // Pass the userData
+          initialCategory={initialMediaCategory} // Pass the initial category
         />
       )}
 
@@ -559,11 +528,16 @@ function App() {
           navigateToHome={navigateToHome} 
           isLoggedIn={isLoggedIn}
           navigateToLogin={navigateToLogin}
+          initialCategory={initialRoomCategory} // Pass the initial category
         />
       )}
 
       {currentScreen === "events" && (
-        <Events navigateToHome={navigateToHome} userData={userData} />
+        <Events 
+          navigateToHome={navigateToHome} 
+          userData={userData}
+          initialCategory={initialEventCategory} // Pass the initial category
+        />
       )}
     </div>
   );

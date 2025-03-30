@@ -5,6 +5,7 @@ const RoomReservation = ({
   navigateToHome,
   isLoggedIn,
   navigateToLogin,
+  initialCategory, // Add this prop
 }) => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +19,13 @@ const RoomReservation = ({
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [displayedRooms, setDisplayedRooms] = useState([]);
   const initialRenderRef = useRef(true);
+
+  // Use the initialCategory prop on mount
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [initialCategory]);
 
   // Fetch all rooms from the API
   useEffect(() => {

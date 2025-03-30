@@ -3,13 +3,25 @@ import '../../styles/events/Events.css';
 import AddEventForm from './AddEventForm';
 import API from '../../services/api';
 
-const Events = ({ userData, navigateToHome }) => {
+const Events = ({ 
+  navigateToHome, 
+  userData,
+  initialCategory // Add this prop
+}) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [rooms, setRooms] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
   
+  // Use the initialCategory prop on mount
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [initialCategory]);
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {

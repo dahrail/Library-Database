@@ -8,12 +8,21 @@ const BookList = ({
   isLoggedIn, // Added isLoggedIn prop
   navigateToAddBook,
   navigateToLogin, // Added navigateToLogin prop
+  initialCategory // Add this prop
 }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [displayedBooks, setDisplayedBooks] = useState([]);
   const initialRenderRef = useRef(true);
   const [imageLoadingStatus, setImageLoadingStatus] = useState({});
   
+  // Use the initialCategory prop on mount
+  useEffect(() => {
+    if (initialCategory) {
+      // Ensure initialCategory is treated as a string
+      setSelectedCategory(String(initialCategory));
+    }
+  }, [initialCategory]);
+
   // Filter books by category
   useEffect(() => {
     if (books.length > 0) {
@@ -21,7 +30,9 @@ const BookList = ({
       
       if (selectedCategory !== "all") {
         filteredBooks = filteredBooks.filter(book => 
-          book.genre && book.genre.toLowerCase() === selectedCategory.toLowerCase()
+          book.genre && typeof book.genre === 'string' && 
+          typeof selectedCategory === 'string' && 
+          book.genre.toLowerCase() === selectedCategory.toLowerCase()
         );
       }
       

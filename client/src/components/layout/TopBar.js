@@ -87,7 +87,7 @@ const TopBar = ({
             onMouseEnter={() => setOpenDropdown('books')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button onClick={navigateToBooks} className="nav-button">
+            <button onClick={() => navigateToBooks('all')} className="nav-button">
               Browse & Borrow
             </button>
             {openDropdown === 'books' && (
@@ -106,7 +106,7 @@ const TopBar = ({
             onMouseEnter={() => setOpenDropdown('media')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button onClick={navigateToMedia} className="nav-button">
+            <button onClick={() => navigateToMedia('all')} className="nav-button">
               Media
             </button>
             {openDropdown === 'media' && (
@@ -125,7 +125,7 @@ const TopBar = ({
             onMouseEnter={() => setOpenDropdown('rooms')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button onClick={navigateToRooms} className="nav-button">
+            <button onClick={() => navigateToRooms('all')} className="nav-button">
               Room Reservation
             </button>
             {openDropdown === 'rooms' && (
@@ -161,7 +161,7 @@ const TopBar = ({
             onMouseEnter={() => setOpenDropdown('events')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button onClick={navigateToEvents} className="nav-button">
+            <button onClick={() => navigateToEvents('all')} className="nav-button">
               Events
             </button>
             {openDropdown === 'events' && (

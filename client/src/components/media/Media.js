@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 // Update the Media component to accept userData as a prop
-const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData }) => {
+const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory }) => {
   // State for media items from database
   const [mediaItems, setMediaItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +35,13 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData }) => {
   useEffect(() => {
     fetchMediaItems();
   }, []);
+
+  // Use the initialCategory prop on mount
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [initialCategory]);
 
   // Filter media items by category
   useEffect(() => {
