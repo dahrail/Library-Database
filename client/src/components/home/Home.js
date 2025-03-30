@@ -28,6 +28,13 @@ const Home = ({
         }
       }
       
+      /* Make sure hero title remains visible */
+      .hero-title {
+        animation: fadeInUp 0.5s forwards;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      
       .fade-in-items .menu-item {
         opacity: 0;
         transform: translateY(30px);
@@ -52,7 +59,18 @@ const Home = ({
     <div className="home-modern-container">
       {/* Hero Section */}
       <div className="hero-section">
-        <h1 className="hero-title">Welcome to BookFinder</h1>
+        <h1 className="hero-title" style={{
+          fontSize: "56px",
+          fontWeight: "600",
+          margin: "0",
+          letterSpacing: "-0.02em",
+          opacity: "1", // Change initial opacity to 1
+          color: "white",
+          position: "relative",
+          zIndex: "10",
+          textShadow: "0 1px 2px rgba(0,0,0,0.5)",
+          animation: "fadeInUp 0.5s ease" // Simplified animation property
+        }}>Welcome to BookFinder</h1>
         <p>
           You are logged in as {userData.FirstName} with role {userData.Role}
         </p>
