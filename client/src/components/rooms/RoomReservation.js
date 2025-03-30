@@ -6,6 +6,7 @@ const RoomReservation = ({
   isLoggedIn,
   navigateToLogin,
   initialCategory, // Add this prop
+  navigateToLanding // Add this prop
 }) => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -671,7 +672,7 @@ const RoomReservation = ({
           </div>
         )}
 
-        <button style={styles.backButton} onClick={navigateToHome}>
+        <button style={styles.backButton} onClick={isLoggedIn ? navigateToHome : navigateToLanding}>
           Back to Home
         </button>
       </div>

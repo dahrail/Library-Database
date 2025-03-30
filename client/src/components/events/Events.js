@@ -6,7 +6,8 @@ import API from '../../services/api';
 const Events = ({ 
   navigateToHome, 
   userData,
-  initialCategory // Add this prop
+  initialCategory,
+  navigateToLanding // Add this prop
 }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -196,7 +197,9 @@ const Events = ({
           </div>
         )}
         
-        <button onClick={navigateToHome} className="btn-back">Back to Home</button>
+        <button onClick={userData ? navigateToHome : navigateToLanding} className="btn-back">
+          Back to Home
+        </button>
       </div>
     </div>
   );

@@ -8,7 +8,8 @@ const BookList = ({
   isLoggedIn, // Added isLoggedIn prop
   navigateToAddBook,
   navigateToLogin, // Added navigateToLogin prop
-  initialCategory // Add this prop
+  initialCategory, // Add this prop
+  navigateToLanding // Add this prop to fix the error
 }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [displayedBooks, setDisplayedBooks] = useState([]);
@@ -533,7 +534,7 @@ const BookList = ({
 
         <button 
           style={styles.backButton}
-          onClick={navigateToHome}
+          onClick={isLoggedIn ? navigateToHome : navigateToLanding}
         >
           Back to Home
         </button>

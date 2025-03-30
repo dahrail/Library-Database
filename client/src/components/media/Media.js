@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 // Update the Media component to accept userData as a prop
-const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory }) => {
+const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding }) => {
   // State for media items from database
   const [mediaItems, setMediaItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -590,7 +590,7 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
 
         <button 
           style={styles.backButton}
-          onClick={navigateToHome}
+          onClick={isLoggedIn ? navigateToHome : navigateToLanding}
         >
           Back to Home
         </button>

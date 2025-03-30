@@ -440,6 +440,7 @@ function App() {
           navigateToAddBook={navigateToAddBook} // Pass the navigateToAddBook function
           navigateToLogin={navigateToLogin} // Pass navigateToLogin for non-logged-in users
           initialCategory={initialBookCategory} // Pass the initial category
+          navigateToLanding={navigateToLanding} // Add this prop
         />
       )}
 
@@ -529,6 +530,7 @@ function App() {
           navigateToLogin={navigateToLogin}
           userData={userData} // Pass the userData
           initialCategory={initialMediaCategory} // Pass the initial category
+          navigateToLanding={navigateToLanding} // Add this prop
         />
       )}
 
@@ -539,6 +541,7 @@ function App() {
           isLoggedIn={isLoggedIn}
           navigateToLogin={navigateToLogin}
           initialCategory={initialRoomCategory} // Pass the initial category
+          navigateToLanding={navigateToLanding} // Add this prop
         />
       )}
 
@@ -547,6 +550,7 @@ function App() {
           navigateToHome={navigateToHome} 
           userData={userData}
           initialCategory={initialEventCategory} // Pass the initial category
+          navigateToLanding={navigateToLanding} // Add this prop
         />
       )}
     </div>
