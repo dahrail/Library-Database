@@ -36,6 +36,7 @@ function App() {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [fines, setFines] = useState([]);
   const [reportData, setReportData] = useState(null); // State to store data report results
+  const [bookGenres, setBookGenres] = useState(['all']); // Add a new state for book genres
 
   // Login handler
   const handleLogin = async (email, password) => {
@@ -99,10 +100,18 @@ function App() {
       if (isLoggedIn && userData) {
         const data = await API.getBooks(userData.UserID);
         setBooks(data);
+        
+        // Extract unique genres
+        const genres = ['all', ...new Set(data.map(book => book.genre).filter(Boolean))];
+        setBookGenres(genres);
       } else {
         // If not logged in, fetch books without user-specific info
         const data = await API.getBooks();
         setBooks(data);
+        
+        // Extract unique genres
+        const genres = ['all', ...new Set(data.map(book => book.genre).filter(Boolean))];
+        setBookGenres(genres);
       }
       setCurrentScreen("books");
       
@@ -398,6 +407,7 @@ function App() {
         navigateToRooms={navigateToRooms} // Pass this function to TopBar
         navigateToEvents={navigateToEvents} // <-- added prop
         navigateToLanding={navigateToLanding} // Add this prop
+        bookGenres={bookGenres} // Pass the book genres to TopBar
       />
 
       {/* Render the appropriate screen based on currentScreen state */}

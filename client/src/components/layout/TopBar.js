@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../styles/layout/TopBar.css';
 
 const TopBar = ({ 
@@ -11,19 +11,15 @@ const TopBar = ({
   navigateToRegister,
   navigateToRooms,
   navigateToEvents,
-  navigateToLanding
+  navigateToLanding,
+  bookGenres = ['all'] // Add default value for bookGenres
 }) => {
   // Add state to track which dropdown is open
   const [openDropdown, setOpenDropdown] = useState(null);
 
   // Define menu items for each dropdown
-  const dropdownMenus = {
+  const [dropdownMenus, setDropdownMenus] = useState({
     books: [
-      { label: 'Fiction', action: () => navigateToBooks('fiction') },
-      { label: 'Non-Fiction', action: () => navigateToBooks('non-fiction') },
-      { label: 'Science', action: () => navigateToBooks('science') },
-      { label: 'History', action: () => navigateToBooks('history') },
-      { label: 'Biography', action: () => navigateToBooks('biography') },
       { label: 'All Books', action: () => navigateToBooks() }
     ],
     media: [
@@ -51,7 +47,29 @@ const TopBar = ({
       { label: 'Book Clubs', action: () => navigateToEvents('book-clubs') },
       { label: 'All Events', action: () => navigateToEvents() }
     ]
-  };
+  });
+
+  // Update book genres menu whenever bookGenres prop changes
+  useEffect(() => {
+    if (bookGenres && bookGenres.length > 0) {
+      const genreItems = bookGenres.map(genre => {
+        if (genre.toLowerCase() === 'all') {
+          return { label: 'All Books', action: () => navigateToBooks() };
+        } else {
+          return { 
+            label: genre.charAt(0).toUpperCase() + genre.slice(1), // Capitalize first letter
+            action: () => navigateToBooks(genre) 
+          };
+        }
+      });
+      
+      // Update the dropdown menus state with the new book genres
+      setDropdownMenus(prev => ({
+        ...prev,
+        books: genreItems
+      }));
+    }
+  }, [bookGenres, navigateToBooks]);
 
   return (
     <div className="top-bar">
