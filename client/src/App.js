@@ -36,7 +36,15 @@ function App() {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [fines, setFines] = useState([]);
   const [reportData, setReportData] = useState(null); // State to store data report results
-  const [bookGenres, setBookGenres] = useState(['all']); // Add a new state for book genres
+  const [bookGenres, setBookGenres] = useState([
+    'fiction', 
+    'fantasy', 
+    'romance', 
+    'thriller', 
+    'novel', 
+    'mystery/Thriller',
+    'all Books'
+  ]); // Add default genres
   
   // Add state variables for initial categories
   const [initialBookCategory, setInitialBookCategory] = useState(null);
@@ -107,16 +115,18 @@ function App() {
         const data = await API.getBooks(userData.UserID);
         setBooks(data);
         
-        // Extract unique genres
-        const genres = ['all', ...new Set(data.map(book => book.genre).filter(Boolean))];
+        // Extract unique genres, but put 'all' at the end
+        const uniqueGenres = [...new Set(data.map(book => book.genre).filter(Boolean))];
+        const genres = [...uniqueGenres, 'all']; // Put 'all' at the end
         setBookGenres(genres);
       } else {
         // If not logged in, fetch books without user-specific info
         const data = await API.getBooks();
         setBooks(data);
         
-        // Extract unique genres
-        const genres = ['all', ...new Set(data.map(book => book.genre).filter(Boolean))];
+        // Extract unique genres, but put 'all' at the end
+        const uniqueGenres = [...new Set(data.map(book => book.genre).filter(Boolean))];
+        const genres = [...uniqueGenres, 'all']; // Put 'all' at the end
         setBookGenres(genres);
       }
       
