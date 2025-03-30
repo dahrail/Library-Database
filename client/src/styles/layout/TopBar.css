@@ -138,7 +138,7 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   z-index: 1000;
   overflow: hidden;
-  animation: slideDown 0.3s ease forwards;
+  animation: slideDown 0.35s ease forwards;
   transform-origin: top center;
   border: 1px solid #333333;
 }
@@ -153,6 +153,23 @@
     opacity: 1;
     transform: scaleY(1);
   }
+}
+
+/* Animation for dropdown disappearance */
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+}
+
+/* Apply closing animation when dropdown is being removed */
+.dropdown-container:not(:hover) .dropdown-menu {
+  animation: slideUp 0.6s ease forwards;
 }
 
 /* Dropdown item styling */
