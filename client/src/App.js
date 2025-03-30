@@ -88,17 +88,100 @@ function App() {
     window.scrollTo(0, 0);
     setCurrentScreen("booksNotLoggedIn");
   };
-  const navigateToMedia = () => {
+
+  // Update the navigation functions to accept category parameters
+
+  // Books navigation with optional category parameter
+  const navigateToBooks = async (category) => {
+    window.scrollTo(0, 0);
+    try {
+      // If user is logged in, fetch books with user-specific info
+      if (isLoggedIn && userData) {
+        const data = await API.getBooks(userData.UserID);
+        setBooks(data);
+      } else {
+        // If not logged in, fetch books without user-specific info
+        const data = await API.getBooks();
+        setBooks(data);
+      }
+      setCurrentScreen("books");
+      
+      // If a category is specified, set it in the BookList component
+      if (category) {
+        // We'll pass this to the component through a ref or state
+        // This could be implemented by having the BookList component
+        // check for this initial category
+        setTimeout(() => {
+          // This is a workaround - in a real implementation you might
+          // use a ref or additional state to pass this to the component
+          const categoryButtons = document.querySelectorAll(".book-category-button");
+          categoryButtons.forEach(button => {
+            if (button.textContent.toLowerCase() === category.toLowerCase()) {
+              button.click();
+            }
+          });
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      alert("An error occurred while fetching books.");
+    }
+  };
+
+  // Media navigation with optional category parameter
+  const navigateToMedia = (category) => {
     window.scrollTo(0, 0);
     setCurrentScreen("media");
+    
+    // Similar approach to pass the category to the Media component
+    if (category) {
+      setTimeout(() => {
+        // This simulates clicking the category button in the Media component
+        const categoryButtons = document.querySelectorAll(".media-category-button");
+        categoryButtons.forEach(button => {
+          if (button.textContent.toLowerCase().includes(category.toLowerCase())) {
+            button.click();
+          }
+        });
+      }, 100);
+    }
   };
+
+  // Room reservation navigation with optional category parameter
+  const navigateToRooms = (category) => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("rooms");
+    
+    // Similar approach to pass the category to the RoomReservation component
+    if (category) {
+      setTimeout(() => {
+        // This simulates clicking the category button in the RoomReservation component
+        const categoryButtons = document.querySelectorAll(".room-category-button");
+        categoryButtons.forEach(button => {
+          if (button.textContent.toLowerCase().includes(category.toLowerCase())) {
+            button.click();
+          }
+        });
+      }, 100);
+    }
+  };
+
+  // Events navigation with optional category parameter
+  const navigateToEvents = (category) => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("events");
+    
+    // For future implementation of event filtering by category
+    if (category) {
+      // Store the category for the Events component to use
+      // This would need to be implemented in the Events component
+      console.log(`Navigating to events with category: ${category}`);
+    }
+  };
+
   const navigateToElectronics = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("electronics");
-  };
-  const navigateToRooms = () => {
-    window.scrollTo(0, 0);
-    setCurrentScreen("rooms");
   };
   const navigateToLanding = () => {
     window.scrollTo(0, 0);
@@ -123,36 +206,7 @@ function App() {
     }
   };
 
-  const navigateToEvents = () => {
-    window.scrollTo(0, 0);
-    try {
-      setCurrentScreen("events");
-    } catch (error) {
-      console.error("Error navigating to events:", error);
-      alert("An error occurred while navigating to events.");
-    }
-  };
-
   // Books navigation and handlers
-  const navigateToBooks = async () => {
-    window.scrollTo(0, 0);
-    try {
-      // If user is logged in, fetch books with user-specific info
-      if (isLoggedIn && userData) {
-        const data = await API.getBooks(userData.UserID);
-        setBooks(data);
-      } else {
-        // If not logged in, fetch books without user-specific info
-        const data = await API.getBooks();
-        setBooks(data);
-      }
-      setCurrentScreen("books");
-    } catch (error) {
-      console.error("Error fetching books:", error);
-      alert("An error occurred while fetching books.");
-    }
-  };
-
   const handleLoan = (book) => {
     setSelectedBook(book);
     setCurrentScreen("loan");
