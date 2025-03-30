@@ -90,7 +90,7 @@ const LandingPage = ({
           <div className="feature-card scroll-animate from-left delay-100" onClick={handleNavigateToBooks}>
             <div className="feature-icon book-icon"></div>
             <h3>Extensive Book Collection</h3>
-            <p>Browse thousands of books across all genres and subjects</p>
+            <p>Browse through our books across all genres and subjects</p>
           </div>
           
           <div className="feature-card scroll-animate from-bottom delay-200" onClick={handleNavigateToMedia}>
