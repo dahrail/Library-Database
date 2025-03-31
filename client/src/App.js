@@ -384,6 +384,7 @@ function App() {
         navigateToRooms={navigateToRooms} // Pass this function to TopBar
         navigateToEvents={navigateToEvents} // <-- added prop
         navigateToLanding={navigateToLanding} // Add this prop
+        navigateToHome={navigateToHome} // Ensure this prop is passed
         bookGenres={bookGenres} // Pass the book genres to TopBar
       />
 

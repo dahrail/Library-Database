@@ -78,6 +78,8 @@
   transform: translateY(0);
 }
 
+/* Removed home-button specific styles as we now use logout-button for both */
+
 .auth-buttons {
   display: flex;
   align-items: center;

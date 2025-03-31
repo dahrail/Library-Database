@@ -12,6 +12,7 @@ const TopBar = ({
   navigateToRooms,
   navigateToEvents,
   navigateToLanding,
+  navigateToHome, // Make sure this prop is passed
   bookGenres = ['all'] // Add default value for bookGenres
 }) => {
   // Add state to track which dropdown is open
@@ -98,6 +99,7 @@ const TopBar = ({
         >
           BookFinder
         </div>
+        
         <div className="nav-buttons">
           <div 
             className="dropdown-container"
@@ -219,6 +221,13 @@ const TopBar = ({
           {isLoggedIn && userData ? (
             <div className="user-info">
               <span>Hello, {userData.FirstName}</span>
+              <button 
+                onClick={navigateToHome} 
+                className="logout-button"
+                title="Go to Home"
+              >
+                Home
+              </button>
               <button className="logout-button" onClick={handleLogout}>
                 Logout
               </button>
