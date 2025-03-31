@@ -17,6 +17,14 @@ const TopBar = ({
   // Add state to track which dropdown is open
   const [openDropdown, setOpenDropdown] = useState(null);
   const [isLogoHovered, setIsLogoHovered] = useState(false); // Add hover state for logo
+  const [hoveredButton, setHoveredButton] = useState(null); // Add state to track hover for each navigation button
+
+  // The glow effect style that will be applied to hovered elements
+  const glowEffect = {
+    color: '#ffffff',
+    textShadow: '0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.1), 0 0 15px rgba(77, 213, 255, 0.15), 0 0 25px rgba(77, 213, 255, 0.4)',
+    transition: 'color 0.3s ease, text-shadow 0.3s ease'
+  };
 
   // Define menu items for each dropdown
   const [dropdownMenus, setDropdownMenus] = useState({
@@ -96,7 +104,13 @@ const TopBar = ({
             onMouseEnter={() => setOpenDropdown('books')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button onClick={() => navigateToBooks('all')} className="nav-button">
+            <button 
+              onClick={() => navigateToBooks('all')} 
+              className="nav-button"
+              onMouseEnter={() => setHoveredButton('books')}
+              onMouseLeave={() => setHoveredButton(null)}
+              style={hoveredButton === 'books' ? glowEffect : {}}
+            >
               Browse & Borrow
             </button>
             {openDropdown === 'books' && (
@@ -115,7 +129,13 @@ const TopBar = ({
             onMouseEnter={() => setOpenDropdown('media')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button onClick={() => navigateToMedia('all')} className="nav-button">
+            <button 
+              onClick={() => navigateToMedia('all')} 
+              className="nav-button"
+              onMouseEnter={() => setHoveredButton('media')}
+              onMouseLeave={() => setHoveredButton(null)}
+              style={hoveredButton === 'media' ? glowEffect : {}}
+            >
               Media
             </button>
             {openDropdown === 'media' && (
@@ -134,7 +154,13 @@ const TopBar = ({
             onMouseEnter={() => setOpenDropdown('rooms')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button onClick={() => navigateToRooms('all')} className="nav-button">
+            <button 
+              onClick={() => navigateToRooms('all')} 
+              className="nav-button"
+              onMouseEnter={() => setHoveredButton('rooms')}
+              onMouseLeave={() => setHoveredButton(null)}
+              style={hoveredButton === 'rooms' ? glowEffect : {}}
+            >
               Room Reservation
             </button>
             {openDropdown === 'rooms' && (
@@ -170,7 +196,13 @@ const TopBar = ({
             onMouseEnter={() => setOpenDropdown('events')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button onClick={() => navigateToEvents('all')} className="nav-button">
+            <button 
+              onClick={() => navigateToEvents('all')} 
+              className="nav-button"
+              onMouseEnter={() => setHoveredButton('events')}
+              onMouseLeave={() => setHoveredButton(null)}
+              style={hoveredButton === 'events' ? glowEffect : {}}
+            >
               Events
             </button>
             {openDropdown === 'events' && (
