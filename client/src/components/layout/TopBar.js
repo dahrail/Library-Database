@@ -16,6 +16,7 @@ const TopBar = ({
 }) => {
   // Add state to track which dropdown is open
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [isLogoHovered, setIsLogoHovered] = useState(false); // Add hover state for logo
 
   // Define menu items for each dropdown
   const [dropdownMenus, setDropdownMenus] = useState({
@@ -77,7 +78,15 @@ const TopBar = ({
         <div 
           className="logo" 
           onClick={navigateToLanding}
-          style={{ cursor: 'pointer' }}
+          onMouseEnter={() => setIsLogoHovered(true)}
+          onMouseLeave={() => setIsLogoHovered(false)}
+          style={{ 
+            cursor: 'pointer',
+            color: isLogoHovered ? '#ffffff' : 'inherit',
+            textShadow: isLogoHovered ? '0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.1), 0 0 15px rgba(77, 213, 255, 0.15), 0 0 25px rgba(77, 213, 255, 0.4)' : 'none',
+            transition: 'color 0.3s ease, text-shadow 0.3s ease',
+            fontWeight: 700, // Keep font weight consistent to prevent layout shift
+          }}
         >
           BookFinder
         </div>
