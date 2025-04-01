@@ -5,7 +5,7 @@ const Home = ({
   userData,
   navigateToBooks,
   navigateToMedia,
-  navigateToElectronics,
+  navigateToDevices,
   navigateToLoans,
   navigateToRooms,
   navigateToDataReport,
@@ -84,7 +84,7 @@ const Home = ({
           position: "relative",
           zIndex: 10
         }}>
-          Explore our collection of books, electronics, media, and more!
+          Explore our collection of books, devices, media, and more!
         </p>
       </div>
 
@@ -113,13 +113,13 @@ const Home = ({
             </div>
           </div>
           
-          <div className="menu-item" onClick={navigateToElectronics}>
+          <div className="menu-item" onClick={() => navigateToDevices('all')}>
             <div className="menu-item-image-container">
-              <img src="/images/electronics.jpg" alt="Electronics" className="menu-image" />
+              <img src="/images/devices.jpg" alt="Devices" className="menu-image" />
             </div>
             <div className="menu-item-content">
-              <h3>Electronics</h3>
-              <p>Borrow electronic devices, laptops, and more</p>
+              <h3>Devices</h3>
+              <p>Borrow Ipad, laptops, and headphone</p>
             </div>
           </div>
           
@@ -142,7 +142,7 @@ const Home = ({
               <p>Reserve private study rooms and meeting spaces</p>
             </div>
           </div>
-          
+
           <div className="menu-item" onClick={navigateToEvents}>
             <div className="menu-item-image-container">
               <img src="/images/events.jpg" alt="Events" className="menu-image" />

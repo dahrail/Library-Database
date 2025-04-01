@@ -21,6 +21,8 @@ import Media from "./components/media/Media"; // Import the Media component
 import RoomReservation from "./components/rooms/RoomReservation"; // Import the RoomReservation component
 import Events from "./components/events/Events"; // Import the Events component
 import LandingPage from "./components/landing/LandingPage"; // Import the new LandingPage component
+import Devices from "./components/devices/Devices"; // Import the Devices component
+import AddDevice from "./components/devices/AddDevice"; // Import the AddDevice component
 
 // Import API service
 import API from "./services/api";
@@ -49,6 +51,7 @@ function App() {
   // Add state variables for initial categories
   const [initialBookCategory, setInitialBookCategory] = useState(null);
   const [initialMediaCategory, setInitialMediaCategory] = useState(null);
+  const [initialDevicesCategory, setInitialDevicesCategory] = useState(null);
   const [initialRoomCategory, setInitialRoomCategory] = useState(null);
   const [initialEventCategory, setInitialEventCategory] = useState(null);
 
@@ -165,13 +168,20 @@ function App() {
     setCurrentScreen("events");
   };
 
-  const navigateToElectronics = () => {
+  const navigateToDevices = (category = 'all') => {
     window.scrollTo(0, 0);
-    setCurrentScreen("electronics");
+    setInitialDevicesCategory(category);
+    setCurrentScreen("devices");
   };
+
   const navigateToLanding = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("landing");
+  };
+
+  const navigateToAddDevice = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("addDevice");
   };
 
   const navigateToDataReport = async () => {
@@ -315,6 +325,23 @@ function App() {
     }
   };
 
+  const handleAddDevice = async (deviceData) => {
+    try {
+      const data = await API.addDevice(deviceData);
+      if (data.success) {
+        alert("Device added successfully!");
+        // Refresh the device list
+        const updatedBooks = await API.getDevices();
+        setCurrentScreen("devices");
+      } else {
+        alert("Failed to add device: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error adding device:", error);
+      alert("An error occurred while adding the device.");
+    }
+  };
+
   const handleConfirmLoan = async () => {
     try {
       const data = await API.confirmLoan(
@@ -378,7 +405,8 @@ function App() {
         userData={userData}
         handleLogout={handleLogout}
         navigateToBooks={navigateToBooks} // Always pass navigateToBooks
-        navigateToMedia={navigateToMedia} // Add this line to pass the function
+        navigateToMedia={navigateToMedia} 
+        navigateToDevices={navigateToDevices}// Add this line to pass the function
         navigateToLogin={navigateToLogin} // Add this line to pass the navigateToLogin function
         navigateToRegister={navigateToRegister} // Make sure this prop is included
         navigateToRooms={navigateToRooms} // Pass this function to TopBar
@@ -393,6 +421,7 @@ function App() {
         <LandingPage
           navigateToBooks={navigateToBooks}
           navigateToMedia={navigateToMedia}
+          navigateToDevices={navigateToDevices}
           navigateToRooms={navigateToRooms}
           navigateToEvents={navigateToEvents}
         />
@@ -419,11 +448,12 @@ function App() {
           userData={userData}
           navigateToBooks={navigateToBooks}
           navigateToMedia={navigateToMedia}
-          navigateToElectronics={navigateToElectronics}
+          navigateToDevices={navigateToDevices}
           navigateToLoans={navigateToLoans} // Pass the function
           navigateToHolds={navigateToHolds}
           navigateToFines={navigateToFines}
           navigateToAddBook={navigateToAddBook} // Pass the function
+          navigateToAddDevice={navigateToAddDevice} // Pass the function
           navigateToDataReport={navigateToDataReport} // Pass the function
           navigateToRooms={navigateToRooms} // Pass the function
           navigateToEvents={navigateToEvents} // Pass the function
@@ -464,6 +494,10 @@ function App() {
 
       {currentScreen === "addBook" && (
         <AddBook onAddBook={handleAddBook} navigateToHome={navigateToHome} />
+      )}
+
+      {currentScreen === "addDevice" && (
+        <AddDevice onAddDevice={handleAddDevice} navigateToHome={navigateToHome} />
       )}
 
       {currentScreen === "loans" && (
@@ -532,6 +566,18 @@ function App() {
           userData={userData} // Pass the userData
           initialCategory={initialMediaCategory} // Pass the initial category
           navigateToLanding={navigateToLanding} // Add this prop
+        />
+      )}
+
+      {currentScreen === "devices" && (
+        <Devices 
+          navigateToHome={navigateToHome} 
+          isLoggedIn={isLoggedIn} 
+          navigateToLogin={navigateToLogin}
+          userData={userData} 
+          initialCategory={initialDevicesCategory} 
+          navigateToLanding={navigateToLanding} 
+          navigateToAddDevice={navigateToAddDevice} 
         />
       )}
 

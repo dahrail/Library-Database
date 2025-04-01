@@ -7,6 +7,7 @@ const TopBar = ({
   handleLogout, 
   navigateToBooks, 
   navigateToMedia,
+  navigateToDevices, // Ensure this function is passed
   navigateToLogin,
   navigateToRegister,
   navigateToRooms,
@@ -44,12 +45,11 @@ const TopBar = ({
       { label: 'Large Rooms (10+)', action: () => navigateToRooms('large') },
       { label: 'All Rooms', action: () => navigateToRooms() }
     ],
-    electronics: [
-      { label: 'Laptops', action: () => {} },
-      { label: 'Tablets', action: () => {} },
-      { label: 'Cameras', action: () => {} },
-      { label: 'Projectors', action: () => {} },
-      { label: 'All Electronics', action: () => {} }
+    devices: [
+      { label: 'Headphone', action: () => navigateToDevices('Headphone') },
+      { label: 'Ipad', action: () => navigateToDevices('Ipad') },
+      { label: 'Laptop', action: () => navigateToDevices('Laptop') },
+      { label: 'All Devices', action: () => navigateToDevices('all') }
     ],
     events: [
       { label: 'Workshops', action: () => navigateToEvents('workshops') },
@@ -113,7 +113,7 @@ const TopBar = ({
               onMouseLeave={() => setHoveredButton(null)}
               style={hoveredButton === 'books' ? glowEffect : {}}
             >
-              Browse & Borrow
+              Books
             </button>
             {openDropdown === 'books' && (
               <div className="dropdown-menu">
@@ -153,6 +153,31 @@ const TopBar = ({
           
           <div 
             className="dropdown-container"
+            onMouseEnter={() => setOpenDropdown('devices')}
+            onMouseLeave={() => setOpenDropdown(null)}
+          >
+            <button 
+              onClick={() => navigateToDevices('all')} 
+              className="nav-button"
+              onMouseEnter={() => setHoveredButton('devices')}
+              onMouseLeave={() => setHoveredButton(null)}
+              style={hoveredButton === 'devices' ? glowEffect : {}}
+            >
+              Devices
+            </button>
+            {openDropdown === 'devices' && (
+              <div className="dropdown-menu">
+                {dropdownMenus.devices.map((item, index) => (
+                  <div key={index} className="dropdown-item" onClick={item.action}>
+                    {item.label}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div 
+            className="dropdown-container"
             onMouseEnter={() => setOpenDropdown('rooms')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
@@ -176,22 +201,6 @@ const TopBar = ({
             )}
           </div>
           
-          <div 
-            className="dropdown-container"
-            onMouseEnter={() => setOpenDropdown('electronics')}
-            onMouseLeave={() => setOpenDropdown(null)}
-          >
-            <button className="nav-button">Electronics (WIP)</button>
-            {openDropdown === 'electronics' && (
-              <div className="dropdown-menu">
-                {dropdownMenus.electronics.map((item, index) => (
-                  <div key={index} className="dropdown-item" onClick={item.action}>
-                    {item.label}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
           
           <div 
             className="dropdown-container"

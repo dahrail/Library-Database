@@ -8,6 +8,7 @@ const fineRoutes = require("./fineRoutes");
 const reportRoutes = require("./reportRoutes");
 const roomRoutes = require("./roomRoutes");
 const eventRoutes = require("./eventRoutes"); // Import the event routes
+const deviceRoutes = require("./deviceRoutes"); // Import the device routes
 
 const parseRequestBody = async (req) => {
   return new Promise((resolve, reject) => {
@@ -68,6 +69,15 @@ const handleRequest = async (req, res) => {
 
     if (method === "PUT" && path === "/api/updateBook") {
       return await bookRoutes.updateBook(req, res);
+    }
+
+    // DEVICE ROUTES
+    if (method === "GET" && path === "/api/device") {
+      return await deviceRoutes.getAllDevice(req, res);
+    }
+
+    if (method === "POST" && path === "/api/addDevice") {
+      return await deviceRoutes.addDevice(req, res);
     }
 
     // LOAN ROUTES

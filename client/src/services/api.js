@@ -196,6 +196,30 @@ const API = {
       throw error;
     }
   },
+
+  // Devices API calls
+  getDevices: async () => {
+    try {
+      const response = await fetch("/api/device");
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching devices:", error);
+      throw error;
+    }
+  },
+  addDevice: async (deviceData) => {
+    try {
+      const response = await fetch("/api/addDevice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(deviceData),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error adding device:", error);
+      throw error;
+    }
+  },
 };
 
 export default API;
