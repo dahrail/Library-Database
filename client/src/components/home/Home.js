@@ -7,6 +7,7 @@ const Home = ({
   navigateToMedia,
   navigateToDevices,
   navigateToLoans,
+  navigateToHolds,  // Add navigateToHolds in the props
   navigateToRooms,
   navigateToDataReport,
   navigateToEvents,
@@ -130,6 +131,17 @@ const Home = ({
             <div className="menu-item-content">
               <h3>Loans</h3>
               <p>Manage your current loans and borrowing history</p>
+            </div>
+          </div>
+          
+          {/* Add the Holds menu item */}
+          <div className="menu-item" onClick={navigateToHolds}>
+            <div className="menu-item-image-container">
+              <img src="/images/holds.jpg" alt="Holds" className="menu-image" />
+            </div>
+            <div className="menu-item-content">
+              <h3>Holds</h3>
+              <p>View and manage your current book holds</p>
             </div>
           </div>
           
