@@ -93,7 +93,7 @@ const Home = ({
         <h2 className="section-title">Library Services</h2>
         
         <div id="menu-grid" className="menu-container fade-in-items">
-          <div className="menu-item" onClick={navigateToBooks}>
+          <div className="menu-item" onClick={() => navigateToBooks('all')}>
             <div className="menu-item-image-container">
               <img src="/images/book.jpg" alt="Books" className="menu-image" />
             </div>
@@ -103,7 +103,7 @@ const Home = ({
             </div>
           </div>
           
-          <div className="menu-item" onClick={navigateToMedia}>
+          <div className="menu-item" onClick={() => navigateToMedia('all')}>
             <div className="menu-item-image-container">
               <img src="/images/media.jpg" alt="Media" className="menu-image" />
             </div>
