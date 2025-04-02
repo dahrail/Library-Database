@@ -29,13 +29,17 @@ const AddDevice = ({ onAddDevice, navigateToHome }) => {
         <div className="form-row">
           <div className="form-group">
             <label>Type:</label>
-            <input
-              type="text"
+            <select
               name="Type"
               value={newDevice.Type}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="">Select Type</option>
+              <option value="Headphone">Laptop</option>
+              <option value="Ipad">Ipad</option>
+              <option value="Laptop">Headphone</option>
+            </select>
           </div>
           <div className="form-group">
             <label>Brand:</label>

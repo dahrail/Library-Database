@@ -7,6 +7,8 @@ const Home = ({
   navigateToMedia,
   navigateToDevices,
   navigateToLoans,
+  navigateToHolds,  // Add navigateToHolds in the props
+  navigateToFines, // Add navigateToFines to props
   navigateToRooms,
   navigateToDataReport,
   navigateToEvents,
@@ -93,7 +95,7 @@ const Home = ({
         <h2 className="section-title">Library Services</h2>
         
         <div id="menu-grid" className="menu-container fade-in-items">
-          <div className="menu-item" onClick={navigateToBooks}>
+          <div className="menu-item" onClick={() => navigateToBooks('all')}>
             <div className="menu-item-image-container">
               <img src="/images/book.jpg" alt="Books" className="menu-image" />
             </div>
@@ -103,7 +105,7 @@ const Home = ({
             </div>
           </div>
           
-          <div className="menu-item" onClick={navigateToMedia}>
+          <div className="menu-item" onClick={() => navigateToMedia('all')}>
             <div className="menu-item-image-container">
               <img src="/images/media.jpg" alt="Media" className="menu-image" />
             </div>
@@ -133,6 +135,28 @@ const Home = ({
             </div>
           </div>
           
+          {/* Add the Holds menu item */}
+          <div className="menu-item" onClick={navigateToHolds}>
+            <div className="menu-item-image-container">
+              <img src="/images/holds.jpg" alt="Holds" className="menu-image" />
+            </div>
+            <div className="menu-item-content">
+              <h3>Holds</h3>
+              <p>View and manage your current book holds</p>
+            </div>
+          </div>
+          
+          {/* Add the Fines menu item - place it after Holds */}
+          <div className="menu-item" onClick={navigateToFines}>
+            <div className="menu-item-image-container">
+              <img src="/images/fines.jpg" alt="Fines" className="menu-image" />
+            </div>
+            <div className="menu-item-content">
+              <h3>Fines</h3>
+              <p>View and pay your outstanding library fines</p>
+            </div>
+          </div>
+
           <div className="menu-item" onClick={navigateToRooms}>
             <div className="menu-item-image-container">
               <img src="/images/rooms.jpg" alt="Rooms" className="menu-image" />
