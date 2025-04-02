@@ -138,9 +138,7 @@ const handleRequest = async (req, res) => {
     }
 
     if (method === "POST" && path === "/api/reserveRoom") {
-      const body = await parseRequestBody(req); // Parse the JSON body
-      req.body = body; // Attach the parsed body to the request object
-      return await roomRoutes.reserveRoom(req, res);
+      return roomRoutes.reserveRoom(req, res);
     }
 
     // EVENT ROUTES

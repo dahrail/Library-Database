@@ -6,7 +6,7 @@ const RoomReservation = ({
   isLoggedIn,
   navigateToLogin,
   initialCategory, // Add this prop
-  navigateToLanding // Add this prop
+  navigateToLanding, // Add this prop
 }) => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -186,6 +186,7 @@ const RoomReservation = ({
           Duration: duration,
         }),
       });
+
       const data = await response.json();
       console.log("Response from backend:", data);
 
@@ -195,8 +196,12 @@ const RoomReservation = ({
         // Refresh the room list
         const refreshResponse = await fetch("/api/rooms");
         const refreshData = await refreshResponse.json();
+        console.log("Refreshed room data:", refreshData);
+
         if (refreshData.success) {
           setRooms(refreshData.rooms);
+        } else {
+          console.error("Failed to refresh room list:", refreshData.error);
         }
       } else {
         alert("Failed to reserve room: " + data.error);
@@ -672,7 +677,10 @@ const RoomReservation = ({
           </div>
         )}
 
-        <button style={styles.backButton} onClick={isLoggedIn ? navigateToHome : navigateToLanding}>
+        <button
+          style={styles.backButton}
+          onClick={isLoggedIn ? navigateToHome : navigateToLanding}
+        >
           Back to Home
         </button>
       </div>

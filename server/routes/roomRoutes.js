@@ -62,6 +62,7 @@ const borrowRoom = async (req, res) => {
       SELECT * FROM ROOMS WHERE RoomID = ? AND IsAvailable = 1
     `;
     pool.query(checkQuery, [RoomID], (err, results) => {
+      console.log("Check query results:", results); // Debugging log
       if (err || results.length === 0) {
         console.error("Room is not available or error occurred:", err);
         sendJsonResponse(res, 400, {
@@ -113,52 +114,52 @@ const borrowRoom = async (req, res) => {
 // Reserve a room
 const reserveRoom = async (req, res) => {
   try {
-    const { RoomID, UserID, Duration } = req.body;
+    // Parse the request body
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
 
-    if (!RoomID || !UserID || !Duration) {
-      console.error("Missing required fields in request body:", req.body);
-      res.writeHead(400, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({ success: false, error: "Invalid request body" })
-      );
-      return;
-    }
+    req.on("end", async () => {
+      const { RoomID, UserID, Duration } = JSON.parse(body);
 
-    console.log("Reserving room:", { RoomID, UserID, Duration });
-
-    const checkQuery = `
-      SELECT * FROM ROOMS WHERE RoomID = ? AND IsAvailable = 1
-    `;
-    pool.query(checkQuery, [RoomID], (err, results) => {
-      if (err || results.length === 0) {
-        console.error("Room is not available or error occurred:", err);
+      if (!RoomID || !UserID || !Duration) {
+        console.error("Missing required fields in request body:", {
+          RoomID,
+          UserID,
+          Duration,
+        });
         res.writeHead(400, { "Content-Type": "application/json" });
         res.end(
-          JSON.stringify({ success: false, error: "Room is not available" })
+          JSON.stringify({ success: false, error: "Invalid request body" })
         );
         return;
       }
 
-      const reserveQuery = `
-        UPDATE ROOMS SET IsAvailable = 0 WHERE RoomID = ?
+      console.log("Reserving room:", { RoomID, UserID, Duration });
+
+      // Check if the room is available
+      const checkQuery = `
+        SELECT * FROM ROOMS WHERE RoomID = ? AND IsAvailable = 1
       `;
-      pool.query(reserveQuery, [RoomID], (err) => {
-        if (err) {
-          console.error("Error reserving room:", err);
-          res.writeHead(500, { "Content-Type": "application/json" });
+      pool.query(checkQuery, [RoomID], (err, results) => {
+        console.log("Check query results:", results); // Debugging log
+        if (err || results.length === 0) {
+          console.error("Room is not available or error occurred:", err);
+          res.writeHead(400, { "Content-Type": "application/json" });
           res.end(
-            JSON.stringify({ success: false, error: "Failed to reserve room" })
+            JSON.stringify({ success: false, error: "Room is not available" })
           );
           return;
         }
 
-        const reservationQuery = `
-          INSERT INTO ROOM_RESERVATIONS (RoomID, UserID, StartTime, EndTime)
-          VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? MINUTE))
+        // Mark the room as reserved
+        const reserveQuery = `
+          UPDATE ROOMS SET IsAvailable = 0 WHERE RoomID = ?
         `;
-        pool.query(reservationQuery, [RoomID, UserID, Duration], (err) => {
+        pool.query(reserveQuery, [RoomID], (err) => {
           if (err) {
-            console.error("Error creating reservation record:", err);
+            console.error("Error reserving room:", err);
             res.writeHead(500, { "Content-Type": "application/json" });
             res.end(
               JSON.stringify({
@@ -169,8 +170,27 @@ const reserveRoom = async (req, res) => {
             return;
           }
 
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ success: true }));
+          // Insert a record into the ROOM_RESERVATIONS table
+          const reservationQuery = `
+            INSERT INTO ROOM_RESERVATIONS (RoomID, UserID, StartAT, EndAT)
+            VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? MINUTE))
+          `;
+          pool.query(reservationQuery, [RoomID, UserID, Duration], (err) => {
+            if (err) {
+              console.error("Error creating reservation record:", err);
+              res.writeHead(500, { "Content-Type": "application/json" });
+              res.end(
+                JSON.stringify({
+                  success: false,
+                  error: "Failed to reserve room",
+                })
+              );
+              return;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: true }));
+          });
         });
       });
     });
