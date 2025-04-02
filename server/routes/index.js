@@ -147,6 +147,32 @@ const handleRequest = async (req, res) => {
     if (method === "GET" && path.match(/^\/api\/events\/?$/)) {
       return eventRoutes.getAllEvents(req, res);
     }
+    
+    if (method === "GET" && path.match(/^\/api\/events\/(\d+)$/)) {
+      req.params = { id: path.split('/').pop() };
+      return eventRoutes.getEventById(req, res);
+    }
+    
+    if (method === "GET" && path.match(/^\/api\/events\/(\d+)\/attendees$/)) {
+      req.params = { id: path.split('/').pop() };
+      return eventRoutes.getEventAttendees(req, res);
+    }
+    
+    if (method === "GET" && path.match(/^\/api\/events\/user-registrations\/(\d+)$/)) {
+      req.params = { userId: path.split('/').pop() };
+      return eventRoutes.getUserRegistrations(req, res);
+    }
+    
+    if (method === "GET" && path.match(/^\/api\/events\/attendance-stats/)) {
+      req.query = new URLSearchParams(path.split('?')[1] || '');
+      return eventRoutes.getAttendanceStats(req, res);
+    }
+
+    if (method === "GET" && path.match(/^\/api\/events\/attendees\/\d+/)) {
+      const id = path.split('/').pop();
+      req.params = { id };
+      return eventRoutes.getEventAttendees(req, res);
+    }
 
     if (method === "POST" && path === "/api/events") {
       return await eventRoutes.addEvent(req, res);
@@ -154,6 +180,14 @@ const handleRequest = async (req, res) => {
 
     if (method === "POST" && path === "/api/events/register") {
       return await eventRoutes.registerForEvent(req, res);
+    }
+    
+    if (method === "POST" && path === "/api/events/check-in") {
+      return await eventRoutes.checkInToEvent(req, res);
+    }
+    
+    if (method === "POST" && path === "/api/events/admin-check-in") {
+      return await eventRoutes.adminCheckIn(req, res);
     }
 
     // If we reach here, no route was matched

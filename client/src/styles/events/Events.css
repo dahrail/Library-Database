@@ -206,6 +206,115 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Registration and check-in buttons */
+.event-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.register-button, .checkin-button {
+  width: 100%;
+  padding: 14px;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.register-button {
+  background-color: var(--success-color);
+}
+
+.register-button:hover {
+  background-color: #27ae60;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.register-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.checkin-button {
+  background-color: var(--primary-color);
+}
+
+.checkin-button:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.checkin-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+checked-in-badge {
+  width: 100%;
+  padding: 14px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 20px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.admin-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 5px;
+}
+
+.admin-button:hover {
+  background-color: #e8e8e8;
+  transform: translateY(-2px);
+}
+
+/* Attendance stats styling */
+.attendance-stats {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #86868b;
+  display: flex;
+  gap: 15px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #86868b;
+}
+
 /* Add Event Form Styles */
 .add-event-form-container {
   background-color: #f5f5f7;
@@ -317,4 +426,94 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Event attendees list styling */
+.attendee-row.checked-in {
+  background-color: #f0f9f0;
+}
+
+.check-in-time {
+  display: block;
+  font-size: 0.8em;
+  color: #555;
+  margin-top: 2px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.status-badge.upcoming {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.status-badge.ongoing {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.past {
+  background-color: #f5f5f5;
+  color: #616161;
+}
+
+.attendance-summary {
+  margin: 30px 0;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.refresh-button {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 10px;
+}
+
+.refresh-button:hover {
+  background-color: #e8e8e8;
+  transform: rotate(180deg);
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.checkin-button.processing, 
+.register-button.processing {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.event-status {
+  margin-top: 10px;
 }

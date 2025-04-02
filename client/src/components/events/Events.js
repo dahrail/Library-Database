@@ -7,7 +7,8 @@ const Events = ({
   navigateToHome, 
   userData,
   initialCategory,
-  navigateToLanding // Add this prop
+  navigateToLanding,
+  navigateToLogin // Add this prop to fix the "not defined" error
 }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,8 +16,12 @@ const Events = ({
   const [showAddForm, setShowAddForm] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [checkedInEvents, setCheckedInEvents] = useState([]);
+  const [attendanceStats, setAttendanceStats] = useState({});
+  const [processingRegistration, setProcessingRegistration] = useState(null);
+  const [processingCheckIn, setProcessingCheckIn] = useState(null);
   
-  // Use the initialCategory prop on mount
   useEffect(() => {
     if (initialCategory) {
       setSelectedCategory(initialCategory);
@@ -66,6 +71,79 @@ const Events = ({
     fetchEvents();
   }, [userData]);
 
+  useEffect(() => {
+    if (userData?.UserID) {
+      // Fetch user's registered events
+      const fetchUserRegistrations = async () => {
+        try {
+          const response = await fetch(`/api/events/user-registrations/${userData.UserID}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+              setRegisteredEvents(data.registrations.map(reg => reg.EventID));
+              setCheckedInEvents(data.registrations
+                .filter(reg => reg.CheckedIn)
+                .map(reg => reg.EventID));
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user registrations:', error);
+        }
+      };
+      
+      fetchUserRegistrations();
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (events.length > 0) {
+      // Fetch attendance stats for all events
+      const fetchAttendanceStats = async () => {
+        try {
+          const eventIds = events.map(event => event.EventID).join(',');
+          const response = await fetch(`/api/events/attendance-stats?eventIds=${eventIds}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+              const statsMap = {};
+              data.stats.forEach(stat => {
+                statsMap[stat.EventID] = {
+                  registeredCount: stat.RegisteredCount || 0,
+                  checkedInCount: stat.CheckedInCount || 0
+                };
+              });
+              setAttendanceStats(statsMap);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching attendance stats:', error);
+        }
+      };
+      
+      fetchAttendanceStats();
+    }
+  }, [events]);
+
+  const refreshEventStats = async (eventId) => {
+    try {
+      const response = await fetch(`/api/events/attendance-stats?eventIds=${eventId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.stats.length > 0) {
+          setAttendanceStats(prev => ({
+            ...prev,
+            [eventId]: {
+              registeredCount: data.stats[0].RegisteredCount,
+              checkedInCount: data.stats[0].CheckedInCount
+            }
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing event stats:', error);
+    }
+  };
+
   const handleAddEvent = async (eventData) => {
     try {
       // Add the UserID from logged in user
@@ -99,6 +177,106 @@ const Events = ({
     } catch (error) {
       console.error('Error adding event:', error);
       alert('An error occurred while adding the event.');
+    }
+  };
+
+  const handleRegisterForEvent = async (eventId) => {
+    if (!userData) {
+      navigateToLogin();
+      return;
+    }
+    
+    try {
+      setProcessingRegistration(eventId);
+      const response = await fetch('/api/events/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          EventID: eventId,
+          UserID: userData.UserID,
+          RegistrationTime: new Date().toISOString()
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setRegisteredEvents([...registeredEvents, eventId]);
+        setAttendanceStats(prev => ({
+          ...prev,
+          [eventId]: {
+            ...prev[eventId],
+            registeredCount: (prev[eventId]?.registeredCount || 0) + 1
+          }
+        }));
+        await refreshEventStats(eventId);
+        alert('Successfully registered for the event!');
+      } else {
+        alert(data.error || 'Failed to register for the event');
+      }
+    } catch (error) {
+      console.error('Error registering for event:', error);
+      alert('An error occurred while registering for the event');
+    } finally {
+      setProcessingRegistration(null);
+    }
+  };
+
+  const handleCheckIn = async (eventId) => {
+    if (!userData) return;
+    
+    try {
+      setProcessingCheckIn(eventId);
+      const response = await fetch('/api/events/check-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          EventID: eventId,
+          UserID: userData.UserID,
+          CheckInTime: new Date().toISOString()
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setCheckedInEvents([...checkedInEvents, eventId]);
+        await refreshEventStats(eventId);
+        alert('Successfully checked in to the event!');
+      } else {
+        alert(data.error || 'Failed to check in to the event');
+      }
+    } catch (error) {
+      console.error('Error checking in to event:', error);
+      alert('An error occurred while checking in to the event');
+    } finally {
+      setProcessingCheckIn(null);
+    }
+  };
+
+  const handleAdminCheckIn = async (eventId, userId) => {
+    try {
+      const response = await fetch('/api/events/admin-check-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          EventID: eventId,
+          UserID: userId,
+          AdminID: userData.UserID
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        await refreshEventStats(eventId);
+        alert('User successfully checked in!');
+      } else {
+        alert(data.error || 'Failed to check in user');
+      }
+    } catch (error) {
+      console.error('Error during admin check-in:', error);
+      alert('An error occurred during check-in');
     }
   };
 
@@ -191,6 +369,51 @@ const Events = ({
                       {event.MaxAttendees} max
                     </span>
                   </div>
+                  
+                  <div className="detail-item">
+                    <span className="detail-label">Attendance:</span>
+                    <span className="detail-value">
+                      {attendanceStats[event.EventID]?.registeredCount || 0} registered / 
+                      {attendanceStats[event.EventID]?.checkedInCount || 0} checked in
+                    </span>
+                  </div>
+                  
+                  {userData && (
+                    <div className="event-actions">
+                      {!registeredEvents.includes(event.EventID) ? (
+                        <button 
+                          className={`register-button ${processingRegistration === event.EventID ? 'processing' : ''}`}
+                          onClick={() => handleRegisterForEvent(event.EventID)}
+                          disabled={processingRegistration === event.EventID || new Date(event.StartAt) < new Date()}
+                        >
+                          {processingRegistration === event.EventID ? 'Processing...' : 'Register'}
+                        </button>
+                      ) : !checkedInEvents.includes(event.EventID) ? (
+                        <button 
+                          className={`checkin-button ${processingCheckIn === event.EventID ? 'processing' : ''}`}
+                          onClick={() => handleCheckIn(event.EventID)}
+                          disabled={processingCheckIn === event.EventID || 
+                                    new Date(event.StartAt) > new Date() || 
+                                    new Date(event.EndAt) < new Date()}
+                        >
+                          {processingCheckIn === event.EventID ? 'Processing...' : 'Check In'}
+                        </button>
+                      ) : (
+                        <div className="checked-in-badge">
+                          <span>✓ Checked In</span>
+                        </div>
+                      )}
+                      
+                      {userData?.Role === 'Admin' && (
+                        <button 
+                          className="admin-button"
+                          onClick={() => window.location.href = `/event-attendees/${event.EventID}`}
+                        >
+                          Manage Attendees
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

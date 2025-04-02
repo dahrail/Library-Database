@@ -598,6 +598,7 @@ function App() {
           userData={userData}
           initialCategory={initialEventCategory} // Pass the initial category
           navigateToLanding={navigateToLanding} // Add this prop
+          navigateToLogin={navigateToLogin} // Add this prop
         />
       )}
     </div>
