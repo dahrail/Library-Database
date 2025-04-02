@@ -9,13 +9,23 @@ const getUserHolds = (req, res, userId) => {
     SELECT 
       U.FirstName, 
       U.LastName, 
-      B.Title, 
-      B.Author, 
+      CASE 
+        WHEN H.ItemType = 'Book' THEN B.Title
+        WHEN H.ItemType = 'Media' THEN M.Title
+        ELSE 'Unknown'
+      END AS Title,
+      CASE 
+        WHEN H.ItemType = 'Book' THEN B.Author
+        WHEN H.ItemType = 'Media' THEN M.Author
+        ELSE 'Unknown'
+      END AS Author,
       DATE_FORMAT(CONVERT_TZ(H.RequestAT, '+00:00', @@session.time_zone), '%Y-%m-%dT%H:%i:%sZ') AS RequestAT, 
-      H.HoldStatus
+      H.HoldStatus,
+      H.ItemType
     FROM USER AS U
     JOIN HOLD AS H ON U.UserID = H.UserID
-    JOIN BOOK AS B ON H.ItemID = B.BookID
+    LEFT JOIN BOOK AS B ON H.ItemID = B.BookID AND H.ItemType = 'Book'
+    LEFT JOIN MEDIA AS M ON H.ItemID = M.MediaID AND H.ItemType = 'Media'
     WHERE U.UserID = ? AND H.HoldStatus IN ('Pending', 'Active')
   `;
 
@@ -48,7 +58,7 @@ const confirmHold = async (req, res) => {
         sendJsonResponse(res, 500, { success: false, error: 'Failed to place hold' });
         return;
       }
-
+      
       console.log('Hold placed successfully for item ID:', ItemID);
       sendJsonResponse(res, 200, { success: true });
     });

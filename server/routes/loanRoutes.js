@@ -10,15 +10,24 @@ const getUserLoans = (req, res, userId) => {
       L.LoanID, 
       U.FirstName, 
       U.LastName, 
-      L.ItemType, 
-      B.Title, 
-      B.Author, 
+      L.ItemType,
+      CASE 
+        WHEN L.ItemType = 'Book' THEN B.Title
+        WHEN L.ItemType = 'Media' THEN M.Title
+        ELSE 'Unknown'
+      END AS Title,
+      CASE 
+        WHEN L.ItemType = 'Book' THEN B.Author
+        WHEN L.ItemType = 'Media' THEN M.Author
+        ELSE 'Unknown'
+      END AS Author,
       L.BorrowedAt, 
-      L.DueAT, 
+      L.DueAt, 
       L.ReturnedAt
-    FROM LOAN AS L
-    JOIN USER AS U ON L.UserID = U.UserID
-    JOIN BOOK AS B ON L.ItemID = B.BookID
+    FROM LOAN L
+    JOIN USER U ON L.UserID = U.UserID
+    LEFT JOIN BOOK B ON (L.ItemType = 'Book' AND L.ItemID = B.BookID)
+    LEFT JOIN MEDIA M ON (L.ItemType = 'Media' AND L.ItemID = M.MediaID)
     WHERE L.UserID = ?
   `;
 
@@ -149,21 +158,10 @@ const confirmReturn = async (req, res) => {
       WHERE LoanID = ?
     `;
 
-    const incrementCopiesQuery = `
-      UPDATE BOOK_INVENTORY
-      SET AvailableCopies = AvailableCopies + 1
-      WHERE BookID = (
-        SELECT ItemID FROM LOAN WHERE LoanID = ? AND ItemType = 'Book'
-      )
-    `;
-
     pool.getConnection((err, connection) => {
       if (err) {
         console.error("Error getting database connection:", err);
-        sendJsonResponse(res, 500, {
-          success: false,
-          error: "Database connection error",
-        });
+        sendJsonResponse(res, 500, { success: false, error: "Database connection error" });
         return;
       }
 
@@ -171,10 +169,7 @@ const confirmReturn = async (req, res) => {
         if (err) {
           console.error("Error starting transaction:", err);
           connection.release();
-          sendJsonResponse(res, 500, {
-            success: false,
-            error: "Transaction error",
-          });
+          sendJsonResponse(res, 500, { success: false, error: "Transaction error" });
           return;
         }
 
@@ -183,46 +178,61 @@ const confirmReturn = async (req, res) => {
           if (err || results.affectedRows === 0) {
             console.error("Error updating loan or no rows affected:", err);
             connection.rollback(() => connection.release());
-            sendJsonResponse(res, 404, {
-              success: false,
-              error: "Loan not found or already returned",
-            });
+            sendJsonResponse(res, 404, { success: false, error: "Loan not found or already returned" });
             return;
           }
 
-          // Increment AvailableCopies in BOOK_INVENTORY
-          connection.query(incrementCopiesQuery, [LoanID], (err, results) => {
-            if (err || results.affectedRows === 0) {
-              console.error(
-                "Error incrementing AvailableCopies or no rows affected:",
-                err
-              );
+          // Fetch the loan's ItemType and ItemID
+          connection.query("SELECT ItemType, ItemID FROM LOAN WHERE LoanID = ?", [LoanID], (err, loanResults) => {
+            if (err || loanResults.length === 0) {
+              console.error("Error fetching loan details:", err);
               connection.rollback(() => connection.release());
-              sendJsonResponse(res, 500, {
-                success: false,
-                error: "Failed to update book inventory",
-              });
+              sendJsonResponse(res, 500, { success: false, error: "Failed to fetch loan details" });
+              return;
+            }
+            
+            const { ItemType, ItemID } = loanResults[0];
+            let updateInventoryQuery = "";
+            if (ItemType === "Book") {
+              updateInventoryQuery = `
+                UPDATE BOOK_INVENTORY
+                SET AvailableCopies = AvailableCopies + 1
+                WHERE BookID = ?
+              `;
+            } else if (ItemType === "Media") {
+              updateInventoryQuery = `
+                UPDATE MEDIA_INVENTORY
+                SET AvailableCopies = AvailableCopies + 1
+                WHERE MediaID = ?
+              `;
+            } else {
+              console.error("Unknown ItemType:", ItemType);
+              connection.rollback(() => connection.release());
+              sendJsonResponse(res, 500, { success: false, error: "Unknown item type" });
               return;
             }
 
-            // Commit the transaction
-            connection.commit((err) => {
-              if (err) {
-                console.error("Error committing transaction:", err);
+            // Update the inventory accordingly
+            connection.query(updateInventoryQuery, [ItemID], (err, results) => {
+              if (err || results.affectedRows === 0) {
+                console.error("Error incrementing AvailableCopies or no rows affected:", err);
                 connection.rollback(() => connection.release());
-                sendJsonResponse(res, 500, {
-                  success: false,
-                  error: "Transaction commit error",
-                });
+                sendJsonResponse(res, 500, { success: false, error: "Failed to update inventory" });
                 return;
               }
 
-              console.log(
-                "Loan return confirmed successfully for LoanID:",
-                LoanID
-              );
-              connection.release();
-              sendJsonResponse(res, 200, { success: true });
+              // Commit the transaction
+              connection.commit((err) => {
+                if (err) {
+                  console.error("Error committing transaction:", err);
+                  connection.rollback(() => connection.release());
+                  sendJsonResponse(res, 500, { success: false, error: "Transaction commit error" });
+                  return;
+                }
+                console.log("Loan return confirmed successfully for LoanID:", LoanID);
+                connection.release();
+                sendJsonResponse(res, 200, { success: true });
+              });
             });
           });
         });

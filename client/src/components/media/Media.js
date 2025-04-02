@@ -438,6 +438,36 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     }
   };
 
+  // Function to handle placing a hold on a media item
+  const handleHold = async (mediaItem) => {
+    try {
+      const response = await fetch('/api/confirmHold', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          UserID: userData.UserID, // Use the actual user ID from props
+          ItemType: mediaItem.Type,
+          ItemID: mediaItem.MediaID,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`Successfully placed hold for "${mediaItem.Title}".`);
+        // Refresh the media items
+        fetchMediaItems();
+      } else {
+        alert(`Failed to place hold for "${mediaItem.Title}": ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error placing hold for media item:', error);
+      alert('An error occurred while placing hold for the media item.');
+    }
+  };
+
   return (
     <div style={styles.container}>
       {/* Hero Section */}
@@ -536,8 +566,8 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
                   )}
                   
                   <img
-                    src={wikipediaImageUrls[item.Title] || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgMzAwIDQ1MCIgZmlsbD0ibm9uZSI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiNmMGYwZjAiLz4KICA8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI0IiBmaWxsPSIjOTk5Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+Cjwvc3ZnPg=="}
-                    alt={item.Title}
+                    src={wikipediaImageUrls[item.Title] || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgMzAwIDQ1MCIgZmlsbD0ibm9uZSI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiNmMGYwZjAiLz4KICA8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI0IiBmaWxsPSIjOTk5Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+Cjwvc3ZnPg=="} 
+                    alt={item.Title} 
                     style={styles.cardImage}
                     onLoad={() => handleImageLoad(item.MediaID)}
                     onError={(e) => handleImageError(item.MediaID, e)}
@@ -554,7 +584,7 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
                     item.AvailableCopies > 0 ? (
                       <button style={styles.button} onClick={() => handleBorrow(item)}>Borrow</button>
                     ) : (
-                      <button style={{...styles.button, backgroundColor: '#f7d774', color: '#000'}}>Hold</button>
+                      <button style={{...styles.button, backgroundColor: '#f7d774', color: '#000'}} onClick={() => handleHold(item)}>Hold</button>
                     )
                   ) : (
                     <div>
@@ -572,29 +602,29 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
             ))}
           </div>
         )}
-
-        {/* Login message at the bottom for users who aren't logged in */}
-        {!isLoggedIn && (
-          <div style={{ textAlign: "center", margin: "40px 0" }}>
-            <p style={styles.loginMessage}>
-              Want to borrow these items?{" "}
-              <span 
-                onClick={navigateToLogin} 
-                style={styles.loginLink}
-              >
-                Log in to your account
-              </span>
-            </p>
-          </div>
-        )}
-
-        <button 
-          style={styles.backButton}
-          onClick={isLoggedIn ? navigateToHome : navigateToLanding}
-        >
-          Back to Home
-        </button>
       </div>
+
+      {/* Login message at the bottom for users who aren't logged in */}
+      {!isLoggedIn && (
+        <div style={{ textAlign: "center", margin: "40px 0" }}>
+          <p style={styles.loginMessage}>
+            Want to borrow these items?{" "}
+            <span 
+              onClick={navigateToLogin} 
+              style={styles.loginLink}
+            >
+              Log in to your account
+            </span>
+          </p>
+        </div>
+      )}
+
+      <button 
+        style={styles.backButton}
+        onClick={isLoggedIn ? navigateToHome : navigateToLanding}
+      >
+        Back to Home
+      </button>
     </div>
   );
 };
