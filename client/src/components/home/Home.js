@@ -8,6 +8,7 @@ const Home = ({
   navigateToDevices,
   navigateToLoans,
   navigateToHolds,  // Add navigateToHolds in the props
+  navigateToFines, // Add navigateToFines to props
   navigateToRooms,
   navigateToDataReport,
   navigateToEvents,
@@ -145,6 +146,17 @@ const Home = ({
             </div>
           </div>
           
+          {/* Add the Fines menu item - place it after Holds */}
+          <div className="menu-item" onClick={navigateToFines}>
+            <div className="menu-item-image-container">
+              <img src="/images/fines.jpg" alt="Fines" className="menu-image" />
+            </div>
+            <div className="menu-item-content">
+              <h3>Fines</h3>
+              <p>View and pay your outstanding library fines</p>
+            </div>
+          </div>
+
           <div className="menu-item" onClick={navigateToRooms}>
             <div className="menu-item-image-container">
               <img src="/images/rooms.jpg" alt="Rooms" className="menu-image" />
