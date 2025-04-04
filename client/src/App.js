@@ -4,7 +4,7 @@ import "./App.css";
 // Import components
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
-import RegisterAsFaculty from "./components/auth/RegisterAsFaculty"; // Import the new component
+import RegisterAsFaculty from "./components/auth/RegisterAsFaculty"; 
 import Welcome from "./components/home/Welcome";
 import Home from "./components/home/Home";
 import BookList from "./components/books/BookList";
@@ -16,13 +16,13 @@ import ReturnConfirmation from "./components/loans/ReturnConfirmation";
 import HoldList from "./components/holds/HoldList";
 import FineList from "./components/fines/FineList";
 import TopBar from "./components/layout/TopBar";
-import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; // Import the new component
-import Media from "./components/media/Media"; // Import the Media component
-import RoomReservation from "./components/rooms/RoomReservation"; // Import the RoomReservation component
-import Events from "./components/events/Events"; // Import the Events component
-import LandingPage from "./components/landing/LandingPage"; // Import the new LandingPage component
-import Devices from "./components/devices/Devices"; // Import the Devices component
-import AddDevice from "./components/devices/AddDevice"; // Import the AddDevice component
+import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; 
+import Media from "./components/media/Media"; 
+import RoomReservation from "./components/rooms/RoomReservation"; 
+import Events from "./components/events/Events"; 
+import LandingPage from "./components/landing/LandingPage"; 
+import Devices from "./components/devices/Devices"; 
+import AddDevice from "./components/devices/AddDevice"; 
 
 // Import API service
 import API from "./services/api";

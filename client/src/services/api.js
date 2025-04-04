@@ -197,6 +197,45 @@ const API = {
     }
   },
 
+  // Media API calls
+  getMedia: async () => {
+    try {
+      const response = await fetch("/api/media");
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching media:", error);
+      throw error;
+    }
+  },
+
+  borrowMedia: async (userId, mediaId) => {
+    try {
+      const response = await fetch("/api/borrowMedia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ UserID: userId, MediaID: mediaId }),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error borrowing media:", error);
+      throw error;
+    }
+  },
+
+  holdMedia: async (userId, mediaId) => {
+    try {
+      const response = await fetch("/api/holdMedia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ UserID: userId, MediaID: mediaId }),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error holding media:", error);
+      throw error;
+    }
+  },
+
   // Devices API calls
   getDevices: async () => {
     try {

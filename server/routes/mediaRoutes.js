@@ -32,5 +32,5 @@ const getAllMedia = (req, res) => {
 };
 
 module.exports = {
-  getAllMedia
+  getAllMedia,
 };

@@ -58,6 +58,26 @@ const confirmHold = async (req, res) => {
   }
 };
 
+// MEDIA SESSION
+const holdMedia = async (req, res) => {
+  try {
+    const { UserID, MediaID } = await parseRequestBody(req);
+    console.log(`Placing hold for media ID: ${MediaID}, user ID: ${UserID}`);
+    
+    // Add entry to Hold table
+    const holdQuery = `
+      INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAt, HoldStatus)
+      VALUES (?, 'Media', ?, NOW(), 'Pending')
+    `;
+    await pool.promise().query(holdQuery, [UserID, MediaID]);
+
+    sendJsonResponse(res, 200, { success: true });
+  } catch (error) {
+    console.error("Error placing hold on media:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Internal server error" });
+  }
+};
+
 // DEVICE SESSION
 const holdDevice = async (req, res) => {
   try {
@@ -81,4 +101,5 @@ module.exports = {
   getUserHolds,
   confirmHold,
   holdDevice,
+  holdMedia,
 };

@@ -7,8 +7,9 @@ const holdRoutes = require("./holdRoutes");
 const fineRoutes = require("./fineRoutes");
 const reportRoutes = require("./reportRoutes");
 const roomRoutes = require("./roomRoutes");
-const eventRoutes = require("./eventRoutes"); // Import the event routes
-const deviceRoutes = require("./deviceRoutes"); // Import the device routes
+const eventRoutes = require("./eventRoutes"); 
+const deviceRoutes = require("./deviceRoutes"); 
+const mediaRoutes = require("./mediaRoutes"); 
 
 const parseRequestBody = async (req) => {
   return new Promise((resolve, reject) => {
@@ -71,6 +72,11 @@ const handleRequest = async (req, res) => {
       return await bookRoutes.updateBook(req, res);
     }
 
+    // MEDIA ROUTES
+    if (method === "GET" && path === "/api/media") {
+      return mediaRoutes.getAllMedia(req, res);
+    }
+
     // DEVICE ROUTES
     if (method === "GET" && path === "/api/device") {
       return await deviceRoutes.getAllDevice(req, res);
@@ -101,8 +107,7 @@ const handleRequest = async (req, res) => {
       return await loanRoutes.borrowDevice(req, res);
     }
 
-    // Add the new route for borrowing media
-    if (method === "POST" && path === "/api/loans") {
+    if (method === "POST" && path === "/api/borrowMedia") {
       return await loanRoutes.borrowMedia(req, res);
     }
 
@@ -118,6 +123,10 @@ const handleRequest = async (req, res) => {
 
     if (method === "POST" && path === "/api/holdDevice") {
       return await holdRoutes.holdDevice(req, res);
+    }
+
+    if (method === "POST" && path === "/api/holdMedia") {
+      return await holdRoutes.holdMedia(req, res);
     }
 
     // FINE ROUTES

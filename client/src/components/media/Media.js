@@ -411,7 +411,7 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
   // Function to handle borrowing a media item
   const handleBorrow = async (mediaItem) => {
     try {
-      const response = await fetch('/api/loans', {
+      const response = await fetch('/api/borrowMedia', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -435,6 +435,30 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     } catch (error) {
       console.error('Error borrowing media item:', error);
       alert('An error occurred while borrowing the media item.');
+    }
+  };
+
+  const handleHold = async (mediaItem) => {
+    try {
+      const response = await fetch("/api/holdMedia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          UserID: userData.UserID,
+          MediaID: mediaItem.MediaID,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(`Successfully placed a hold on "${mediaItem.Title}".`);
+        fetchMediaItems(); 
+      } else {
+        alert(`Failed to place a hold on "${mediaItem.Title}": ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error placing hold on media:", error);
+      alert("An error occurred while placing the hold.");
     }
   };
 
@@ -554,7 +578,8 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
                     item.AvailableCopies > 0 ? (
                       <button style={styles.button} onClick={() => handleBorrow(item)}>Borrow</button>
                     ) : (
-                      <button style={{...styles.button, backgroundColor: '#f7d774', color: '#000'}}>Hold</button>
+                      <button style={{...styles.button, backgroundColor: '#f7d774', color: '#000'}} 
+                        onClick={() => handleHold(item)}>Hold</button>
                     )
                   ) : (
                     <div>
