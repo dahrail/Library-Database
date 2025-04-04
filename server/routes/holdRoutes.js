@@ -58,7 +58,27 @@ const confirmHold = async (req, res) => {
   }
 };
 
+// DEVICE SESSION
+const holdDevice = async (req, res) => {
+  try {
+    const { UserID, DeviceID } = await parseRequestBody(req);
+
+    // Add entry to Hold table
+    const holdQuery = `
+      INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAt, HoldStatus)
+      VALUES (?, 'Device', ?, NOW(), 'Pending')
+    `;
+    await pool.promise().query(holdQuery, [UserID, DeviceID]);
+
+    sendJsonResponse(res, 200, { success: true });
+  } catch (error) {
+    console.error("Error placing hold on device:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Internal server error" });
+  }
+};
+
 module.exports = {
   getUserHolds,
-  confirmHold
+  confirmHold,
+  holdDevice,
 };

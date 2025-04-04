@@ -82,60 +82,6 @@ const addDevice = async (req, res) => {
   }
 };
 
-const borrowDevice = async (req, res) => {
-  try {
-    const { UserID, DeviceID } = await parseRequestBody(req);
-
-    // Check if the device is available
-    const checkQuery = "SELECT AvailableCopies FROM DEVICE_INVENTORY WHERE DeviceID = ?";
-    const [rows] = await pool.promise().query(checkQuery, [DeviceID]);
-
-    if (rows.length === 0 || rows[0].AvailableCopies == 0) {
-      return sendJsonResponse(res, 400, { success: false, error: "Device is not available for borrowing." });
-    }
-
-    // Determine loan period based on user role
-    const roleQuery = `SELECT Role FROM USER WHERE UserID = ?`;
-    const [user] = await pool.promise().query(roleQuery, [UserID]);
-    const role = user[0]?.Role || "Student";
-    const loanPeriod = role === "Student" ? 7 : 14;
-
-    // Update inventory
-    const updateQuery = "UPDATE DEVICE_INVENTORY SET AvailableCopies = AvailableCopies - 1 WHERE DeviceID = ?";
-    await pool.promise().query(updateQuery, [DeviceID]);
-
-    // Add entry to Loan table
-    const loanQuery = `
-      INSERT INTO LOAN (UserID, ItemType, ItemID, BorrowedAt, DueAt)
-      VALUES (?, 'Device', ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY))
-    `;
-    await pool.promise().query(loanQuery, [UserID, DeviceID,loanPeriod]);
-
-    sendJsonResponse(res, 200, { success: true });
-  } catch (error) {
-    console.error("Error borrowing device:", error);
-    sendJsonResponse(res, 500, { success: false, error: "Internal server error" });
-  }
-};
-
-const holdDevice = async (req, res) => {
-  try {
-    const { UserID, DeviceID } = await parseRequestBody(req);
-
-    // Add entry to Hold table
-    const holdQuery = `
-      INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAt, HoldStatus)
-      VALUES (?, 'Device', ?, NOW(), 'Pending')
-    `;
-    await pool.promise().query(holdQuery, [UserID, DeviceID]);
-
-    sendJsonResponse(res, 200, { success: true });
-  } catch (error) {
-    console.error("Error placing hold on device:", error);
-    sendJsonResponse(res, 500, { success: false, error: "Internal server error" });
-  }
-};
-
 const returnDevice = async (req, res) => {
   try {
     const { UserID, DeviceID } = await parseRequestBody(req);
@@ -158,7 +104,5 @@ const returnDevice = async (req, res) => {
 module.exports = {
   getAllDevice,
   addDevice,
-  borrowDevice,
-  holdDevice,
   returnDevice,
 };

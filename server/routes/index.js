@@ -80,14 +80,6 @@ const handleRequest = async (req, res) => {
       return await deviceRoutes.addDevice(req, res);
     }
 
-    if (method === "POST" && path === "/api/borrowDevice") {
-      return await deviceRoutes.borrowDevice(req, res);
-    }
-
-    if (method === "POST" && path === "/api/holdDevice") {
-      return await deviceRoutes.holdDevice(req, res);
-    }
-
     if (method === "POST" && path === "/api/returnDevice") {
       return await deviceRoutes.returnDevice(req, res);
     }
@@ -105,6 +97,9 @@ const handleRequest = async (req, res) => {
     if (method === "POST" && path === "/api/confirmReturn") {
       return await loanRoutes.confirmReturn(req, res);
     }
+    if (method === "POST" && path === "/api/borrowDevice") {
+      return await loanRoutes.borrowDevice(req, res);
+    }
 
     // Add the new route for borrowing media
     if (method === "POST" && path === "/api/loans") {
@@ -119,6 +114,10 @@ const handleRequest = async (req, res) => {
 
     if (method === "POST" && path === "/api/confirmHold") {
       return await holdRoutes.confirmHold(req, res);
+    }
+
+    if (method === "POST" && path === "/api/holdDevice") {
+      return await holdRoutes.holdDevice(req, res);
     }
 
     // FINE ROUTES
