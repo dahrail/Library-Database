@@ -80,6 +80,14 @@ const handleRequest = async (req, res) => {
       return await deviceRoutes.addDevice(req, res);
     }
 
+    if (method === "POST" && path === "/api/borrowDevice") {
+      return await deviceRoutes.borrowDevice(req, res);
+    }
+
+    if (method === "POST" && path === "/api/holdDevice") {
+      return await deviceRoutes.holdDevice(req, res);
+    }
+
     // LOAN ROUTES
     if (method === "GET" && path.match(/^\/api\/loans\/\d+$/)) {
       const userId = path.split("/").pop();
@@ -138,7 +146,7 @@ const handleRequest = async (req, res) => {
     }
 
     if (method === "POST" && path === "/api/reserveRoom") {
-      return roomRoutes.reserveRoom(req, res);
+       return await roomRoutes.reserveRoom(req, res);
     }
 
     // EVENT ROUTES

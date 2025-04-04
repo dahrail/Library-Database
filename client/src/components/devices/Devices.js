@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import API from "../../services/api";
+import DeviceBorrowConfirmation from "./DeviceBorrowConfirmation";
+import DeviceHoldConfirmation from "./DeviceHoldConfirmation";
 
 const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding, navigateToAddDevice }) => {
   const [devices, setDevices] = useState([]);
@@ -9,6 +11,8 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [displayedDevices, setDisplayedDevices] = useState([]);
   const initialRenderRef = useRef(true);
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [currentAction, setCurrentAction] = useState(null); // "borrow" or "hold"
 
   // Fetch devices from the backend
   const fetchDevices = async () => {
@@ -67,25 +71,34 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
     }
   }, [selectedCategory, devices]);
 
-  // Handle borrowing a device
-  const handleBorrow = async (device) => {
+  const navigateToBorrowConfirmation = (device) => {
+    setSelectedDevice(device);
+    setCurrentAction("borrow");
+  };
+
+  const navigateToHoldConfirmation = (device) => {
+    setSelectedDevice(device);
+    setCurrentAction("hold");
+  };
+
+  const handleConfirmBorrow = async () => {
     try {
-      const response = await fetch("/api/loans", {
+      const response = await fetch("/api/borrowDevice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           UserID: userData.UserID,
-          ItemType: "Device",
-          ItemID: device.DeviceID,
+          DeviceID: selectedDevice.DeviceID,
         }),
       });
 
       const data = await response.json();
       if (data.success) {
-        alert(`Successfully borrowed "${device.Model}".`);
+        alert(`Successfully borrowed "${selectedDevice.Model}".`);
         fetchDevices(); // Refresh devices to update available copies
+        setCurrentAction(null); // Return to the device list
       } else {
-        alert(`Failed to borrow "${device.Model}": ${data.error}`);
+        alert(`Failed to borrow "${selectedDevice.Model}": ${data.error}`);
       }
     } catch (error) {
       console.error("Error borrowing device:", error);
@@ -93,62 +106,106 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
     }
   };
 
+  const handleConfirmHold = async () => {
+    try {
+      const response = await fetch("/api/holdDevice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          UserID: userData.UserID,
+          DeviceID: selectedDevice.DeviceID,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(`Successfully placed a hold on "${selectedDevice.Model}".`);
+        fetchDevices(); // Refresh devices to update available copies
+        setCurrentAction(null); // Return to the device list
+      } else {
+        alert(`Failed to place a hold on "${selectedDevice.Model}": ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error placing hold on device:", error);
+      alert("An error occurred while placing the hold.");
+    }
+  };
+
   return (
     <div className="content-container">
-      <h2>Devices Collection</h2>
-
-      {/* Show "Add Device" button for admins */}
-      {isLoggedIn && userData?.Role === "Admin" && (
-        <button onClick={navigateToAddDevice} className="btn-primary">
-          Add Device
-        </button>
-      )}
-
-      {/* Category Filter */}
-      <div className="category-filter">
-        <label htmlFor="category-select">Filter by Category:</label>
-        <select
-          id="category-select"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          {categories.map((category, index) => (
-            <option key={index} value={category}>
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Device List */}
-      {loading ? (
-        <p>Loading devices...</p>
-      ) : error ? (
-        <p style={{ color: "red" }}>{error}</p>
+      {currentAction === "borrow" && selectedDevice ? (
+        <DeviceBorrowConfirmation
+          device={selectedDevice}
+          userData={userData}
+          handleConfirmBorrow={handleConfirmBorrow}
+          navigateToDevices={() => setCurrentAction(null)}
+        />
+      ) : currentAction === "hold" && selectedDevice ? (
+        <DeviceHoldConfirmation
+          device={selectedDevice}
+          userData={userData}
+          handleConfirmHold={handleConfirmHold}
+          navigateToDevices={() => setCurrentAction(null)}
+        />
       ) : (
-        <div id="devices-grid" className="fade-in-items">
-          {displayedDevices.map((device) => (
-            <div key={device.DeviceID} className="device-card">
-              <h3>{device.Model}</h3>
-              <p>Type: {device.Type}</p>
-              <p>Brand: {device.Brand}</p>
-              {isLoggedIn ? (
-                device.AvailableCopies > 0 ? (
-                  <button onClick={() => handleBorrow(device)}>Borrow</button>
-                ) : (
-                  <button disabled>Out of Stock</button>
-                )
-              ) : (
-                <button onClick={navigateToLogin}>Login to Borrow</button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+        <>
+          <h2>Devices Collection</h2>
 
-      <button onClick={isLoggedIn ? navigateToHome : navigateToLanding} className="btn-back">
-        Back to Home
-      </button>
+          {/* Show "Add Device" button for admins */}
+          {isLoggedIn && userData?.Role === "Admin" && (
+            <button onClick={navigateToAddDevice} className="btn-primary">
+              Add Device
+            </button>
+          )}
+
+          {/* Category Filter */}
+          <div className="category-filter">
+            <label htmlFor="category-select">Filter by Category:</label>
+            <select
+              id="category-select"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              {categories.map((category, index) => (
+                <option key={index} value={category}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Device List */}
+          {loading ? (
+            <p>Loading devices...</p>
+          ) : error ? (
+            <p style={{ color: "red" }}>{error}</p>
+          ) : (
+            <div id="devices-grid" className="fade-in-items">
+              {displayedDevices.map((device) => (
+                <div key={device.DeviceID} className="device-card">
+                  <h3>{device.Model}</h3>
+                  <p>Type: {device.Type}</p>
+                  <p>Brand: {device.Brand}</p>
+                  <p>Available Copies: {device.AvailableCopies}</p>
+                  {isLoggedIn ? (
+                    device.AvailableCopies > 0 ? (
+                      <button onClick={() => navigateToBorrowConfirmation(device)}>Borrow</button>
+                    ) : (
+                      <button onClick={() => navigateToHoldConfirmation(device)}>Hold</button>
+                    )
+                  ) : (
+                    <button onClick={navigateToLogin}>Login to Borrow</button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button onClick={isLoggedIn ? navigateToHome : navigateToLanding} className="btn-back">
+            Back to Home
+          </button>
+        </>
+      )}
     </div>
   );
 };
