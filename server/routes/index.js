@@ -88,6 +88,10 @@ const handleRequest = async (req, res) => {
       return await deviceRoutes.holdDevice(req, res);
     }
 
+    if (method === "POST" && path === "/api/returnDevice") {
+      return await deviceRoutes.returnDevice(req, res);
+    }
+
     // LOAN ROUTES
     if (method === "GET" && path.match(/^\/api\/loans\/\d+$/)) {
       const userId = path.split("/").pop();
