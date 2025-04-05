@@ -32,31 +32,25 @@ const getUserHolds = (req, res, userId) => {
 };
 
 // Place a hold
-const confirmHold = async (req, res) => {
+const holdBook = async (req, res) => {
   try {
-    const { UserID, ItemType, ItemID } = await parseRequestBody(req);
-    console.log(`Placing hold for item ID: ${ItemID}, user ID: ${UserID}, item type: ${ItemType}`);
+    const { UserID, BookID } = await parseRequestBody(req);
+    console.log(`Placing hold for book ID: ${BookID}, user ID: ${UserID}`);
     
-    const query = `
-      INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAT, HoldStatus)
-      VALUES (?, ?, ?, NOW(), 'Pending')
+    // Add entry to Hold table
+    const holdQuery = `
+      INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAt, HoldStatus)
+      VALUES (?, 'Book', ?, NOW(), 'Pending')
     `;
+    await pool.promise().query(holdQuery, [UserID, BookID]);
 
-    pool.query(query, [UserID, ItemType, ItemID], (err, results) => {
-      if (err) {
-        console.error('Error inserting hold:', err);
-        sendJsonResponse(res, 500, { success: false, error: 'Failed to place hold' });
-        return;
-      }
-
-      console.log('Hold placed successfully for item ID:', ItemID);
-      sendJsonResponse(res, 200, { success: true });
-    });
+    sendJsonResponse(res, 200, { success: true });
   } catch (error) {
-    console.error('Error in confirmHold:', error);
-    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+    console.error("Error placing hold on book:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Internal server error" });
   }
 };
+
 
 // MEDIA SESSION
 const holdMedia = async (req, res) => {
@@ -99,7 +93,7 @@ const holdDevice = async (req, res) => {
 
 module.exports = {
   getUserHolds,
-  confirmHold,
+  holdBook,
   holdDevice,
   holdMedia,
 };

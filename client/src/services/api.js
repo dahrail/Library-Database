@@ -57,9 +57,9 @@ const API = {
     }
   },
 
-  confirmLoan: async (bookId, userId, role) => {
+  borrowBook: async (bookId, userId, role) => {
     try {
-      const response = await fetch("/api/confirmLoan", {
+      const response = await fetch("/api/borrowBook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -75,20 +75,16 @@ const API = {
     }
   },
 
-  confirmHold: async (userId, itemId) => {
+  holdBook: async (userId, bookId) => {
     try {
-      const response = await fetch("/api/confirmHold", {
+      const response = await fetch("/api/holdBook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          UserID: userId,
-          ItemType: "Book",
-          ItemID: itemId,
-        }),
+        body: JSON.stringify({ UserID: userId, BookID: bookId }),
       });
       return await response.json();
     } catch (error) {
-      console.error("Error placing hold:", error);
+      console.error("Error holding book:", error);
       throw error;
     }
   },

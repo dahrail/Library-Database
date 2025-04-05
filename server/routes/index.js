@@ -96,8 +96,8 @@ const handleRequest = async (req, res) => {
       return loanRoutes.getUserLoans(req, res, userId);
     }
 
-    if (method === "POST" && path === "/api/confirmLoan") {
-      return await loanRoutes.confirmLoan(req, res);
+    if (method === "POST" && path === "/api/borrowBook") {
+      return await loanRoutes.borrowBook(req, res);
     }
 
     if (method === "POST" && path === "/api/confirmReturn") {
@@ -117,8 +117,8 @@ const handleRequest = async (req, res) => {
       return holdRoutes.getUserHolds(req, res, userId);
     }
 
-    if (method === "POST" && path === "/api/confirmHold") {
-      return await holdRoutes.confirmHold(req, res);
+    if (method === "POST" && path === "/api/holdBook") {
+      return await holdRoutes.holdBook(req, res);
     }
 
     if (method === "POST" && path === "/api/holdDevice") {

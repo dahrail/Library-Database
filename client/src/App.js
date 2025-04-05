@@ -342,28 +342,28 @@ function App() {
     }
   };
 
-  const handleConfirmLoan = async () => {
+  const handleBorrowBook = async () => {
     try {
-      const data = await API.confirmLoan(
+      const data = await API.borrowBook(
         selectedBook.bookID,
         userData.UserID,
         userData.Role
       );
       if (data.success) {
-        alert("Loan confirmed successfully!");
+        alert("Book borrow successfully!");
         setCurrentScreen("home");
       } else {
-        alert("Failed to confirm loan: " + data.error);
+        alert("Failed to confirm book borrow: " + data.error);
       }
     } catch (error) {
-      console.error("Error confirming loan:", error);
-      alert("An error occurred while confirming the loan.");
+      console.error("Error confirming book borrow:", error);
+      alert("An error occurred while confirming book borrow.");
     }
   };
 
-  const handleConfirmHold = async () => {
+  const handleHoldBook = async () => {
     try {
-      const data = await API.confirmHold(userData.UserID, selectedBook.bookID);
+      const data = await API.holdBook(userData.UserID, selectedBook.bookID);
       if (data.success) {
         alert("Hold placed successfully!");
         setCurrentScreen("books");
@@ -479,7 +479,7 @@ function App() {
         <BookLoan
           selectedBook={selectedBook}
           userData={userData}
-          handleConfirmLoan={handleConfirmLoan}
+          handleBorrowBook={handleBorrowBook}
           navigateToBooks={() => setCurrentScreen("books")}
         />
       )}
@@ -487,7 +487,7 @@ function App() {
       {currentScreen === "hold" && selectedBook && (
         <BookHold
           selectedBook={selectedBook}
-          handleConfirmHold={handleConfirmHold}
+          handleHoldBook={handleHoldBook}
           navigateToBooks={() => setCurrentScreen("books")}
         />
       )}

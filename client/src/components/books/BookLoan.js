@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../styles/books/Books.css';
 
-const BookLoan = ({ selectedBook, userData, handleConfirmLoan, navigateToBooks }) => {
+const BookLoan = ({ selectedBook, userData, handleBorrowBook, navigateToBooks }) => {
   return (
     <div className="content-container">
       <h2>Loan Screen</h2>
@@ -11,8 +11,8 @@ const BookLoan = ({ selectedBook, userData, handleConfirmLoan, navigateToBooks }
         <strong>{userData.Role === 'Student' ? '7 days' : '14 days'}</strong>.
       </p>
       <div className="button-group">
-        <button onClick={navigateToBooks} className="btn-secondary">Back to Books</button>
-        <button onClick={handleConfirmLoan} className="btn-primary">Confirm</button>
+        <button onClick={navigateToBooks} className="btn-secondary">Cancel</button>
+        <button onClick={handleBorrowBook} className="btn-primary">Confirm</button>
       </div>
     </div>
   );

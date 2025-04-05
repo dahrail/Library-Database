@@ -82,27 +82,7 @@ const addDevice = async (req, res) => {
   }
 };
 
-const returnDevice = async (req, res) => {
-  try {
-    const { UserID, DeviceID } = await parseRequestBody(req);
-
-    // Update inventory
-    const updateQuery = "UPDATE DEVICE_INVENTORY SET AvailableCopies = AvailableCopies + 1 WHERE DeviceID = ?";
-    await pool.promise().query(updateQuery, [DeviceID]);
-
-    // Delete entry from Loan table
-    const deleteQuery = "DELETE FROM LOAN WHERE UserID = ? AND ItemType = 'Device' AND ItemID = ?";
-    await pool.promise().query(deleteQuery, [UserID, DeviceID]);
-
-    sendJsonResponse(res, 200, { success: true });
-  } catch (error) {
-    console.error("Error returning device:", error);
-    sendJsonResponse(res, 500, { success: false, error: "Internal server error" });
-  }
-};
-
 module.exports = {
   getAllDevice,
   addDevice,
-  returnDevice,
 };

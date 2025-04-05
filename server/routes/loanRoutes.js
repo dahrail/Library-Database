@@ -38,7 +38,7 @@ const getUserLoans = (req, res, userId) => {
 };
 
 // Confirm a loan
-const confirmLoan = async (req, res) => {
+const borrowBook = async (req, res) => {
   try {
     const { BookID, UserID, Role } = await parseRequestBody(req);
     console.log(
@@ -132,7 +132,7 @@ const confirmLoan = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error("Error in confirmLoan:", error);
+    console.error("Error in borrowBook:", error);
     sendJsonResponse(res, 500, { success: false, error: "Server error" });
   }
 };
@@ -331,7 +331,7 @@ const borrowDevice = async (req, res) => {
 
 module.exports = {
   getUserLoans,
-  confirmLoan,
+  borrowBook,
   confirmReturn,
   borrowMedia,
   borrowDevice,

@@ -466,16 +466,16 @@ const BookList = ({
                   {isLoggedIn ? (
                     // Logged in user buttons
                     isOutOfStock ? (
-                      <button style={{...styles.button, backgroundColor: '#cccccc', cursor: 'not-allowed'}} disabled>
-                        Out of Stock
+                      <button style={{...styles.button, backgroundColor: '#cccccc', cursor: 'not-allowed'}}>
+                        Hold
                       </button>
                     ) : isOnHold ? (
                       <button style={styles.holdButton} onClick={() => handleLoanClick(book)}>
-                        Place Hold
+                        Hold
                       </button>
                     ) : (
                       <button style={styles.button} onClick={() => handleLoanClick(book)}>
-                        Borrow Book
+                        Borrow
                       </button>
                     )
                   ) : (
