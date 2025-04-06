@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 
 const BookList = ({
   books,
-  handleLoan,
+  navigateToLoan,
+  navigateToHold,
   navigateToHome,
   userData,
   isLoggedIn, // Added isLoggedIn prop
@@ -343,7 +344,18 @@ const BookList = ({
     } else {
       alert(`Checking out a loan for book: "${book.title}".`);
     }
-    handleLoan(book);
+    navigateToLoan(book);
+  };
+
+  const handleHoldClick = (book) => {
+    // Only process if user is logged in
+    if (!isLoggedIn) {
+      navigateToLogin();
+      return;
+    }
+    
+    alert(`Placing order for hold on book: "${book.title}".`);
+    navigateToHold(book);
   };
 
   return (
@@ -454,23 +466,23 @@ const BookList = ({
                   <h3 style={styles.cardTitle}>{book.title}</h3>
                   <p style={styles.cardInfo}>Author: {book.author}</p>
                   <p style={styles.cardInfo}>Genre: {book.genre}</p>
-                  {isOutOfStock ? (
+                  {/* {isOutOfStock ? (
                     <p style={styles.cardInfo}><strong>Status: Out of Stock</strong></p>
                   ) : isOnHold ? (
                     <p style={styles.cardInfo}><strong>Status: On Hold</strong></p>
                   ) : (
                     <p style={styles.cardInfo}><strong>Status: Available</strong></p>
-                  )}
+                  )} */}
                   
                   {/* Conditional button rendering based on login status and availability */}
                   {isLoggedIn ? (
                     // Logged in user buttons
                     isOutOfStock ? (
-                      <button style={{...styles.button, backgroundColor: '#cccccc', cursor: 'not-allowed'}}>
+                      <button style={styles.holdButton} onClick={() => handleHoldClick(book)}>
                         Hold
                       </button>
                     ) : isOnHold ? (
-                      <button style={styles.holdButton} onClick={() => handleLoanClick(book)}>
+                      <button style={styles.holdButton} onClick={() => handleHoldClick(book)}>
                         Hold
                       </button>
                     ) : (

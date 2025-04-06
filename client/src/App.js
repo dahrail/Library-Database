@@ -203,7 +203,7 @@ function App() {
   };
 
   // Books navigation and handlers
-  const handleLoan = (book) => {
+  const navigateToLoan = (book) => {
     setSelectedBook(book);
     setCurrentScreen("loan");
   };
@@ -463,7 +463,8 @@ function App() {
       {currentScreen === "books" && (
         <BookList
           books={books}
-          handleLoan={handleLoan}
+          navigateToLoan={navigateToLoan}
+          navigateToHold={navigateToHold}
           handleReturn={handleReturn}
           navigateToHome={navigateToHome}
           userData={userData} // Pass userData to check for admin role
@@ -487,6 +488,7 @@ function App() {
       {currentScreen === "hold" && selectedBook && (
         <BookHold
           selectedBook={selectedBook}
+          userData={userData}
           handleHoldBook={handleHoldBook}
           navigateToBooks={() => setCurrentScreen("books")}
         />
