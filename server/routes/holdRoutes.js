@@ -7,16 +7,30 @@ const getUserHolds = (req, res, userId) => {
   
   const query = `
     SELECT 
-      U.FirstName, 
-      U.LastName, 
-      B.Title, 
-      B.Author, 
-      DATE_FORMAT(CONVERT_TZ(H.RequestAT, '+00:00', @@session.time_zone), '%Y-%m-%dT%H:%i:%sZ') AS RequestAT, 
-      H.HoldStatus
-    FROM USER AS U
-    JOIN HOLD AS H ON U.UserID = H.UserID
-    JOIN BOOK AS B ON H.ItemID = B.BookID
-    WHERE U.UserID = ? AND H.HoldStatus IN ('Pending', 'Active')
+  H.HoldID, 
+  U.FirstName, 
+  U.LastName, 
+  H.ItemType, 
+  CASE 
+    WHEN H.ItemType = 'book' THEN B.Title
+    WHEN H.ItemType = 'media' THEN M.Title
+    WHEN H.ItemType = 'device' THEN D.Model
+    ELSE 'Unknown'
+  END AS Title,
+  CASE 
+    WHEN H.ItemType = 'book' THEN B.Author
+    WHEN H.ItemType = 'media' THEN M.Author
+    WHEN H.ItemType = 'device' THEN D.Brand
+    ELSE 'Unknown'
+  END AS AuthorOrBrand,
+  H.RequestAT,
+  H.HoldStatus
+FROM HOLD AS H
+LEFT JOIN USER AS U ON H.UserID = U.UserID
+LEFT JOIN BOOK AS B ON H.ItemID = B.BookID
+LEFT JOIN MEDIA AS M ON H.ItemID = M.MediaID
+LEFT JOIN DEVICE AS D ON H.ItemID = D.DeviceID
+WHERE H.UserID = ?;
   `;
 
   pool.query(query, [userId], (err, results) => {

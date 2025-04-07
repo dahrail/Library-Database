@@ -13,8 +13,9 @@ const HoldList = ({ holds, navigateToHome }) => {
             <tr>
               <th>First Name</th>
               <th>Last Name</th>
+              <th>Item Type</th> {/* Add this for ItemType */}
               <th>Title</th>
-              <th>Author</th>
+              <th>Author/Brand</th>
               <th>Requested At</th>
               <th>Hold Status</th>
             </tr>
@@ -24,8 +25,9 @@ const HoldList = ({ holds, navigateToHome }) => {
               <tr key={index}>
                 <td>{hold.FirstName}</td>
                 <td>{hold.LastName}</td>
-                <td>{hold.Title}</td>
-                <td>{hold.Author}</td>
+                <td>{hold.ItemType}</td> {/* Display the ItemType here */}
+                <td>{hold.Title}</td> {/* Title will vary based on ItemType */}
+                <td>{hold.AuthorOrBrand}</td> {/* Author for books/media, Brand for devices */}
                 <td>{new Date(hold.RequestAT).toLocaleString()}</td>
                 <td>{hold.HoldStatus}</td>
               </tr>
