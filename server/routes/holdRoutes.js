@@ -46,6 +46,17 @@ const holdBook = async (req, res) => {
       return sendJsonResponse(res, 400, { success: false, error: "You have already placed a hold on this book." });
     }
 
+    // Check if the user has loaned the book and not returned it
+    const activeLoanQuery = `
+      SELECT * FROM LOAN 
+      WHERE UserID = ? AND ItemID = ? AND ItemType = 'Book' AND ReturnedAt IS NULL
+    `;
+    const [activeLoan] = await pool.promise().query(activeLoanQuery, [UserID, BookID]);
+
+    if (activeLoan.length > 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "You have borrowed this item." });
+    }
+
     // Add entry to Hold table
     const holdQuery = `
       INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAt, HoldStatus)
@@ -77,6 +88,17 @@ const holdMedia = async (req, res) => {
       return sendJsonResponse(res, 400, { success: false, error: "You already have a pending hold on this item." });
     }
 
+    // Check if the user has loaned the media and not returned it
+    const activeLoanQuery = `
+      SELECT * FROM LOAN 
+      WHERE UserID = ? AND ItemID = ? AND ItemType = 'Media' AND ReturnedAt IS NULL
+    `;
+    const [activeLoan] = await pool.promise().query(activeLoanQuery, [UserID, MediaID]);
+
+    if (activeLoan.length > 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "You have borrowed this item." });
+    }
+
     // Add entry to Hold table
     const holdQuery = `
       INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAt, HoldStatus)
@@ -106,6 +128,17 @@ const holdDevice = async (req, res) => {
     if (existingHold.length > 0) {
       // If the user already has a pending hold, they cannot place another one
       return sendJsonResponse(res, 400, { success: false, error: "You already have a pending hold on this item." });
+    }
+
+    // Check if the user has loaned the device and not returned it
+    const activeLoanQuery = `
+      SELECT * FROM LOAN 
+      WHERE UserID = ? AND ItemID = ? AND ItemType = 'Device' AND ReturnedAt IS NULL
+    `;
+    const [activeLoan] = await pool.promise().query(activeLoanQuery, [UserID, DeviceID]);
+
+    if (activeLoan.length > 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "You have borrowed this item." });
     }
 
     // Add entry to Hold table
