@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
+import MediaBorrowConfirmation from "./MediaBorrowConfirmation";
+import MediaHoldConfirmation from "./MediaHoldConfirmation";
 
-// Update the Media component to accept userData as a prop
 const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding }) => {
-  // State for media items from database
   const [mediaItems, setMediaItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [displayedItems, setDisplayedItems] = useState([]);
   const initialRenderRef = useRef(true);
+  const [currentAction, setCurrentAction] = useState(null); // "borrow" or "hold"
+  const [selectedMedia, setSelectedMedia] = useState(null);
 
-  // Define fetchMediaItems outside of useEffect so it can be used elsewhere
   const fetchMediaItems = async () => {
     try {
       setLoading(true);
@@ -31,29 +31,25 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     }
   };
 
-  // Fetch media data from database
   useEffect(() => {
     fetchMediaItems();
   }, []);
 
-  // Use the initialCategory prop on mount
   useEffect(() => {
     if (initialCategory) {
       setSelectedCategory(initialCategory);
     }
   }, [initialCategory]);
 
-  // Filter media items by category
   useEffect(() => {
     if (mediaItems.length > 0) {
       let items = [...mediaItems];
       
       if (selectedCategory !== "all") {
-        // Map UI categories to database enum values
         const categoryMap = {
           "music": "Music",
-          "movies": "Movie", // This is working correctly
-          "videogames": "VideoGame" // Updated to match the enum value in your database
+          "movies": "Movie",
+          "videogames": "VideoGame"
         };
         
         const dbCategory = categoryMap[selectedCategory];
@@ -64,13 +60,10 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
       
       setDisplayedItems(items);
       
-      // Only apply animation on initial render or category change
       if (!initialRenderRef.current) {
-        // Add a class to the container to trigger a CSS animation
         const container = document.querySelector('#media-grid');
         if (container) {
           container.classList.remove('fade-in-items');
-          // Force a reflow to restart animation
           void container.offsetWidth;
           container.classList.add('fade-in-items');
         }
@@ -80,7 +73,6 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     }
   }, [selectedCategory, mediaItems]);
 
-  // Apple-inspired styling
   const styles = {
     container: {
       padding: "0",
@@ -177,10 +169,10 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
       overflow: "hidden",
       backgroundColor: "#fff",
       boxShadow: "0 8px 30px rgba(0, 0, 0, 0.08)",
-      opacity: "1", // Start visible
-      transform: "translateY(0)", // Start in final position
+      opacity: "1",
+      transform: "translateY(0)",
       cursor: "pointer",
-      animation: "none", // Remove JS animation
+      animation: "none",
     },
     cardImage: {
       width: "100%",
@@ -257,21 +249,20 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     },
     disabledButton: {
       display: "inline-block",
-      backgroundColor: "#000000", // Change to black instead of blue
+      backgroundColor: "#000000",
       color: "#ffffff",
       border: "none",
       borderRadius: "8px",
       padding: "12px 22px",
       fontSize: "17px",
       fontWeight: "500",
-      cursor: "pointer", // Change cursor to pointer
+      cursor: "pointer",
       marginTop: "15px",
       textAlign: "center",
       opacity: "0.9",
     },
   };
 
-  // Add CSS styles for animations to document head
   useEffect(() => {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -318,10 +309,8 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     };
   }, []);
 
-  // Add a loading state for images
   const [imageLoadingStatus, setImageLoadingStatus] = useState({});
 
-  // Handle image loading status
   const handleImageLoad = (id) => {
     setImageLoadingStatus(prev => ({
       ...prev,
@@ -334,12 +323,10 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
       ...prev,
       [id]: 'error'
     }));
-    e.target.onerror = null; // Prevent any further error handling
-    // Use a data URI instead of an image file to prevent infinite loops
+    e.target.onerror = null;
     e.target.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgMzAwIDQ1MCIgZmlsbD0ibm9uZSI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiNmMGYwZjAiLz4KICA8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI0IiBmaWxsPSIjOTk5Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+Cjwvc3ZnPg==";
   };
 
-  // Enhance styling for image container
   const additionalStyles = {
     imageContainer: {
       position: "relative",
@@ -370,7 +357,6 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     }
   };
 
-  // Add the spinner animation
   useEffect(() => {
     const styleElement = document.createElement('style');
     styleElement.innerHTML = `
@@ -386,7 +372,6 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     };
   }, []);
 
-  // Map of Wikipedia image URLs for media items
   const wikipediaImageUrls = {
     "Abbey Road": "https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg",
     "Thriller": "https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png",
@@ -408,8 +393,17 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
     "Hades": "https://upload.wikimedia.org/wikipedia/en/c/cc/Hades_cover_art.jpg"
   };
 
-  // Function to handle borrowing a media item
-  const handleBorrow = async (mediaItem) => {
+  const navigateToBorrowConfirmation = (mediaItem) => {
+    setSelectedMedia(mediaItem);
+    setCurrentAction("borrow");
+  };
+
+  const navigateToHoldConfirmation = (mediaItem) => {
+    setSelectedMedia(mediaItem);
+    setCurrentAction("hold");
+  };
+
+  const handleBorrow = async () => {
     try {
       const response = await fetch('/api/borrowMedia', {
         method: 'POST',
@@ -417,61 +411,88 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          UserID: userData.UserID, // Use the actual user ID from props
-          ItemType: mediaItem.Type,
-          ItemID: mediaItem.MediaID,
+          UserID: userData.UserID,
+          ItemType: selectedMedia.Type,
+          ItemID: selectedMedia.MediaID,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        alert(`Successfully borrowed "${mediaItem.Title}".`);
-        // Refresh the media items to update available copies
-        fetchMediaItems(); // Now this is defined properly
+        alert(`Successfully borrowed "${selectedMedia.Title}".`);
+        fetchMediaItems();
       } else {
-        alert(`Failed to borrow "${mediaItem.Title}": ${data.error}`);
+        alert(`Failed to borrow "${selectedMedia.Title}": ${data.error}`);
       }
     } catch (error) {
       console.error('Error borrowing media item:', error);
       alert('An error occurred while borrowing the media item.');
+    } finally {
+      setCurrentAction(null);
     }
   };
 
-  const handleHold = async (mediaItem) => {
+  const handleHold = async () => {
     try {
       const response = await fetch("/api/holdMedia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           UserID: userData.UserID,
-          MediaID: mediaItem.MediaID,
+          MediaID: selectedMedia.MediaID,
         }),
       });
 
       const data = await response.json();
       if (data.success) {
-        alert(`Successfully placed a hold on "${mediaItem.Title}".`);
+        alert(`Successfully placed a hold on "${selectedMedia.Title}".`);
         fetchMediaItems(); 
       } else {
-        alert(`Failed to place a hold on "${mediaItem.Title}": ${data.error}`);
+        alert(`Failed to place a hold on "${selectedMedia.Title}": ${data.error}`);
       }
     } catch (error) {
       console.error("Error placing hold on media:", error);
       alert("An error occurred while placing the hold.");
+    } finally {
+      setCurrentAction(null);
     }
   };
 
+  const navigateToMedia = () => {
+    setCurrentAction(null);
+  };
+
+  if (currentAction === "borrow") {
+    return (
+      <MediaBorrowConfirmation
+        media={selectedMedia}
+        userData={userData}
+        actionType="Borrow"
+        handleAction={handleBorrow}
+        navigateToMedia={navigateToMedia}
+      />
+    );
+  }
+
+  if (currentAction === "hold") {
+    return (
+      <MediaHoldConfirmation
+        media={selectedMedia}
+        handleAction={handleHold}
+        navigateToMedia={navigateToMedia}
+      />
+    );
+  }
+
   return (
     <div style={styles.container}>
-      {/* Hero Section */}
       <div style={styles.hero}>
         <h1 style={styles.heroTitle}>Explore Our Media Collection</h1>
         <p style={styles.heroSubtitle}>
           Discover our curated selection of music, movies, and video games
         </p>
         
-        {/* Add login prompt for users who aren't logged in */}
         {!isLoggedIn && (
           <p style={{
             ...styles.heroSubtitle, 
@@ -493,7 +514,6 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
         )}
       </div>
 
-      {/* Navigation */}
       <div style={styles.navContainer}>
         <div style={styles.nav}>
           <button
@@ -514,7 +534,6 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
           >
             Movies
           </button>
-          {/* Optional: You can remove or hide this button until your database supports video games */}
           <button
             style={selectedCategory === "videogames" ? {...styles.navButton, ...styles.activeNavButton} : styles.navButton}
             onClick={() => setSelectedCategory("videogames")}
@@ -524,7 +543,6 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
         </div>
       </div>
 
-      {/* Content Section */}
       <div style={styles.contentSection}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '50px 0' }}>
@@ -552,7 +570,6 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
                 }}
               >
                 <div style={additionalStyles.imageContainer}>
-                  {/* Show loading spinner until image loads */}
                   {imageLoadingStatus[item.MediaID] !== 'loaded' && imageLoadingStatus[item.MediaID] !== 'error' && (
                     <div style={additionalStyles.loadingOverlay}>
                       <div style={additionalStyles.loadingSpinner}></div>
@@ -573,13 +590,12 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
                   <p style={styles.cardInfo}>Genre: {item.Genre}</p>
                   <p style={styles.cardInfo}>Year: {item.PublicationYear}</p>
                   
-                  {/* Conditional button rendering based on login status and availability */}
                   {isLoggedIn ? (
                     item.AvailableCopies > 0 ? (
-                      <button style={styles.button} onClick={() => handleBorrow(item)}>Borrow</button>
+                      <button style={styles.button} onClick={() => navigateToBorrowConfirmation(item)}>Borrow</button>
                     ) : (
                       <button style={{...styles.button, backgroundColor: '#f7d774', color: '#000'}} 
-                        onClick={() => handleHold(item)}>Hold</button>
+                        onClick={() => navigateToHoldConfirmation(item)}>Hold</button>
                     )
                   ) : (
                     <div>
@@ -598,7 +614,6 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
           </div>
         )}
 
-        {/* Login message at the bottom for users who aren't logged in */}
         {!isLoggedIn && (
           <div style={{ textAlign: "center", margin: "40px 0" }}>
             <p style={styles.loginMessage}>
