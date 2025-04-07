@@ -56,8 +56,18 @@ const holdBook = async (req, res) => {
 const holdMedia = async (req, res) => {
   try {
     const { UserID, MediaID } = await parseRequestBody(req);
-    console.log(`Placing hold for media ID: ${MediaID}, user ID: ${UserID}`);
-    
+
+    // Check if the user has a pending hold on the media
+    const existingHoldQuery = `
+      SELECT * FROM HOLD
+      WHERE UserID = ? AND ItemID = ? AND ItemType = 'Media' AND HoldStatus = 'Pending'
+    `;
+    const [existingHold] = await pool.promise().query(existingHoldQuery, [UserID, MediaID]);
+
+    if (existingHold.length > 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "You already have a pending hold on this item." });
+    }
+
     // Add entry to Hold table
     const holdQuery = `
       INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAt, HoldStatus)
@@ -76,6 +86,18 @@ const holdMedia = async (req, res) => {
 const holdDevice = async (req, res) => {
   try {
     const { UserID, DeviceID } = await parseRequestBody(req);
+
+    // Check if the user has an pending hold on the device
+    const existingHoldQuery = `
+      SELECT * FROM HOLD
+      WHERE UserID = ? AND ItemID = ? AND ItemType = 'Device' AND HoldStatus = 'Pending'
+    `;
+    const [existingHold] = await pool.promise().query(existingHoldQuery, [UserID, DeviceID]);
+
+    if (existingHold.length > 0) {
+      // If the user already has a pending hold, they cannot place another one
+      return sendJsonResponse(res, 400, { success: false, error: "You already have a pending hold on this item." });
+    }
 
     // Add entry to Hold table
     const holdQuery = `

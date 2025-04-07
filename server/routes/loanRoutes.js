@@ -240,6 +240,18 @@ const borrowMedia = async (req, res) => {
     const { UserID, ItemID } = await parseRequestBody(req);
     // Start a transaction using a connection from the pool
     const connection = await pool.promise().getConnection();
+
+    // Check if the user has loaned the media and not returned it
+    const activeLoanQuery = `
+      SELECT * FROM LOAN 
+      WHERE UserID = ? AND ItemID = ? AND ItemType = 'Media' AND ReturnedAt IS NULL
+    `;
+    const [activeLoan] = await pool.promise().query(activeLoanQuery, [UserID, ItemID]);
+
+    if (activeLoan.length > 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "You have borrowed this item. You can only borrow this item once." });
+    }
+
     try {
       await connection.beginTransaction();
 
@@ -295,6 +307,17 @@ const borrowDevice = async (req, res) => {
   try {
     const { UserID, DeviceID } = await parseRequestBody(req);
 
+    // Check if the user has loaned the device and not returned it
+    const activeLoanQuery = `
+      SELECT * FROM LOAN 
+      WHERE UserID = ? AND ItemID = ? AND ItemType = 'Device' AND ReturnedAt IS NULL
+    `;
+    const [activeLoan] = await pool.promise().query(activeLoanQuery, [UserID, DeviceID]);
+
+    if (activeLoan.length > 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "You have borrowed this item. You can only borrow this item once." });
+    }
+
     // Check if the device is available
     const checkQuery = "SELECT AvailableCopies FROM DEVICE_INVENTORY WHERE DeviceID = ?";
     const [rows] = await pool.promise().query(checkQuery, [DeviceID]);
@@ -327,12 +350,10 @@ const borrowDevice = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   getUserLoans,
-  borrowBook,
   confirmReturn,
+  borrowBook,
   borrowMedia,
   borrowDevice,
 };

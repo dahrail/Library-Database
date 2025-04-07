@@ -99,6 +99,7 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
         setCurrentAction(null); // Return to the device list
       } else {
         alert(`Failed to borrow "${selectedDevice.Model}": ${data.error}`);
+        setCurrentAction(null); // Return to the device list
       }
     } catch (error) {
       console.error("Error borrowing device:", error);
@@ -124,6 +125,7 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
         setCurrentAction(null); // Return to the device list
       } else {
         alert(`Failed to place a hold on "${selectedDevice.Model}": ${data.error}`);
+        setCurrentAction(null); // Return to the device list
       }
     } catch (error) {
       console.error("Error placing hold on device:", error);
@@ -186,7 +188,6 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
                   <h3>{device.Model}</h3>
                   <p>Type: {device.Type}</p>
                   <p>Brand: {device.Brand}</p>
-                  <p>Available Copies: {device.AvailableCopies}</p>
                   {isLoggedIn ? (
                     device.AvailableCopies > 0 ? (
                       <button onClick={() => navigateToBorrowConfirmation(device)}>Borrow</button>
