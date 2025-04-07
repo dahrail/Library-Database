@@ -232,6 +232,49 @@ const RoomReservation = ({
     }
   };
 
+  const handleCancelReservation = async (roomId) => {
+    try {
+      if (!isLoggedIn) {
+        navigateToLogin();
+        return;
+      }
+
+      console.log("Cancelling reservation for room:", roomId);
+
+      const response = await fetch("/api/cancelReservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          RoomID: roomId,
+          UserID: userData.UserID,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Response from backend:", data);
+
+      if (data.success) {
+        alert("Reservation cancelled successfully!");
+
+        // Refresh the room list
+        const refreshResponse = await fetch("/api/rooms");
+        const refreshData = await refreshResponse.json();
+        console.log("Refreshed room data:", refreshData);
+
+        if (refreshData.success) {
+          setRooms(refreshData.rooms);
+        } else {
+          console.error("Failed to refresh room list:", refreshData.error);
+        }
+      } else {
+        alert("Failed to cancel reservation: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error cancelling reservation:", error);
+      alert("An error occurred while cancelling the reservation.");
+    }
+  };
+
   // Apple-inspired styling
   const styles = {
     container: {
@@ -663,12 +706,12 @@ const RoomReservation = ({
                       <button
                         style={{
                           ...styles.button,
-                          backgroundColor: "#cccccc",
-                          cursor: "not-allowed",
+                          backgroundColor: "#dc2626", // Red color for cancel button
+                          marginTop: "10px",
                         }}
-                        disabled
+                        onClick={() => handleCancelReservation(room.RoomID)}
                       >
-                        Currently Reserved
+                        Cancel Reservation
                       </button>
                     )
                   ) : (

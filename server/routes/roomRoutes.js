@@ -234,10 +234,82 @@ const releaseExpiredReservations = () => {
   });
 };
 
+const cancelReservation = async (req, res) => {
+  try {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on("end", async () => {
+      const { RoomID, UserID } = JSON.parse(body);
+
+      if (!RoomID || !UserID) {
+        console.error("Missing required fields in request body:", {
+          RoomID,
+          UserID,
+        });
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({ success: false, error: "Invalid request body" })
+        );
+        return;
+      }
+
+      console.log("Cancelling reservation for room:", { RoomID, UserID });
+
+      // Delete the reservation from ROOM_RESERVATIONS
+      const deleteQuery = `
+        DELETE FROM ROOM_RESERVATIONS
+        WHERE RoomID = ? AND UserID = ?
+      `;
+      pool.query(deleteQuery, [RoomID, UserID], (err, results) => {
+        if (err || results.affectedRows === 0) {
+          console.error(
+            "Error cancelling reservation or no reservation found:",
+            err
+          );
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({ success: false, error: "Reservation not found" })
+          );
+          return;
+        }
+
+        // Mark the room as available in ROOMS
+        const updateQuery = `
+          UPDATE ROOMS SET IsAvailable = 1 WHERE RoomID = ?
+        `;
+        pool.query(updateQuery, [RoomID], (err) => {
+          if (err) {
+            console.error("Error updating room availability:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                success: false,
+                error: "Failed to update room availability",
+              })
+            );
+            return;
+          }
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ success: true }));
+        });
+      });
+    });
+  } catch (error) {
+    console.error("Error in cancelReservation:", error);
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ success: false, error: "Server error" }));
+  }
+};
+
 module.exports = {
   getRooms,
   addRoom,
   borrowRoom,
   reserveRoom,
   releaseExpiredReservations,
+  cancelReservation,
 };

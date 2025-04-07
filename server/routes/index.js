@@ -7,9 +7,9 @@ const holdRoutes = require("./holdRoutes");
 const fineRoutes = require("./fineRoutes");
 const reportRoutes = require("./reportRoutes");
 const roomRoutes = require("./roomRoutes");
-const eventRoutes = require("./eventRoutes"); 
-const deviceRoutes = require("./deviceRoutes"); 
-const mediaRoutes = require("./mediaRoutes"); 
+const eventRoutes = require("./eventRoutes");
+const deviceRoutes = require("./deviceRoutes");
+const mediaRoutes = require("./mediaRoutes");
 
 const parseRequestBody = async (req) => {
   return new Promise((resolve, reject) => {
@@ -158,7 +158,11 @@ const handleRequest = async (req, res) => {
     }
 
     if (method === "POST" && path === "/api/reserveRoom") {
-       return await roomRoutes.reserveRoom(req, res);
+      return await roomRoutes.reserveRoom(req, res);
+    }
+
+    if (method === "POST" && path === "/api/cancelReservation") {
+      return roomRoutes.cancelReservation(req, res);
     }
 
     // EVENT ROUTES
