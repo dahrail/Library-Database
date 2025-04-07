@@ -50,6 +50,26 @@ const RoomReservation = ({
     fetchRooms();
   }, []);
 
+  // Periodically refresh rooms every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const fetchRooms = async () => {
+        try {
+          const response = await fetch("/api/rooms");
+          const data = await response.json();
+          if (data.success) {
+            setRooms(data.rooms);
+          }
+        } catch (err) {
+          console.error("Error fetching rooms:", err);
+        }
+      };
+      fetchRooms();
+    }, 60000); // Refresh every 60 seconds
+
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, []);
+
   // Filter rooms by capacity category
   useEffect(() => {
     if (rooms.length > 0) {

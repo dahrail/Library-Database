@@ -201,4 +201,43 @@ const reserveRoom = async (req, res) => {
   }
 };
 
-module.exports = { getRooms, addRoom, borrowRoom, reserveRoom };
+const releaseExpiredReservations = () => {
+  const releaseQuery = `
+    UPDATE ROOMS
+    SET IsAvailable = 1
+    WHERE RoomID IN (
+      SELECT RoomID
+      FROM ROOM_RESERVATIONS
+      WHERE EndAT <= NOW()
+    )
+  `;
+
+  const deleteQuery = `
+    DELETE FROM ROOM_RESERVATIONS
+    WHERE EndAT <= NOW()
+  `;
+
+  pool.query(releaseQuery, (err, results) => {
+    if (err) {
+      console.error("Error releasing expired reservations:", err);
+    } else {
+      console.log("Expired reservations released:", results.affectedRows);
+    }
+  });
+
+  pool.query(deleteQuery, (err, results) => {
+    if (err) {
+      console.error("Error deleting expired reservations:", err);
+    } else {
+      console.log("Expired reservations deleted:", results.affectedRows);
+    }
+  });
+};
+
+module.exports = {
+  getRooms,
+  addRoom,
+  borrowRoom,
+  reserveRoom,
+  releaseExpiredReservations,
+};
