@@ -41,9 +41,17 @@ const getUserLoans = (req, res, userId) => {
 const borrowBook = async (req, res) => {
   try {
     const { BookID, UserID, Role } = await parseRequestBody(req);
-    console.log(
-      `Confirming loan for book ID: ${BookID}, user ID: ${UserID}, role: ${Role}`
-    );
+    
+    // Check if the user has loaned the book and not returned it
+    const activeLoanQuery = `
+      SELECT * FROM LOAN 
+      WHERE UserID = ? AND ItemID = ? AND ItemType = 'Book' AND ReturnedAt IS NULL
+    `;
+    const [activeLoan] = await pool.promise().query(activeLoanQuery, [UserID, BookID]);
+
+    if (activeLoan.length > 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "You have borrowed this item. You can only borrow this item once." });
+    }
 
     const decrementQuery = `
       UPDATE BOOK_INVENTORY

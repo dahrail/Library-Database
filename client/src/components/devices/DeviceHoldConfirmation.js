@@ -1,7 +1,7 @@
 import React from "react";
 import "../../styles/devices/devices.css";
 
-const DeviceHoldConfirmation = ({ device, userData, handleConfirmHold, navigateToDevices }) => {
+const DeviceHoldConfirmation = ({ device, handleConfirmHold, navigateToDevices }) => {
   return (
     <div className="content-container">
       <h2>Hold Confirmation</h2>
@@ -11,6 +11,7 @@ const DeviceHoldConfirmation = ({ device, userData, handleConfirmHold, navigateT
         <p><strong>Model:</strong> {device.Model}</p>
         <p><strong>Brand:</strong> {device.Brand}</p>
       </div>
+      <p>We will notify you when this item becomes available.</p>
       <div className="button-group">
         <button onClick={navigateToDevices} className="btn-secondary">Cancel</button>
         <button onClick={handleConfirmHold} className="btn-primary">Confirm</button>

@@ -420,10 +420,10 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
       const data = await response.json();
 
       if (data.success) {
-        alert(`Successfully borrowed "${selectedMedia.Title}".`);
+        alert(`Borrow successfully`);
         fetchMediaItems();
       } else {
-        alert(`Failed to borrow "${selectedMedia.Title}": ${data.error}`);
+        alert(`Failed to borrow: ${data.error}`);
       }
     } catch (error) {
       console.error('Error borrowing media item:', error);
@@ -446,10 +446,10 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
 
       const data = await response.json();
       if (data.success) {
-        alert(`Successfully placed a hold on "${selectedMedia.Title}".`);
+        alert(`Place hold successfully`);
         fetchMediaItems(); 
       } else {
-        alert(`Failed to place a hold on "${selectedMedia.Title}": ${data.error}`);
+        alert(`Failed to place a hold: ${data.error}`);
       }
     } catch (error) {
       console.error("Error placing hold on media:", error);

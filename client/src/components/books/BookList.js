@@ -17,6 +17,7 @@ const BookList = ({
   const initialRenderRef = useRef(true);
   const [imageLoadingStatus, setImageLoadingStatus] = useState({});
   
+  
   // Use the initialCategory prop on mount
   useEffect(() => {
     if (initialCategory) {
@@ -339,12 +340,7 @@ const BookList = ({
       return;
     }
     
-    if (book.userHasHold || book.otherUserHasHold) {
-      alert(`Placing order for hold on book: "${book.title}".`);
-    } else {
-      alert(`Checking out a loan for book: "${book.title}".`);
-    }
-    navigateToLoan(book);
+    navigateToLoan(book);;
   };
 
   const handleHoldClick = (book) => {
@@ -354,7 +350,6 @@ const BookList = ({
       return;
     }
     
-    alert(`Placing order for hold on book: "${book.title}".`);
     navigateToHold(book);
   };
 

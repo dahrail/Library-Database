@@ -12,9 +12,7 @@ const MediaBorrowConfirmation = ({ media, userData, actionType, handleAction, na
         <p><strong>Type:</strong> {media.Type}</p>
         <p><strong>Model:</strong> {media.Title}</p>
         <p><strong>Brand:</strong> {media.Author}</p>
-        {actionType === "Borrow" && (
-          <p><strong>Borrow Duration:</strong> {borrowDays} days</p>
-        )}
+        <p><strong>Borrow Duration:</strong> {borrowDays} days</p>
       </div>
       <div className="button-group">
         <button onClick={navigateToMedia} className="btn-secondary">Cancel</button>

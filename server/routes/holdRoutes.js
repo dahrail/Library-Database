@@ -31,12 +31,21 @@ const getUserHolds = (req, res, userId) => {
   });
 };
 
-// Place a hold
+// BOOK SESSION
 const holdBook = async (req, res) => {
   try {
     const { UserID, BookID } = await parseRequestBody(req);
-    console.log(`Placing hold for book ID: ${BookID}, user ID: ${UserID}`);
     
+    // Check if the user has a pending hold on the book
+    const checkHoldQuery = `
+      SELECT * FROM HOLD WHERE UserID = ? AND ItemID = ? AND ItemType = 'Book' AND HoldStatus = 'Pending'
+    `;
+    const [existingHold] = await pool.promise().query(checkHoldQuery, [UserID, BookID]);
+    
+    if (existingHold.length > 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "You have already placed a hold on this book." });
+    }
+
     // Add entry to Hold table
     const holdQuery = `
       INSERT INTO HOLD (UserID, ItemType, ItemID, RequestAt, HoldStatus)

@@ -350,10 +350,11 @@ function App() {
         userData.Role
       );
       if (data.success) {
-        alert("Book borrow successfully!");
-        setCurrentScreen("home");
+        alert("Borrow successfully");
+        setCurrentScreen("books");
       } else {
-        alert("Failed to confirm book borrow: " + data.error);
+        alert("Failed to borrow: " + data.error);
+        setCurrentScreen("books");
       }
     } catch (error) {
       console.error("Error confirming book borrow:", error);
@@ -365,10 +366,11 @@ function App() {
     try {
       const data = await API.holdBook(userData.UserID, selectedBook.bookID);
       if (data.success) {
-        alert("Hold placed successfully!");
+        alert("Place hold successfully");
         setCurrentScreen("books");
       } else {
         alert("Failed to place hold: " + data.error);
+        setCurrentScreen("books");
       }
     } catch (error) {
       console.error("Error placing hold:", error);

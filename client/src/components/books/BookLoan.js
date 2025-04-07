@@ -2,14 +2,18 @@ import React from 'react';
 import '../../styles/books/Books.css';
 
 const BookLoan = ({ selectedBook, userData, handleBorrowBook, navigateToBooks }) => {
+  const borrowDays = userData.Role === "Faculty" ? 14 : 7;
+
   return (
     <div className="content-container">
-      <h2>Loan Screen</h2>
-      <p>Checking out a loan for book: <strong>{selectedBook.title}</strong></p>
-      <p>
-        The book will be due in{' '}
-        <strong>{userData.Role === 'Student' ? '7 days' : '14 days'}</strong>.
-      </p>
+      <h2>Borrow Confirmation</h2>
+      <p>Are you sure you want to borrow this book? </p>
+      <div className="book-details">
+        <p><strong>Type:</strong> {selectedBook.title}</p>
+        <p><strong>Model:</strong> {selectedBook.author}</p>
+        <p><strong>Brand:</strong> {selectedBook.genre}</p>
+        <p><strong>Borrow Duration:</strong> {borrowDays} days</p>
+      </div>
       <div className="button-group">
         <button onClick={navigateToBooks} className="btn-secondary">Cancel</button>
         <button onClick={handleBorrowBook} className="btn-primary">Confirm</button>

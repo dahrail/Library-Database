@@ -11,6 +11,7 @@ const MediaHoldConfirmation = ({ media, handleAction, navigateToMedia }) => {
         <p><strong>Title:</strong> {media.Title}</p>
         <p><strong>Author:</strong> {media.Author}</p>
       </div>
+      <p>We will notify you when this item becomes available.</p>
       <div className="button-group">
         <button onClick={navigateToMedia} className="btn-secondary">Cancel</button>
         <button onClick={handleAction} className="btn-primary">Confirm</button>

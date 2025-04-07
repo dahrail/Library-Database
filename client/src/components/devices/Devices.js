@@ -94,11 +94,11 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
 
       const data = await response.json();
       if (data.success) {
-        alert(`Successfully borrowed "${selectedDevice.Model}".`);
+        alert(`Borrow successfully`);
         fetchDevices(); // Refresh devices to update available copies
         setCurrentAction(null); // Return to the device list
       } else {
-        alert(`Failed to borrow "${selectedDevice.Model}": ${data.error}`);
+        alert(`Failed to borrow: ${data.error}`);
         setCurrentAction(null); // Return to the device list
       }
     } catch (error) {
@@ -120,11 +120,11 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
 
       const data = await response.json();
       if (data.success) {
-        alert(`Successfully placed a hold on "${selectedDevice.Model}".`);
+        alert(`Place hold successfully`);
         fetchDevices(); // Refresh devices to update available copies
         setCurrentAction(null); // Return to the device list
       } else {
-        alert(`Failed to place a hold on "${selectedDevice.Model}": ${data.error}`);
+        alert(`Failed to place a hold: ${data.error}`);
         setCurrentAction(null); // Return to the device list
       }
     } catch (error) {
