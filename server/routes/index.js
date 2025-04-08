@@ -165,6 +165,10 @@ const handleRequest = async (req, res) => {
       return roomRoutes.cancelReservation(req, res);
     }
 
+    if (method === "POST" && path === "/api/updateRoom") {
+      return await roomRoutes.updateRoom(req, res);
+    }
+
     // EVENT ROUTES
     if (method === "GET" && path.match(/^\/api\/events\/?$/)) {
       return eventRoutes.getAllEvents(req, res);

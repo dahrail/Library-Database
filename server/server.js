@@ -1,7 +1,10 @@
 const http = require("http");
 const { setCorsHeaders } = require("./utils/requestUtils");
 const handleRequest = require("./routes/index");
-const { releaseExpiredReservations } = require("./routes/roomRoutes");
+const {
+  releaseExpiredReservations,
+  updateRoom,
+} = require("./routes/roomRoutes");
 
 // Create the HTTP server with the new request handler
 const server = http.createServer(async (req, res) => {
@@ -13,6 +16,12 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(204);
     res.end();
     return;
+  }
+
+  const { method, url: path } = req;
+
+  if (method === "POST" && path === "/api/updateRoom") {
+    return await updateRoom(req, res);
   }
 
   // Process the request with our main handler

@@ -20,6 +20,50 @@ const RoomReservation = ({
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [displayedRooms, setDisplayedRooms] = useState([]);
   const initialRenderRef = useRef(true);
+  const [editRoom, setEditRoom] = useState(null);
+
+  const handleEditClick = (room) => {
+    setEditRoom({
+      RoomID: room.RoomID,
+      RoomName: room.RoomName,
+      Capacity: room.Capacity,
+      Notes: room.Notes,
+      IsAvailable: room.IsAvailable,
+    });
+  };
+
+  const handleEditRoom = async () => {
+    try {
+      if (!editRoom.RoomID) {
+        alert("Please select a room to edit.");
+        return;
+      }
+
+      const response = await fetch("/api/updateRoom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editRoom),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert("Room updated successfully!");
+
+        // Refresh the room list
+        const refreshResponse = await fetch("/api/rooms");
+        const refreshData = await refreshResponse.json();
+        if (refreshData.success) {
+          setRooms(refreshData.rooms);
+          setEditRoom(null); // Clear the edit form
+        }
+      } else {
+        alert("Failed to update room: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error updating room:", error);
+      alert("An error occurred while updating the room.");
+    }
+  };
 
   // Use the initialCategory prop on mount
   useEffect(() => {
@@ -396,6 +440,44 @@ const RoomReservation = ({
       transition: "all 0.2s ease",
       marginTop: "10px",
     },
+    updateButton: {
+      backgroundColor: "#ff9800", // Orange color
+      color: "#ffffff",
+      border: "none",
+      borderRadius: "8px",
+      padding: "10px 20px",
+      fontSize: "16px",
+      fontWeight: "600",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      marginTop: "10px",
+    },
+    updateButtonHover: {
+      backgroundColor: "#e68900",
+      transform: "scale(1.05)",
+    },
+    saveButton: {
+      backgroundColor: "#4caf50", // Green color
+      color: "#ffffff",
+      border: "none",
+      borderRadius: "8px",
+      padding: "10px 20px",
+      fontSize: "16px",
+      fontWeight: "600",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      marginTop: "10px",
+    },
+    textArea: {
+      width: "100%",
+      padding: "12px 16px",
+      borderRadius: "8px",
+      border: "1px solid #d2d2d7",
+      fontSize: "16px",
+      color: "#1d1d1f",
+      transition: "border-color 0.2s ease",
+      marginBottom: "16px",
+    },
     grid: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
@@ -690,7 +772,11 @@ const RoomReservation = ({
                         : styles.statusReserved),
                     }}
                   >
-                    {room.IsAvailable ? "Available" : "Currently Reserved"}
+                    {room.IsAvailable
+                      ? "Available"
+                      : room.IsReserved
+                      ? "Currently Reserved"
+                      : "Room Temporarily Unavailable"}
                   </div>
 
                   {/* Show appropriate button based on login status and room availability */}
@@ -722,6 +808,80 @@ const RoomReservation = ({
                       Login to Reserve
                     </button>
                   )}
+
+                  {isLoggedIn && userData?.Role === "Admin" && (
+                    <button
+                      style={{
+                        ...styles.updateButton,
+                      }}
+                      onClick={() => handleEditClick(room)}
+                    >
+                      Update Room
+                    </button>
+                  )}
+
+                  {isLoggedIn &&
+                    userData?.Role === "Admin" &&
+                    editRoom?.RoomID === room.RoomID && (
+                      <div style={styles.adminSection}>
+                        <h3 style={styles.adminTitle}>Edit Room</h3>
+                        <div style={styles.formRow}>
+                          <input
+                            type="text"
+                            placeholder="Room Name"
+                            value={editRoom.RoomName}
+                            onChange={(e) =>
+                              setEditRoom({
+                                ...editRoom,
+                                RoomName: e.target.value,
+                              })
+                            }
+                            style={styles.inputField}
+                          />
+                          <input
+                            type="number"
+                            placeholder="Capacity"
+                            value={editRoom.Capacity}
+                            onChange={(e) =>
+                              setEditRoom({
+                                ...editRoom,
+                                Capacity: e.target.value,
+                              })
+                            }
+                            style={styles.inputField}
+                          />
+                        </div>
+                        <textarea
+                          placeholder="Notes (e.g., Projector, Board)"
+                          value={editRoom.Notes}
+                          onChange={(e) =>
+                            setEditRoom({ ...editRoom, Notes: e.target.value })
+                          }
+                          style={styles.textArea}
+                        />
+                        <div>
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={editRoom.IsAvailable}
+                              onChange={(e) =>
+                                setEditRoom({
+                                  ...editRoom,
+                                  IsAvailable: e.target.checked,
+                                })
+                              }
+                            />
+                            Room Available
+                          </label>
+                        </div>
+                        <button
+                          onClick={handleEditRoom}
+                          style={styles.saveButton}
+                        >
+                          Save Changes
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
             ))}

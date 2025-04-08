@@ -305,6 +305,52 @@ const cancelReservation = async (req, res) => {
   }
 };
 
+const updateRoom = async (req, res) => {
+  try {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      const { RoomID, RoomName, Capacity, Notes, IsAvailable } = JSON.parse(body);
+
+      if (!RoomID) {
+        console.error("RoomID is required to update a room.");
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ success: false, error: "RoomID is required." }));
+        return;
+      }
+
+      const updateQuery = `
+        UPDATE ROOMS
+        SET RoomName = ?, Capacity = ?, Notes = ?, IsAvailable = ?
+        WHERE RoomID = ?
+      `;
+
+      pool.query(
+        updateQuery,
+        [RoomName, Capacity, Notes, IsAvailable, RoomID],
+        (err, results) => {
+          if (err || results.affectedRows === 0) {
+            console.error("Error updating room or no rows affected:", err);
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: false, error: "Room not found" }));
+            return;
+          }
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ success: true, message: "Room updated successfully." }));
+        }
+      );
+    });
+  } catch (error) {
+    console.error("Error in updateRoom:", error);
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ success: false, error: "Server error." }));
+  }
+};
+
 module.exports = {
   getRooms,
   addRoom,
@@ -312,4 +358,5 @@ module.exports = {
   reserveRoom,
   releaseExpiredReservations,
   cancelReservation,
+  updateRoom, // Ensure this is exported
 };
