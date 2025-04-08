@@ -216,13 +216,37 @@ function App() {
   const handleReturn = async (loan) => {
     try {
       console.log("Returning loan with LoanID:", loan.LoanID); // Debugging line
+  
+      // // Immediately update the local state to reflect the loan's return
+      // const updatedLoan = { ...loan, ReturnedAt: new Date().toISOString() };
+  
+      // // Update the local state to disable the button and reflect the return
+      // setLoans((prevLoans) =>
+      //   prevLoans.map((l) => (l.LoanID === loan.LoanID ? updatedLoan : l))
+      // );
+  
+      // Call the API to confirm the return
       const data = await API.confirmReturn(loan.LoanID); // Pass the correct LoanID
+  
       if (data.success) {
         alert(`The item "${loan.Title}" has been successfully returned.`);
-        // Refresh the loan list after returning
+
+        const updatedLoan = { ...loan, ReturnedAt: new Date().toISOString() };
+        setLoans((prevLoans) =>
+          prevLoans.map((l) => (l.LoanID === loan.LoanID ? updatedLoan : l))
+        );
+        
+        // Fetch the updated loan list from the API after the return
         const updatedLoans = await API.getLoans(userData.UserID);
-        setLoans(updatedLoans);
+        setLoans(updatedLoans);  // Update state with the fresh data from the server
+  
+        // Navigate to the loans page to display the updated loan list
+        navigateToLoans(); // Assuming this function takes the user to the loan page
       } else {
+        // If the return fails, revert the change in local state
+        setLoans((prevLoans) =>
+          prevLoans.map((l) => (l.LoanID === loan.LoanID ? loan : l))
+        );
         alert("Failed to return the item: " + data.error);
       }
     } catch (error) {
@@ -230,7 +254,9 @@ function App() {
       alert("An error occurred while returning the item.");
     }
   };
-
+  
+  
+  
   // Loans navigation and handlers
   const navigateToLoans = async () => {
     window.scrollTo(0, 0);

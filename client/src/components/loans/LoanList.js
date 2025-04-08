@@ -28,6 +28,7 @@ const LoanList = ({ loans, handleReturn, navigateToHome }) => {
               <th>Author/Brand</th>
               <th>Borrowed At</th>
               <th>Due At</th>
+              <th>Returned At</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -39,6 +40,7 @@ const LoanList = ({ loans, handleReturn, navigateToHome }) => {
                 <td>{loan.AuthorOrBrand}</td> 
                 <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
                 <td>{new Date(loan.DueAT).toLocaleString()}</td>
+                <td>{loan.ReturnedAt ? new Date(loan.ReturnedAt).toLocaleString() : "Not Returned"}</td>
                 <td>
                   <button
                     onClick={() => handleReturn(loan)}

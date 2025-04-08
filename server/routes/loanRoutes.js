@@ -24,7 +24,8 @@ const getUserLoans = (req, res, userId) => {
     ELSE 'Unknown'
   END AS AuthorOrBrand,
   L.BorrowedAt,
-  L.DueAT
+  L.DueAT,
+  L.ReturnedAt
 FROM LOAN AS L
 LEFT JOIN USER AS U ON L.UserID = U.UserID
 LEFT JOIN BOOK AS B ON L.ItemID = B.BookID
