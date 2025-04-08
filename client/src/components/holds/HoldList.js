@@ -11,10 +11,8 @@ const HoldList = ({ holds, navigateToHome }) => {
         <table className="holds-table">
           <thead>
             <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Item Type</th> {/* Add this for ItemType */}
-              <th>Title</th>
+              <th>Item Type</th>
+              <th>Title/Model</th>
               <th>Author/Brand</th>
               <th>Requested At</th>
               <th>Hold Status</th>
@@ -23,11 +21,9 @@ const HoldList = ({ holds, navigateToHome }) => {
           <tbody>
             {holds.map((hold, index) => (
               <tr key={index}>
-                <td>{hold.FirstName}</td>
-                <td>{hold.LastName}</td>
-                <td>{hold.ItemType}</td> {/* Display the ItemType here */}
-                <td>{hold.Title}</td> {/* Title will vary based on ItemType */}
-                <td>{hold.AuthorOrBrand}</td> {/* Author for books/media, Brand for devices */}
+                <td>{hold.ItemType}</td> 
+                <td>{hold.Title}</td> 
+                <td>{hold.AuthorOrBrand}</td> 
                 <td>{new Date(hold.RequestAT).toLocaleString()}</td>
                 <td>{hold.HoldStatus}</td>
               </tr>

@@ -7,19 +7,30 @@ const getUserLoans = (req, res, userId) => {
 
   const query = `
     SELECT 
-      L.LoanID, 
-      U.FirstName, 
-      U.LastName, 
-      L.ItemType, 
-      B.Title, 
-      B.Author, 
-      L.BorrowedAt, 
-      L.DueAT, 
-      L.ReturnedAt
-    FROM LOAN AS L
-    JOIN USER AS U ON L.UserID = U.UserID
-    JOIN BOOK AS B ON L.ItemID = B.BookID
-    WHERE L.UserID = ?
+  L.LoanID, 
+  U.FirstName, 
+  U.LastName, 
+  L.ItemType, 
+  CASE 
+    WHEN L.ItemType = 'book' THEN B.Title
+    WHEN L.ItemType = 'media' THEN M.Title
+    WHEN L.ItemType = 'device' THEN D.Model
+    ELSE 'Unknown'
+  END AS Title,
+  CASE 
+    WHEN L.ItemType = 'book' THEN B.Author
+    WHEN L.ItemType = 'media' THEN M.Author
+    WHEN L.ItemType = 'device' THEN D.Brand
+    ELSE 'Unknown'
+  END AS AuthorOrBrand,
+  L.BorrowedAt,
+  L.DueAT
+FROM LOAN AS L
+LEFT JOIN USER AS U ON L.UserID = U.UserID
+LEFT JOIN BOOK AS B ON L.ItemID = B.BookID
+LEFT JOIN MEDIA AS M ON L.ItemID = M.MediaID
+LEFT JOIN DEVICE AS D ON L.ItemID = D.DeviceID
+WHERE L.UserID = ?
   `;
 
   pool.query(query, [userId], (err, results) => {
