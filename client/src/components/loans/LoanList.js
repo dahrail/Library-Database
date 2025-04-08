@@ -23,8 +23,9 @@ const LoanList = ({ loans, handleReturn, navigateToHome }) => {
         <table className="loans-table">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Author</th>
+              <th>Item Type</th>
+              <th>Title/Model</th>
+              <th>Author/Brand</th>
               <th>Borrowed At</th>
               <th>Due At</th>
               <th>Action</th>
@@ -33,8 +34,9 @@ const LoanList = ({ loans, handleReturn, navigateToHome }) => {
           <tbody>
             {loans.map((loan, index) => (
               <tr key={index}>
-                <td>{loan.Title}</td>
-                <td>{loan.Author}</td>
+                <td>{loan.ItemType}</td> 
+                <td>{loan.Title}</td> 
+                <td>{loan.AuthorOrBrand}</td> 
                 <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
                 <td>{new Date(loan.DueAT).toLocaleString()}</td>
                 <td>
