@@ -77,6 +77,20 @@ const borrowBook = async (req, res) => {
 
     // Determine the loan period based on the user's role
     const loanPeriod = Role === "Student" ? 7 : 14;
+    const borrowLimit = Role === "Student" ? 2 : 3;
+
+    // Check if the user meet the borrow limit
+    const activeLoansQuery = `
+      SELECT COUNT(*) AS activeLoans
+      FROM LOAN
+      WHERE UserID = ? AND ItemType = 'Book' AND ReturnedAt IS NULL
+    `;
+    const [activeLoans] = await pool.promise().query(activeLoansQuery, [UserID]);
+
+    // If the number of active loans exceeds the borrow limit, reject the request
+    if (activeLoans[0].activeLoans >= borrowLimit) {
+      return sendJsonResponse(res, 400, { success: false, error: `You can only borrow up to ${borrowLimit} book at a time.` });
+    }
 
     pool.getConnection((err, connection) => {
       if (err) {
@@ -274,6 +288,25 @@ const borrowMedia = async (req, res) => {
     try {
       await connection.beginTransaction();
 
+      const roleQuery = `SELECT Role FROM USER WHERE UserID = ?`;
+      const [user] = await connection.query(roleQuery, [UserID]);
+      const role = user[0]?.Role || "Student";
+      const loanPeriod = role === "Student" ? 7 : 14;
+      const borrowLimit = Role === "Student" ? 2 : 3;
+
+    // Check if the user meet the borrow limit
+    const activeLoansQuery = `
+      SELECT COUNT(*) AS activeLoans
+      FROM LOAN
+      WHERE UserID = ? AND ItemType = 'Media' AND ReturnedAt IS NULL
+    `;
+    const [activeLoans] = await pool.promise().query(activeLoansQuery, [UserID]);
+
+    // If the number of active loans exceeds the borrow limit, reject the request
+    if (activeLoans[0].activeLoans >= borrowLimit) {
+      return sendJsonResponse(res, 400, { success: false, error: `You can only borrow up to ${borrowLimit} media at a time.` });
+    }
+
       // Decrement AvailableCopies in MEDIA_INVENTORY for the borrowed media item
       const updateQuery = `
         UPDATE MEDIA_INVENTORY
@@ -287,12 +320,6 @@ const borrowMedia = async (req, res) => {
         connection.release();
         return sendJsonResponse(res, 400, { success: false, error: "No available copies for media item." });
       }
-
-      // Determine loan period based on user role
-      const roleQuery = `SELECT Role FROM USER WHERE UserID = ?`;
-      const [user] = await connection.query(roleQuery, [UserID]);
-      const role = user[0]?.Role || "Student";
-      const loanPeriod = role === "Student" ? 7 : 14;
 
       // Insert loan record with ItemType always 'Media'
       const insertQuery = `
@@ -350,6 +377,20 @@ const borrowDevice = async (req, res) => {
     const [user] = await pool.promise().query(roleQuery, [UserID]);
     const role = user[0]?.Role || "Student";
     const loanPeriod = role === "Student" ? 7 : 14;
+    const borrowLimit = Role === "Student" ? 2 : 3;
+
+    // Chekc if the user meet the borrow limit
+    const activeLoansQuery = `
+      SELECT COUNT(*) AS activeLoans
+      FROM LOAN
+      WHERE UserID = ? AND ItemType = 'Device' AND ReturnedAt IS NULL
+    `;
+    const [activeLoans] = await pool.promise().query(activeLoansQuery, [UserID]);
+
+    // If the number of active loans exceeds the borrow limit, reject the request
+    if (activeLoans[0].activeLoans >= borrowLimit) {
+      return sendJsonResponse(res, 400, { success: false, error: `You can only borrow up to ${borrowLimit} devices at a time.` });
+    }
 
     // Update inventory
     const updateQuery = "UPDATE DEVICE_INVENTORY SET AvailableCopies = AvailableCopies - 1 WHERE DeviceID = ?";
