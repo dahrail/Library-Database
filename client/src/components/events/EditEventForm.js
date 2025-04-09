@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 
-const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
+const EditEventForm = ({ event, rooms, onSubmit, onCancel }) => {
   const [eventData, setEventData] = useState({
-    EventName: '',
-    RoomID: '',
-    StartAt: '',
-    EndAt: '',
-    MaxAttendees: '',
-    Category: '',
-    Description: ''
+    EventID: event.EventID,
+    EventName: event.EventName,
+    RoomID: event.RoomID,
+    StartAt: formatDateTimeForInput(event.StartAt),
+    EndAt: formatDateTimeForInput(event.EndAt),
+    MaxAttendees: event.MaxAttendees,
+    Category: event.Category || '',
+    Description: event.Description || '',
+    UserID: event.UserID
   });
   
   const handleChange = (e) => {
@@ -25,10 +27,13 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
   };
   
   // Format datetime for input fields
-  const formatDateTimeForInput = (date) => {
-    const d = new Date(date || new Date());
-    return d.toISOString().slice(0, 16); // Format as YYYY-MM-DDTHH:MM
-  };
+  function formatDateTimeForInput(dateString) {
+    const d = new Date(dateString);
+    // Ensure local timezone is considered
+    const tzOffset = d.getTimezoneOffset() * 60000; // offset in milliseconds
+    const localISOTime = (new Date(d - tzOffset)).toISOString().slice(0, 16);
+    return localISOTime;
+  }
   
   const eventCategories = [
     'Workshop',
@@ -43,7 +48,7 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
   
   return (
     <div className="add-event-form-container">
-      <h3>Add New Event</h3>
+      <h3>Edit Event</h3>
       <form onSubmit={handleSubmit} className="add-event-form">
         <div className="form-group">
           <label htmlFor="EventName">Event Name:</label>
@@ -104,7 +109,6 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
               value={eventData.StartAt}
               onChange={handleChange}
               required
-              min={formatDateTimeForInput()}
             />
           </div>
           
@@ -117,7 +121,7 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
               value={eventData.EndAt}
               onChange={handleChange}
               required
-              min={eventData.StartAt || formatDateTimeForInput()}
+              min={eventData.StartAt}
             />
           </div>
         </div>
@@ -145,7 +149,6 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
             onChange={handleChange}
             rows="4"
             placeholder="Provide details about the event"
-            required
           ></textarea>
         </div>
         
@@ -154,7 +157,7 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
             Cancel
           </button>
           <button type="submit" className="btn-submit">
-            Create Event
+            Update Event
           </button>
         </div>
       </form>
@@ -162,4 +165,4 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
   );
 };
 
-export default AddEventForm;
+export default EditEventForm;

@@ -182,6 +182,22 @@ const handleRequest = async (req, res) => {
       return await eventRoutes.registerForEvent(req, res);
     }
 
+    if (method === "POST" && path === "/api/events/checkin") {
+      return await eventRoutes.checkInForEvent(req, res);
+    }
+
+    if (method === "GET" && path.match(/^\/api\/events\/(\d+)\/attendees$/)) {
+      const eventId = path.match(/^\/api\/events\/(\d+)\/attendees$/)[1];
+      req.params = { eventId };
+      return eventRoutes.getEventAttendees(req, res);
+    }
+
+    if (method === "GET" && path.match(/^\/api\/events\/(\d+)\/count$/)) {
+      const eventId = path.match(/^\/api\/events\/(\d+)\/count$/)[1];
+      req.params = { eventId };
+      return eventRoutes.getEventAttendeeCount(req, res);
+    }
+
     // If we reach here, no route was matched
     console.log("No route matched for:", path);
     sendJsonResponse(res, 404, { error: "Not found" });

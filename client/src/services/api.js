@@ -186,9 +186,128 @@ const API = {
         body: JSON.stringify({ UserID: userId, EventID: eventId }),
       });
       
-      return await response.json();
+      // First try to get the text response
+      const responseText = await response.text();
+      
+      // Then try to parse it as JSON
+      try {
+        const data = JSON.parse(responseText);
+        return data;
+      } catch (jsonError) {
+        console.error('Error parsing registration response:', responseText, jsonError);
+        throw new Error('Invalid response from server');
+      }
     } catch (error) {
       console.error('Error registering for event:', error);
+      throw error;
+    }
+  },
+  
+  checkInForEvent: async (userId, eventId) => {
+    try {
+      const response = await fetch('/api/events/checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ UserID: userId, EventID: eventId }),
+      });
+      
+      // First try to get the text response
+      const responseText = await response.text();
+      console.log("Raw check-in response:", responseText);
+      
+      // Then try to parse it as JSON
+      try {
+        const data = JSON.parse(responseText);
+        return data;
+      } catch (jsonError) {
+        console.error('Error parsing check-in response:', responseText, jsonError);
+        throw new Error(`Invalid server response: ${responseText}`);
+      }
+    } catch (error) {
+      console.error('Error checking in for event:', error);
+      throw error;
+    }
+  },
+  
+  getEventAttendeeCount: async (eventId) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}/count`);
+      
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch event attendee count');
+      }
+      
+      return {
+        checkedInCount: data.CheckedInCount,
+        totalRegistrations: data.TotalRegistrations
+      };
+    } catch (error) {
+      console.error('Error fetching event attendee count:', error);
+      throw error;
+    }
+  },
+  
+  updateEvent: async (eventId, eventData) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating event:', error);
+      throw error;
+    }
+  },
+  
+  deleteEvent: async (eventId) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      throw error;
+    }
+  },
+  
+  getEventAttendees: async (eventId) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}/attendees`);
+      
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch event attendees');
+      }
+      
+      return data.attendees || [];
+    } catch (error) {
+      console.error('Error fetching event attendees:', error);
       throw error;
     }
   },

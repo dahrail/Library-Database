@@ -1,0 +1,244 @@
+.event-detail-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  color: #1d1d1f;
+}
+
+.event-detail-header {
+  margin-bottom: 30px;
+}
+
+.event-detail-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.event-detail-content h2 {
+  font-size: 28px;
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.event-category {
+  margin-bottom: 24px;
+}
+
+.event-category-tag {
+  display: inline-block;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.event-detail-info {
+  margin-bottom: 30px;
+}
+
+.detail-row {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: baseline;
+}
+
+.detail-label {
+  font-weight: 600;
+  width: 100px;
+  flex-shrink: 0;
+  color: #6e6e73;
+}
+
+.detail-value {
+  flex-grow: 1;
+}
+
+.attendance-count {
+  font-weight: 500;
+}
+
+.capacity-info {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #6e6e73;
+}
+
+.low-availability {
+  color: #c0392b !important;
+  font-weight: 600;
+}
+
+.detail-description {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.detail-description h4 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.event-detail-actions {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.btn-register {
+  width: 100%;
+  padding: 14px;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-register:hover {
+  background-color: #0058b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-register:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.btn-checkin {
+  width: 100%;
+  padding: 14px;
+  background-color: #34c759;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 12px;
+}
+
+.btn-checkin:hover {
+  background-color: #2eb352;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.registered-message {
+  background-color: #e3f9e5;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.checked-in-message {
+  background-color: #e3f9e5;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 10px;
+  text-align: center;
+  color: #1d8531;
+  font-weight: 600;
+}
+
+.past-event-message {
+  background-color: #f5f5f7;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 10px;
+  text-align: center;
+  color: #86868b;
+}
+
+.login-prompt {
+  font-style: italic;
+  color: #86868b;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.admin-section {
+  margin-top: 40px;
+  padding: 20px;
+  background-color: #f5f5f7;
+  border-radius: 12px;
+}
+
+.admin-section h4 {
+  margin-top: 0;
+  font-size: 18px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.attendee-list {
+  margin-top: 16px;
+}
+
+.attendee-list h4 {
+  margin-top: 0;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.attendee-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.attendee-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e8e8e8;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checked-in-tag {
+  font-size: 12px;
+  background-color: #34c759;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.not-checked-tag {
+  font-size: 12px;
+  background-color: #ff9500;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #0071e3;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.btn-back:hover {
+  text-decoration: underline;
+}
