@@ -282,19 +282,6 @@ const API = {
       throw error;
     }
   },
-  returnDevice: async (userId, deviceId) => {
-    try {
-      const response = await fetch("/api/returnDevice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ UserID: userId, DeviceID: deviceId }),
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Error returning device:", error);
-      throw error;
-    }
-  },
 };
 
 export default API;

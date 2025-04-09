@@ -213,19 +213,19 @@ function App() {
     setCurrentScreen("hold");
   };
 
-  const handleReturn = async (loan) => {
+  const handleReturn = async (loans) => {
     try {
-      console.log("Returning loan with LoanID:", loan.LoanID); // Debugging line
+      console.log("Returning loan with LoanID:", loans.LoanID); // Debugging line
   
       // Call the API to confirm the return
-      const data = await API.confirmReturn(loan.LoanID); // Pass the correct LoanID
+      const data = await API.confirmReturn(loans.LoanID); // Pass the correct LoanID
   
       if (data.success) {
-        alert(`The item "${loan.Title}" has been successfully returned.`);
+        alert(`The item "${loans.Title}" has been successfully returned.`);
 
-        const updatedLoan = { ...loan, ReturnedAt: new Date().toISOString() };
+        const updatedLoan = { ...loans, ReturnedAt: new Date().toISOString() };
         setLoans((prevLoans) =>
-          prevLoans.map((l) => (l.LoanID === loan.LoanID ? updatedLoan : l))
+          prevLoans.map((l) => (l.LoanID === loans.LoanID ? updatedLoan : l))
         );
         
         // Fetch the updated loan list from the API after the return
@@ -237,7 +237,7 @@ function App() {
       } else {
         // If the return fails, revert the change in local state
         setLoans((prevLoans) =>
-          prevLoans.map((l) => (l.LoanID === loan.LoanID ? loan : l))
+          prevLoans.map((l) => (l.LoanID === loans.LoanID ? loans : l))
         );
         alert("Failed to return the item: " + data.error);
       }
@@ -394,26 +394,26 @@ function App() {
     }
   };
 
-  const handleConfirmReturn = async () => {
-    try {
-      console.log("Confirming return for LoanID:", selectedLoan.LoanID); // Debugging line
-      const data = await API.confirmReturn(selectedLoan.LoanID); // Pass the correct LoanID
-      if (data.success) {
-        alert(
-          `The item "${selectedLoan.Title}" has been successfully returned.`
-        );
-        // Refresh the loan list
-        const updatedLoans = await API.getLoans(userData.UserID);
-        setLoans(updatedLoans);
-        setCurrentScreen("loans");
-      } else {
-        alert("Failed to return the item: " + data.error);
-      }
-    } catch (error) {
-      console.error("Error returning the item:", error);
-      alert("An error occurred while returning the item.");
-    }
-  };
+  // const handleConfirmReturn = async () => {
+  //   try {
+  //     console.log("Confirming return for LoanID:", selectedLoan.LoanID); // Debugging line
+  //     const data = await API.confirmReturn(selectedLoan.LoanID); // Pass the correct LoanID
+  //     if (data.success) {
+  //       alert(
+  //         `The item "${selectedLoan.Title}" has been successfully returned.`
+  //       );
+  //       // Refresh the loan list
+  //       const updatedLoans = await API.getLoans(userData.UserID);
+  //       setLoans(updatedLoans);
+  //       setCurrentScreen("loans");
+  //     } else {
+  //       alert("Failed to return the item: " + data.error);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error returning the item:", error);
+  //     alert("An error occurred while returning the item.");
+  //   }
+  // };
 
   return (
     <div className="app-container">
@@ -529,13 +529,13 @@ function App() {
         />
       )}
 
-      {currentScreen === "returnConfirmation" && selectedLoan && (
+      {/* {currentScreen === "returnConfirmation" && selectedLoan && (
         <ReturnConfirmation
           selectedLoan={selectedLoan}
           handleConfirmReturn={handleConfirmReturn}
           navigateToLoans={() => setCurrentScreen("loans")}
         />
-      )}
+      )} */}
 
       {currentScreen === "holds" && (
         <HoldList holds={holds} navigateToHome={navigateToHome} />

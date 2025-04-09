@@ -183,13 +183,27 @@ const confirmReturn = async (req, res) => {
       WHERE LoanID = ?
     `;
 
-    const incrementCopiesQuery = `
-      UPDATE BOOK_INVENTORY
-      SET AvailableCopies = AvailableCopies + 1
-      WHERE BookID = (
-        SELECT ItemID FROM LOAN WHERE LoanID = ? AND ItemType = 'Book'
-      )
+    const getItemTypeQuery = `
+      SELECT ItemType, ItemID FROM LOAN WHERE LoanID = ?
     `;
+
+    const incrementCopiesQueries = {
+      Book: `
+        UPDATE BOOK_INVENTORY
+        SET AvailableCopies = AvailableCopies + 1
+        WHERE BookID = ?
+      `,
+      Media: `
+        UPDATE MEDIA_INVENTORY
+        SET AvailableCopies = AvailableCopies + 1
+        WHERE MediaID = ?
+      `,
+      Device: `
+        UPDATE DEVICE_INVENTORY
+        SET AvailableCopies = AvailableCopies + 1
+        WHERE DeviceID = ?
+      `,
+    };
 
     pool.getConnection((err, connection) => {
       if (err) {
@@ -224,39 +238,66 @@ const confirmReturn = async (req, res) => {
             return;
           }
 
-          // Increment AvailableCopies in BOOK_INVENTORY
-          connection.query(incrementCopiesQuery, [LoanID], (err, results) => {
-            if (err || results.affectedRows === 0) {
-              console.error(
-                "Error incrementing AvailableCopies or no rows affected:",
-                err
-              );
+          // Get the ItemType and ItemID for the loan
+          connection.query(getItemTypeQuery, [LoanID], (err, results) => {
+            if (err || results.length === 0) {
+              console.error("Error fetching item type or no rows found:", err);
               connection.rollback(() => connection.release());
-              sendJsonResponse(res, 500, {
+              sendJsonResponse(res, 404, {
                 success: false,
-                error: "Failed to update book inventory",
+                error: "Loan not found",
               });
               return;
             }
 
-            // Commit the transaction
-            connection.commit((err) => {
-              if (err) {
-                console.error("Error committing transaction:", err);
+            const { ItemType, ItemID } = results[0];
+            console.log(`ItemType: ${ItemType}, ItemID: ${ItemID}`); // Debugging line
+            const incrementQuery = incrementCopiesQueries[ItemType];
+
+            if (!incrementQuery) {
+              console.error("Invalid item type:", ItemType);
+              connection.rollback(() => connection.release());
+              sendJsonResponse(res, 400, {
+                success: false,
+                error: "Invalid item type",
+              });
+              return;
+            }
+
+            // Increment AvailableCopies in the appropriate inventory table
+            connection.query(incrementQuery, [ItemID], (err, results) => {
+              if (err || results.affectedRows === 0) {
+                console.error(
+                  "Error incrementing AvailableCopies or no rows affected:",
+                  err
+                );
                 connection.rollback(() => connection.release());
                 sendJsonResponse(res, 500, {
                   success: false,
-                  error: "Transaction commit error",
+                  error: "Failed to update inventory",
                 });
                 return;
               }
 
-              console.log(
-                "Loan return confirmed successfully for LoanID:",
-                LoanID
-              );
-              connection.release();
-              sendJsonResponse(res, 200, { success: true });
+              // Commit the transaction
+              connection.commit((err) => {
+                if (err) {
+                  console.error("Error committing transaction:", err);
+                  connection.rollback(() => connection.release());
+                  sendJsonResponse(res, 500, {
+                    success: false,
+                    error: "Transaction commit error",
+                  });
+                  return;
+                }
+
+                console.log(
+                  "Return confirmed successfully for LoanID:",
+                  LoanID
+                );
+                connection.release();
+                sendJsonResponse(res, 200, { success: true });
+              });
             });
           });
         });
