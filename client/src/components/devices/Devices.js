@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import API from "../../services/api";
 import DeviceBorrowConfirmation from "./DeviceBorrowConfirmation";
 import DeviceHoldConfirmation from "./DeviceHoldConfirmation";
+import "../../styles/devices/devices.css";
 
 const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding, navigateToAddDevice }) => {
   const [devices, setDevices] = useState([]);
@@ -133,8 +134,148 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
     }
   };
 
+  const styles = {
+    container: {
+      padding: "0",
+      maxWidth: "100%",
+      margin: "0 auto",
+      backgroundColor: "#ffffff",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      color: "#1d1d1f",
+      overflowX: "hidden",
+    },
+    hero: {
+      height: "70vh",
+      backgroundImage: "linear-gradient(to bottom, #000000, #212121)",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      color: "#ffffff",
+      position: "relative",
+      marginBottom: "60px",
+      textAlign: "center",
+    },
+    heroTitle: {
+      fontSize: "56px",
+      fontWeight: "600",
+      margin: "0",
+      letterSpacing: "-0.02em",
+      opacity: "0",
+      transform: "translateY(20px)",
+      animation: "fadeInUp 1s forwards",
+    },
+    heroSubtitle: {
+      fontSize: "24px",
+      fontWeight: "400",
+      maxWidth: "600px",
+      margin: "20px 0 0 0",
+      opacity: "0",
+      transform: "translateY(20px)",
+      animation: "fadeInUp 1s forwards 0.3s",
+    },
+    navContainer: {
+      position: "sticky",
+      top: "70px",
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
+      backdropFilter: "blur(20px)",
+      zIndex: "100",
+      padding: "20px 0",
+      marginBottom: "40px",
+      borderBottom: "1px solid #f5f5f7",
+    },
+    nav: {
+      display: "flex",
+      justifyContent: "center",
+      maxWidth: "800px",
+      margin: "0 auto",
+      padding: "0 20px",
+    },
+    navButton: {
+      backgroundColor: "transparent",
+      border: "none",
+      fontSize: "17px",
+      fontWeight: "400",
+      padding: "8px 18px",
+      margin: "0 5px",
+      cursor: "pointer",
+      borderRadius: "20px",
+      transition: "all 0.2s ease",
+      color: "#1d1d1f",
+    },
+    activeNavButton: {
+      backgroundColor: "#1d1d1f",
+      color: "#ffffff",
+      fontWeight: "500",
+    },
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", // Adjusted min column width for 3 columns
+      gap: "35px",
+      marginBottom: "40px",
+    },
+    card: {
+      borderRadius: "18px",
+      overflow: "hidden",
+      backgroundColor: "#fff",
+      boxShadow: "0 8px 30px rgba(0, 0, 0, 0.08)",
+      cursor: "pointer",
+      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    },
+    cardImage: {
+      width: "100%",
+      height: "300px",
+      objectFit: "cover",
+      borderTopLeftRadius: "18px",
+      borderTopRightRadius: "18px",
+      transition: "transform 0.5s ease",
+    },
+    cardContent: {
+      padding: "20px",
+    },
+    cardTitle: {
+      fontSize: "18px",
+      fontWeight: "600",
+      margin: "0 0 8px 0",
+      color: "#1d1d1f",
+    },
+    cardInfo: {
+      fontSize: "14px",
+      color: "#86868b",
+      margin: "0 0 5px 0",
+    },
+    button: {
+      display: "inline-block",
+      backgroundColor: "#0071e3",
+      color: "#ffffff",
+      border: "none",
+      borderRadius: "8px",
+      padding: "12px 22px",
+      fontSize: "17px",
+      fontWeight: "500",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      marginTop: "15px",
+      textAlign: "center",
+    },
+    backButton: {
+      display: "block",
+      width: "max-content",
+      margin: "60px auto 0 auto",
+      backgroundColor: "transparent",
+      border: "1px solid #86868b",
+      color: "#1d1d1f",
+      padding: "12px 24px",
+      borderRadius: "8px",
+      fontSize: "17px",
+      fontWeight: "500",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    },
+  };
+
   return (
-    <div className="content-container">
+    <div style={styles.container}>
       {currentAction === "borrow" && selectedDevice ? (
         <DeviceBorrowConfirmation
           device={selectedDevice}
@@ -151,7 +292,11 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
         />
       ) : (
         <>
-          <h2>Devices Collection</h2>
+          {/* Hero Section */}
+          <div style={styles.hero}>
+            <h1 style={styles.heroTitle}>Explore Devices</h1>
+            <p style={styles.heroSubtitle}>Find the perfect device for your needs.</p>
+          </div>
 
           {/* Show "Add Device" button for admins */}
           {isLoggedIn && userData?.Role === "Admin" && (
@@ -160,20 +305,19 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
             </button>
           )}
 
-          {/* Category Filter */}
-          <div className="category-filter">
-            <label htmlFor="category-select">Filter by Category:</label>
-            <select
-              id="category-select"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              {categories.map((category, index) => (
-                <option key={index} value={category}>
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </option>
+          {/* Category Navigation */}
+          <div style={styles.navContainer}>
+            <div style={styles.nav}>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  style={selectedCategory === category ? { ...styles.navButton, ...styles.activeNavButton } : styles.navButton}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category === "all" ? "All Devices" : category.charAt(0).toUpperCase() + category.slice(1)}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* Device List */}
@@ -182,27 +326,34 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
           ) : error ? (
             <p style={{ color: "red" }}>{error}</p>
           ) : (
-            <div id="devices-grid" className="fade-in-items">
+            <div id="devices-grid" className="fade-in-items" style={styles.grid}>
               {displayedDevices.map((device) => (
-                <div key={device.DeviceID} className="device-card">
-                  <h3>{device.Model}</h3>
-                  <p>Type: {device.Type}</p>
-                  <p>Brand: {device.Brand}</p>
-                  {isLoggedIn ? (
-                    device.AvailableCopies > 0 ? (
-                      <button onClick={() => navigateToBorrowConfirmation(device)}>Borrow</button>
+                <div key={device.DeviceID} className="device-card" style={styles.card}>
+                  <img
+                    src={`/images/${device.Type}.jpg`}
+                    alt={device.Model}
+                    style={styles.cardImage}
+                  />
+                  <div style={styles.cardContent}>
+                    <h3 style={styles.cardTitle}>{device.Model}</h3>
+                    <p style={styles.cardInfo}>Type: {device.Type}</p>
+                    <p style={styles.cardInfo}>Brand: {device.Brand}</p>
+                    {isLoggedIn ? (
+                      device.AvailableCopies > 0 ? (
+                        <button style={styles.button} onClick={() => navigateToBorrowConfirmation(device)}>Borrow</button>
+                      ) : (
+                        <button style={{ ...styles.button, backgroundColor: "#f7d774", color: "#000" }} onClick={() => navigateToHoldConfirmation(device)}>Hold</button>
+                      )
                     ) : (
-                      <button onClick={() => navigateToHoldConfirmation(device)}>Hold</button>
-                    )
-                  ) : (
-                    <button onClick={navigateToLogin}>Login to Borrow</button>
-                  )}
+                      <button style={styles.button} onClick={navigateToLogin}>Login to Borrow</button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          <button onClick={isLoggedIn ? navigateToHome : navigateToLanding} className="btn-back">
+          <button onClick={isLoggedIn ? navigateToHome : navigateToLanding} style={styles.backButton}>
             Back to Home
           </button>
         </>
