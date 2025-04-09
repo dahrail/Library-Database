@@ -293,7 +293,7 @@ const borrowMedia = async (req, res) => {
       const [user] = await connection.query(roleQuery, [UserID]);
       const role = user[0]?.Role || "Student";
       const loanPeriod = role === "Student" ? 7 : 14;
-      const borrowLimit = Role === "Student" ? 2 : 3;
+      const borrowLimit = role === "Student" ? 2 : 3;
 
     // Check if the user meet the borrow limit
     const activeLoansQuery = `
@@ -378,7 +378,7 @@ const borrowDevice = async (req, res) => {
     const [user] = await pool.promise().query(roleQuery, [UserID]);
     const role = user[0]?.Role || "Student";
     const loanPeriod = role === "Student" ? 7 : 14;
-    const borrowLimit = Role === "Student" ? 2 : 3;
+    const borrowLimit = role === "Student" ? 2 : 3;
 
     // Chekc if the user meet the borrow limit
     const activeLoansQuery = `

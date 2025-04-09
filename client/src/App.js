@@ -217,14 +217,6 @@ function App() {
     try {
       console.log("Returning loan with LoanID:", loan.LoanID); // Debugging line
   
-      // // Immediately update the local state to reflect the loan's return
-      // const updatedLoan = { ...loan, ReturnedAt: new Date().toISOString() };
-  
-      // // Update the local state to disable the button and reflect the return
-      // setLoans((prevLoans) =>
-      //   prevLoans.map((l) => (l.LoanID === loan.LoanID ? updatedLoan : l))
-      // );
-  
       // Call the API to confirm the return
       const data = await API.confirmReturn(loan.LoanID); // Pass the correct LoanID
   
@@ -254,8 +246,6 @@ function App() {
       alert("An error occurred while returning the item.");
     }
   };
-  
-  
   
   // Loans navigation and handlers
   const navigateToLoans = async () => {
