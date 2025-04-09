@@ -290,6 +290,25 @@ function App() {
     }
   };
 
+  const handleCancelHold = async (hold) => {
+    try {
+      const response = await API.cancelHold(hold.HoldID); // Assuming this API is working fine
+      if (response.success) {
+        alert(`The hold for "${hold.Title}" has been successfully canceled.`);
+        // Update the hold status immediately in the frontend state
+        const updatedHolds = holds.map((h) =>
+          h.HoldID === hold.HoldID ? { ...h, HoldStatus: "Canceled" } : h
+        );
+        setHolds(updatedHolds); // Update the holds state with the new status
+      } else {
+        alert("Failed to cancel hold: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error canceling hold:", error);
+      alert("An error occurred while canceling the hold.");
+    }
+  };
+
   // Fines navigation
   const navigateToFines = async () => {
     window.scrollTo(0, 0);
@@ -540,7 +559,11 @@ function App() {
       )} */}
 
       {currentScreen === "holds" && (
-        <HoldList holds={holds} navigateToHome={navigateToHome} />
+        <HoldList 
+        holds={holds} 
+        navigateToHome={navigateToHome} 
+        handleCancelHold={handleCancelHold}
+        />
       )}
 
       {currentScreen === "fines" && (

@@ -115,6 +115,20 @@ const API = {
     }
   },
 
+  cancelHold: async (holdId) => {
+    try {
+      const response = await fetch("/api/cancelHold", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ HoldID: holdId }),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error canceling hold:", error);
+      throw error;
+    }
+  },
+
   // Holds API calls
   getHolds: async (userId) => {
     try {

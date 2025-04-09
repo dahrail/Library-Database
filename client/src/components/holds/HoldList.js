@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../styles/holds/Holds.css';
 
-const HoldList = ({ holds, navigateToHome }) => {
+const HoldList = ({ holds, handleCancelHold, navigateToHome }) => {
   return (
     <div className="content-container">
       <h2>Your Holds</h2>
@@ -16,6 +16,7 @@ const HoldList = ({ holds, navigateToHome }) => {
               <th>Author/Brand</th>
               <th>Requested At</th>
               <th>Hold Status</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -26,6 +27,15 @@ const HoldList = ({ holds, navigateToHome }) => {
                 <td>{hold.AuthorOrBrand}</td> 
                 <td>{new Date(hold.RequestAT).toLocaleString()}</td>
                 <td>{hold.HoldStatus}</td>
+                <td>
+                  <button
+                    onClick={() => handleCancelHold(hold)} 
+                    className={hold.HoldStatus === "Pending" ? "btn-cancel" : "btn-disabled"}
+                    disabled={hold.HoldStatus !== "Pending"}
+                  >
+                    Cancel
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

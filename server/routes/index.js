@@ -129,6 +129,10 @@ const handleRequest = async (req, res) => {
       return await holdRoutes.holdMedia(req, res);
     }
 
+    if (method === "POST" && path === "/api/cancelHold") {
+      return await holdRoutes.cancelHold(req, res);
+    }
+
     // FINE ROUTES
     if (method === "GET" && path.match(/^\/api\/fines\/\d+$/)) {
       const userId = path.split("/").pop();

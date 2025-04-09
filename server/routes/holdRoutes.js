@@ -169,9 +169,42 @@ const holdDevice = async (req, res) => {
   }
 };
 
+// CANCEL HOLD
+const cancelHold = async (req, res) => {
+  try {
+    const { HoldID } = await parseRequestBody(req);
+
+    // Check if the hold exists and is in 'Pending' status
+    const existingHoldQuery = `
+      SELECT * FROM HOLD
+      WHERE HoldID = ? AND HoldStatus = 'Pending'
+    `;
+    const [existingHold] = await pool.promise().query(existingHoldQuery, [HoldID]);
+
+    if (existingHold.length === 0) {
+      return sendJsonResponse(res, 400, { success: false, error: "No pending hold found for this ID." });
+    }
+
+    // Update the hold's status to 'Canceled'
+    const cancelHoldQuery = `
+      UPDATE HOLD
+      SET HoldStatus = 'Canceled'
+      WHERE HoldID = ? AND HoldStatus = 'Pending'
+    `;
+    
+    await pool.promise().query(cancelHoldQuery, [HoldID]);
+
+    sendJsonResponse(res, 200, { success: true, message: "Hold canceled successfully." });
+  } catch (error) {
+    console.error("Error canceling hold:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Internal server error" });
+  }
+};
+
 module.exports = {
   getUserHolds,
   holdBook,
   holdDevice,
   holdMedia,
+  cancelHold,
 };
