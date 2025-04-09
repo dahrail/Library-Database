@@ -49,7 +49,7 @@ WHERE L.UserID = ?
   });
 };
 
-// Confirm a loan
+// BOOK BORROW
 const borrowBook = async (req, res) => {
   try {
     const { BookID, UserID, Role } = await parseRequestBody(req);
@@ -171,7 +171,7 @@ const borrowBook = async (req, res) => {
   }
 };
 
-// Confirm a return
+// RETURN ITEMS
 const confirmReturn = async (req, res) => {
   try {
     const { LoanID } = await parseRequestBody(req);
@@ -251,7 +251,7 @@ const confirmReturn = async (req, res) => {
             }
 
             const { ItemType, ItemID } = results[0];
-            console.log(`ItemType: ${ItemType}, ItemID: ${ItemID}`); // Debugging line
+
             const incrementQuery = incrementCopiesQueries[ItemType];
 
             if (!incrementQuery) {
@@ -309,7 +309,7 @@ const confirmReturn = async (req, res) => {
   }
 };
 
-// Route to handle borrowing a media item
+// MEDIA BORROW
 const borrowMedia = async (req, res) => {
   try {
     const { UserID, ItemID } = await parseRequestBody(req);
@@ -390,7 +390,7 @@ const borrowMedia = async (req, res) => {
   }
 };
 
-// DEVICE SESSION
+// DEVICE BORROW
 const borrowDevice = async (req, res) => {
   try {
     const { UserID, DeviceID } = await parseRequestBody(req);

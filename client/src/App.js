@@ -367,6 +367,8 @@ function App() {
       );
       if (data.success) {
         alert("Borrow successfully");
+        const updatedBooks = await API.getBooks(userData.UserID);
+        setBooks(updatedBooks);
         setCurrentScreen("books");
       } else {
         alert("Failed to borrow: " + data.error);
