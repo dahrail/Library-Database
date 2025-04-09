@@ -14,6 +14,9 @@ const LoanList = ({ loans, handleReturn, navigateToHome }) => {
     );
   }
 
+  // Sort loans by BorrowedAt (newest to oldest)
+  const sortedLoans = loans.sort((a, b) => new Date(b.BorrowedAt) - new Date(a.BorrowedAt));
+
   return (
     <div className="content-container">
       <h2>Your Loans</h2>
@@ -33,7 +36,7 @@ const LoanList = ({ loans, handleReturn, navigateToHome }) => {
             </tr>
           </thead>
           <tbody>
-            {loans.map((loan, index) => (
+            {sortedLoans.map((loan, index) => (
               <tr key={index}>
                 <td>{loan.ItemType}</td> 
                 <td>{loan.Title}</td> 
