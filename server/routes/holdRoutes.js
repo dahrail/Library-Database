@@ -49,6 +49,26 @@ WHERE H.UserID = ?;
 const holdBook = async (req, res) => {
   try {
     const { UserID, BookID } = await parseRequestBody(req);
+
+    const roleQuery = `
+      SELECT role FROM USER WHERE UserID = ? `;
+    const [userRoleResult] = await pool.promise().query(roleQuery, [UserID]);
+    const role = userRoleResult[0].role;
+    const holdLimit = role === "Student" ? 2 : 3;
+
+    const currentHoldsQuery = `
+      SELECT COUNT(*) AS holdCount FROM HOLD
+      WHERE UserID = ? AND HoldStatus = 'Pending' AND ItemType = 'Book'
+    `;
+    const [currentHolds] = await pool.promise().query(currentHoldsQuery, [UserID]);
+
+    // Check if the user has reached the hold limit
+    if (currentHolds[0].holdCount >= holdLimit) {
+      return sendJsonResponse(res, 400, {
+        success: false,
+        error: `You cannot place more than ${holdLimit} holds on book.`,
+      });
+    }
     
     // Check if the user has a pending hold on the book
     const checkHoldQuery = `
@@ -91,6 +111,26 @@ const holdMedia = async (req, res) => {
   try {
     const { UserID, MediaID } = await parseRequestBody(req);
 
+    const roleQuery = `
+      SELECT role FROM USER WHERE UserID = ? `;
+    const [userRoleResult] = await pool.promise().query(roleQuery, [UserID]);
+    const role = userRoleResult[0].role;
+    const holdLimit = role === "Student" ? 2 : 3;
+
+    const currentHoldsQuery = `
+      SELECT COUNT(*) AS holdCount FROM HOLD
+      WHERE UserID = ? AND HoldStatus = 'Pending' AND ItemType = 'Media'
+    `;
+    const [currentHolds] = await pool.promise().query(currentHoldsQuery, [UserID]);
+
+    // Check if the user has reached the hold limit
+    if (currentHolds[0].holdCount >= holdLimit) {
+      return sendJsonResponse(res, 400, {
+        success: false,
+        error: `You cannot place more than ${holdLimit} holds on media.`,
+      });
+    }
+
     // Check if the user has a pending hold on the media
     const existingHoldQuery = `
       SELECT * FROM HOLD
@@ -131,6 +171,26 @@ const holdMedia = async (req, res) => {
 const holdDevice = async (req, res) => {
   try {
     const { UserID, DeviceID } = await parseRequestBody(req);
+
+    const roleQuery = `
+      SELECT role FROM USER WHERE UserID = ? `;
+    const [userRoleResult] = await pool.promise().query(roleQuery, [UserID]);
+    const role = userRoleResult[0].role;
+    const holdLimit = role === "Student" ? 2 : 3;
+
+    const currentHoldsQuery = `
+      SELECT COUNT(*) AS holdCount FROM HOLD
+      WHERE UserID = ? AND HoldStatus = 'Pending' AND ItemType = 'Device'
+    `;
+    const [currentHolds] = await pool.promise().query(currentHoldsQuery, [UserID]);
+
+    // Check if the user has reached the hold limit
+    if (currentHolds[0].holdCount >= holdLimit) {
+      return sendJsonResponse(res, 400, {
+        success: false,
+        error: `You cannot place more than ${holdLimit} holds on device.`,
+      });
+    }
 
     // Check if the user has an pending hold on the device
     const existingHoldQuery = `
