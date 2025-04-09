@@ -25,12 +25,31 @@ const Events = ({
   const [eventAttendees, setEventAttendees] = useState([]);
   const [attendeeCount, setAttendeeCount] = useState({ checked: 0, total: 0 });
   const initialRenderRef = useRef(true);
-  const categories = ["all", "Workshop", "Lecture", "Book Club", "Kids Event", "Author Visit", "Exhibition", "Movie Screening", "Other"];
+  const categories = ["all"]; // Removed category options as they're not in schema
   
+  const [filters, setFilters] = useState({
+    dateFrom: '',
+    dateTo: '',
+    location: '',
+  });
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const filteredEvents = events.filter((event) => {
+    const matchesDate =
+      (!filters.dateFrom || new Date(event.StartAt) >= new Date(filters.dateFrom)) &&
+      (!filters.dateTo || new Date(event.EndAt) <= new Date(filters.dateTo));
+    const matchesLocation = !filters.location || event.RoomNumber.includes(filters.location);
+    return matchesDate && matchesLocation;
+  });
+
   // Use the initialCategory prop on mount
   useEffect(() => {
     if (initialCategory) {
-      setSelectedCategory(initialCategory);
+      setSelectedCategory("all"); // Always use "all" since categories aren't needed
     }
   }, [initialCategory]);
 
@@ -539,6 +558,41 @@ const Events = ({
           ))}
         </div>
         
+        {/* Filters Section */}
+        <div className="filters-section">
+          <div className="filter-group">
+            <label htmlFor="dateFrom">From:</label>
+            <input
+              type="date"
+              id="dateFrom"
+              name="dateFrom"
+              value={filters.dateFrom}
+              onChange={handleFilterChange}
+            />
+          </div>
+          <div className="filter-group">
+            <label htmlFor="dateTo">Until:</label>
+            <input
+              type="date"
+              id="dateTo"
+              name="dateTo"
+              value={filters.dateTo}
+              onChange={handleFilterChange}
+            />
+          </div>
+          <div className="filter-group">
+            <label htmlFor="location">Location:</label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              placeholder="Enter location"
+              value={filters.location}
+              onChange={handleFilterChange}
+            />
+          </div>
+        </div>
+
         {loading && <p className="loading-message">Loading events...</p>}
         
         {error && (
@@ -559,11 +613,10 @@ const Events = ({
         
         {!loading && !error && displayedEvents.length > 0 && (
           <div className="events-grid fade-in-items">
-            {displayedEvents.map(event => (
+            {filteredEvents.map(event => (
               <div key={event.EventID} className="event-card">
                 <div className="event-header">
                   <h3>{event.EventName}</h3>
-                  {event.Category && <div className="event-category-tag">{event.Category}</div>}
                 </div>
                 
                 <div className="event-details">

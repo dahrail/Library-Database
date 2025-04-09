@@ -31,14 +31,10 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
   };
   
   const eventCategories = [
+    'All Events',
     'Workshop',
     'Lecture',
-    'Book Club',
-    'Kids Event',
-    'Author Visit',
-    'Exhibition',
-    'Movie Screening',
-    'Other'
+    'Book Club'
   ];
   
   return (

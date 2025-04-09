@@ -142,12 +142,15 @@ DROP TABLE IF EXISTS `event`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `event` (
   `EventID` int NOT NULL AUTO_INCREMENT,
+  `EventCategory` enum('Workshops','Seminar','Conference') NOT NULL,
   `UserID` int NOT NULL,
   `EventName` varchar(250) NOT NULL,
   `RoomID` int NOT NULL,
   `StartAt` datetime NOT NULL,
   `EndAt` datetime NOT NULL,
   `MaxAttendees` int DEFAULT NULL,
+  `EventDescription` varchar(250) DEFAULT NULL,
+
   PRIMARY KEY (`EventID`),
   KEY `UserID` (`UserID`),
   KEY `RoomID` (`RoomID`),
@@ -177,6 +180,7 @@ CREATE TABLE `event_attendee` (
   `UserID` int NOT NULL,
   `EventID` int NOT NULL,
   `CheckedIn` tinyint(1) DEFAULT NULL,
+  `CheckedInAt` datetime DEFAULT NULL,
   PRIMARY KEY (`EventAttendeeID`),
   KEY `UserID` (`UserID`),
   KEY `EventID` (`EventID`),
