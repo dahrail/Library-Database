@@ -7,11 +7,12 @@ const Home = ({
   navigateToMedia,
   navigateToDevices,
   navigateToLoans,
-  navigateToHolds,  // Add navigateToHolds in the props
-  navigateToFines, // Add navigateToFines to props
+  navigateToHolds,
+  navigateToFines,
   navigateToRooms,
   navigateToDataReport,
   navigateToEvents,
+  navigateToAdminDashboard, // Add this line
 }) => {
   const isAdmin = userData?.Role === "Admin";
   
@@ -176,6 +177,18 @@ const Home = ({
               <p>Check out upcoming library events and activities</p>
             </div>
           </div>
+
+          {isAdmin && (
+            <div className="menu-item" onClick={navigateToAdminDashboard}>
+              <div className="menu-item-image-container">
+                <img src="/images/admin.jpg" alt="Admin Dashboard" className="menu-image" />
+              </div>
+              <div className="menu-item-content">
+                <h3>Admin Dashboard</h3>
+                <p>Access administrative tools and reports</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {isAdmin && (

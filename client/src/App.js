@@ -23,6 +23,7 @@ import Events from "./components/events/Events";
 import LandingPage from "./components/landing/LandingPage"; 
 import Devices from "./components/devices/Devices"; 
 import AddDevice from "./components/devices/AddDevice"; 
+import AdminDashboard from "./components/admin/AdminDashboard"; // Add import for AdminDashboard
 
 // Import API service
 import API from "./services/api";
@@ -200,6 +201,12 @@ function App() {
       console.error("Error loading data report:", error);
       alert("An error occurred while loading the data report.");
     }
+  };
+
+  // Add new navigation function
+  const navigateToAdminDashboard = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("adminDashboard");
   };
 
   // Books navigation and handlers
@@ -496,6 +503,7 @@ function App() {
           navigateToDataReport={navigateToDataReport} // Pass the function
           navigateToRooms={navigateToRooms} // Pass the function
           navigateToEvents={navigateToEvents} // Pass the function
+          navigateToAdminDashboard={navigateToAdminDashboard} // Pass the function
         />
       )}
 
@@ -643,6 +651,13 @@ function App() {
           userData={userData}
           initialCategory={initialEventCategory} // Pass the initial category
           navigateToLanding={navigateToLanding} // Add this prop
+        />
+      )}
+
+      {currentScreen === "adminDashboard" && userData?.Role === "Admin" && (
+        <AdminDashboard 
+          userData={userData}
+          navigateToHome={navigateToHome}
         />
       )}
     </div>
