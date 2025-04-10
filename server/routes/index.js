@@ -77,9 +77,13 @@ const handleRequest = async (req, res) => {
       return mediaRoutes.getAllMedia(req, res);
     }
 
+    if (method === "POST" && path === "/api/addMedia") {
+      return await mediaRoutes.addMedia(req, res);
+    }
+
     // DEVICE ROUTES
     if (method === "GET" && path === "/api/device") {
-      return await deviceRoutes.getAllDevice(req, res);
+      return deviceRoutes.getAllDevice(req, res);
     }
 
     if (method === "POST" && path === "/api/addDevice") {

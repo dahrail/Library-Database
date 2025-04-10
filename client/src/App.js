@@ -23,6 +23,7 @@ import Events from "./components/events/Events";
 import LandingPage from "./components/landing/LandingPage"; 
 import Devices from "./components/devices/Devices"; 
 import AddDevice from "./components/devices/AddDevice"; 
+import AddMedia from "./components/media/AddMedia";
 import AdminDashboard from "./components/admin/AdminDashboard"; // Add import for AdminDashboard
 
 // Import API service
@@ -154,6 +155,11 @@ function App() {
     setInitialMediaCategory(category || 'all');
     setCurrentScreen("media");
   };
+
+  const navigateToAddMedia = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("addMedia");
+  }
 
   // Room reservation navigation with optional category parameter
   const navigateToRooms = (category) => {
@@ -384,6 +390,23 @@ function App() {
     }
   };
 
+  const handleAddMedia = async (mediaData) => {
+    try {
+      const data = await API.addMedia(mediaData);
+      if (data.success) {
+        alert("Media added successfully!");
+        // Refresh the media list
+        const updatedBooks = await API.getMedia();
+        setCurrentScreen("media");
+      } else {
+        alert("Failed to add media: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error adding media:", error);
+      alert("An error occurred while adding the media.");
+    }
+  };
+
   const handleBorrowBook = async () => {
     try {
       const data = await API.borrowBook(
@@ -500,6 +523,7 @@ function App() {
           navigateToFines={navigateToFines}
           navigateToAddBook={navigateToAddBook} // Pass the function
           navigateToAddDevice={navigateToAddDevice} // Pass the function
+          navigateToAddMedia={navigateToAddMedia} // Pass the function
           navigateToDataReport={navigateToDataReport} // Pass the function
           navigateToRooms={navigateToRooms} // Pass the function
           navigateToEvents={navigateToEvents} // Pass the function
@@ -547,6 +571,10 @@ function App() {
 
       {currentScreen === "addDevice" && (
         <AddDevice onAddDevice={handleAddDevice} navigateToHome={navigateToHome} />
+      )}
+
+      {currentScreen === "addMedia" && (
+        <AddMedia onAddMedia={handleAddMedia} navigateToHome={navigateToHome} />
       )}
 
       {currentScreen === "loans" && (
@@ -619,6 +647,7 @@ function App() {
           userData={userData} // Pass the userData
           initialCategory={initialMediaCategory} // Pass the initial category
           navigateToLanding={navigateToLanding} // Add this prop
+          navigateToAddMedia={navigateToAddMedia} // Pass the function
         />
       )}
 
