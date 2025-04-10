@@ -55,12 +55,19 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
         <div className="form-row">
           <div className="form-group">
             <label>Genre:</label>
-            <input
-              type="text"
+            <select
               name="Genre"
               value={newBook.Genre}
               onChange={handleChange}
-            />
+              required
+            >
+              <option value="">Select Genre</option>
+              <option value="Fiction">Fiction</option>
+              <option value="Fantasy">Fantasy</option>
+              <option value="Romance">Romance</option>
+              <option value="Thriller">Thriller</option>
+              <option value="Novel">Novel</option>
+            </select>
           </div>
           <div className="form-group">
             <label>Publication Year:</label>
