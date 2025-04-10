@@ -113,7 +113,7 @@ const TopBar = ({
               onMouseLeave={() => setHoveredButton(null)}
               style={hoveredButton === 'books' ? glowEffect : {}}
             >
-              Books
+              Book
             </button>
             {openDropdown === 'books' && (
               <div className="dropdown-menu">
@@ -163,7 +163,7 @@ const TopBar = ({
               onMouseLeave={() => setHoveredButton(null)}
               style={hoveredButton === 'devices' ? glowEffect : {}}
             >
-              Devices
+              Device
             </button>
             {openDropdown === 'devices' && (
               <div className="dropdown-menu">
@@ -188,7 +188,7 @@ const TopBar = ({
               onMouseLeave={() => setHoveredButton(null)}
               style={hoveredButton === 'rooms' ? glowEffect : {}}
             >
-              Room Reservation
+              Room
             </button>
             {openDropdown === 'rooms' && (
               <div className="dropdown-menu">
@@ -214,7 +214,7 @@ const TopBar = ({
               onMouseLeave={() => setHoveredButton(null)}
               style={hoveredButton === 'events' ? glowEffect : {}}
             >
-              Events
+              Event
             </button>
             {openDropdown === 'events' && (
               <div className="dropdown-menu">
