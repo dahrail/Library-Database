@@ -516,11 +516,11 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
 
         {/* Show "Add Media" button for admins */}
         {isLoggedIn && userData?.Role === "Admin" && (
-          <>
-            <button onClick={navigateToAddMedia} className="btn-primary">Add Media</button>
-            <button onClick={() => navigateToUpdateMediaList()} className="btn-secondary">Update Media</button>
-          </>
-          )}
+          <div style={{ display: "flex", justifyContent: "center", gap: "15px", margin: "20px 0" }}>
+            <button onClick={navigateToAddMedia} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Add Media</button>
+            <button onClick={() => navigateToUpdateMediaList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Update Media</button>
+          </div>
+        )}
 
       <div style={styles.navContainer}>
         <div style={styles.nav}>
