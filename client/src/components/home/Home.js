@@ -138,7 +138,7 @@ const Home = ({
           {/* Add the Holds menu item */}
           <div className="menu-item" onClick={navigateToHolds}>
             <div className="menu-item-image-container">
-              <img src="images\hold.png" alt="Holds" className="menu-image" />
+              <img src="https://www.northbrook.info/sites/default/files/large-feature/hold-shelves_0.jpg" alt="Holds" className="menu-image" />
             </div>
             <div className="menu-item-content">
               <h3>Holds</h3>
