@@ -49,7 +49,7 @@ const UpdateBookList = ({ navigateToHome, navigateToUpdateBook }) => {
         <>
           {/* Genre Filter Dropdown */}
           <div className="filter-container">
-            <label htmlFor="genreFilter">Filter by Genre: </label>
+            <label htmlFor="genreFilter">Genre: </label>
             <select
               id="genreFilter"
               value={selectedGenre}

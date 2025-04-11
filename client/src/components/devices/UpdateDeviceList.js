@@ -49,7 +49,7 @@ const UpdateDeviceList = ({ navigateToHome, navigateToUpdateDevice }) => {
         <>
           {/* Filter by Type */}
           <div className="filter-container">
-            <label htmlFor="typeFilter">Filter by Type: </label>
+            <label htmlFor="typeFilter">Type: </label>
             <select
               id="typeFilter"
               value={selectedType}

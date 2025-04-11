@@ -61,7 +61,7 @@ const UpdateMediaList = ({ navigateToHome, navigateToUpdateMedia }) => {
         <>
           {/* Filter by Type */}
           <div className="filter-container">
-            <label htmlFor="typeFilter">Filter by Type: </label>
+            <label htmlFor="typeFilter">Type: </label>
             <select
               id="typeFilter"
               value={selectedType}
@@ -80,7 +80,7 @@ const UpdateMediaList = ({ navigateToHome, navigateToUpdateMedia }) => {
 
           {/* Filter by Genre */}
           <div className="filter-container">
-            <label htmlFor="genreFilter">Filter by Genre: </label>
+            <label htmlFor="genreFilter">Genre: </label>
             <select
               id="genreFilter"
               value={selectedGenre}
