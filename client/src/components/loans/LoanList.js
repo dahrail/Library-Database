@@ -7,12 +7,16 @@ const LoanList = ({ loans, handleReturn, navigateToHome }) => {
 
   if (!Array.isArray(loans)) {
     return (
-      <div className="content-container">
-        <h2>Your Loans</h2>
-        <p>Unable to display loans. Please try again later.</p>
-        <button onClick={navigateToHome} className="btn-back">
-          Back to Home
-        </button>
+      <div className="loans-page">
+        <div className="loans-header">
+          <h2>Your Loans</h2>
+          <button onClick={navigateToHome} className="btn-back">
+            Back to Home
+          </button>
+        </div>
+        <div className="loans-content">
+          <p>Unable to display loans. Please try again later.</p>
+        </div>
       </div>
     );
   }
@@ -36,84 +40,92 @@ const LoanList = ({ loans, handleReturn, navigateToHome }) => {
   });
 
   return (
-    <div className="content-container">
-      <h2>Your Loans</h2>
-
-      {/* Filters */}
-      <div className="filter-container">
-        <label htmlFor="typeFilter">Item Type: </label>
-        <select
-          id="typeFilter"
-          value={selectedItemType}
-          onChange={(e) => setSelectedItemType(e.target.value)}
-        >
-          {itemTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
-
-        <label htmlFor="returnFilter" style={{ marginLeft: "1rem" }}>
-          Return Status:{" "}
-        </label>
-        <select
-          id="returnFilter"
-          value={returnFilter}
-          onChange={(e) => setReturnFilter(e.target.value)}
-        >
-          <option value="All">All</option>
-          <option value="Returned">Returned</option>
-          <option value="Not Returned">Not Returned</option>
-        </select>
+    <div className="loans-page">
+      <div className="loans-header">
+        <h2>Your Loans</h2>
+        <button onClick={navigateToHome} className="btn-back">
+          Back to Home
+        </button>
       </div>
 
-      {filteredLoans.length === 0 ? (
-        <p>No matching loan records found.</p>
-      ) : (
-        <table className="loans-table">
-          <thead>
-            <tr>
-              <th>Item Type</th>
-              <th>Title/Model</th>
-              <th>Author/Brand</th>
-              <th>Borrowed At</th>
-              <th>Due At</th>
-              <th>Returned At</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLoans.map((loan, index) => (
-              <tr key={index}>
-                <td>{loan.ItemType}</td>
-                <td>{loan.Title}</td>
-                <td>{loan.AuthorOrBrand}</td>
-                <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
-                <td>{new Date(loan.DueAT).toLocaleString()}</td>
-                <td>
-                  {loan.ReturnedAt
-                    ? new Date(loan.ReturnedAt).toLocaleString()
-                    : "Not Returned"}
-                </td>
-                <td>
-                  <button
-                    onClick={() => handleReturn(loan)}
-                    className={loan.ReturnedAt ? "btn-disabled" : "btn-return"}
-                    disabled={!!loan.ReturnedAt}
-                  >
-                    {loan.ReturnedAt ? "Returned" : "Return"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <div className="loans-content">
+        <div className="filter-container">
+          <div className="filter-group">
+            <label htmlFor="typeFilter">Item Type: </label>
+            <select
+              id="typeFilter"
+              value={selectedItemType}
+              onChange={(e) => setSelectedItemType(e.target.value)}
+            >
+              {itemTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <button onClick={navigateToHome} className="btn-back">
-        Back to Home
-      </button>
+          <div className="filter-group">
+            <label htmlFor="returnFilter">Return Status: </label>
+            <select
+              id="returnFilter"
+              value={returnFilter}
+              onChange={(e) => setReturnFilter(e.target.value)}
+            >
+              <option value="All">All</option>
+              <option value="Returned">Returned</option>
+              <option value="Not Returned">Not Returned</option>
+            </select>
+          </div>
+        </div>
+
+        {filteredLoans.length === 0 ? (
+          <div className="no-loans-message">
+            <p>No matching loan records found.</p>
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="loans-table">
+              <thead>
+                <tr>
+                  <th>Item Type</th>
+                  <th>Title/Model</th>
+                  <th>Author/Brand</th>
+                  <th>Borrowed At</th>
+                  <th>Due At</th>
+                  <th>Returned At</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLoans.map((loan, index) => (
+                  <tr key={index}>
+                    <td>{loan.ItemType}</td>
+                    <td>{loan.Title}</td>
+                    <td>{loan.AuthorOrBrand}</td>
+                    <td>{new Date(loan.BorrowedAt).toLocaleString()}</td>
+                    <td>{new Date(loan.DueAT).toLocaleString()}</td>
+                    <td>
+                      {loan.ReturnedAt
+                        ? new Date(loan.ReturnedAt).toLocaleString()
+                        : "Not Returned"}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleReturn(loan)}
+                        className={loan.ReturnedAt ? "btn-disabled" : "btn-return"}
+                        disabled={!!loan.ReturnedAt}
+                      >
+                        {loan.ReturnedAt ? "Returned" : "Return"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
