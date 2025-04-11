@@ -317,29 +317,20 @@ const registerForEvent = async (req, res) => {
   }
 };
 
-// Fix getEventAttendees to handle eventId parameter correctly
+// Update the getEventAttendees function to include CheckedInAt
 const getEventAttendees = (req, res, eventId) => {
-  // If eventId was passed directly as parameter, use it, otherwise try to get from req.params
-  const id = eventId || (req.params ? req.params.eventId : null);
+  const id = eventId || req.params.eventId;
   
-  if (!id) {
-    console.error("Missing event ID in getEventAttendees");
-    return sendJsonResponse(res, 400, {
-      success: false,
-      error: "Event ID is required"
-    });
-  }
+  console.log(`Getting attendees for event ID: ${id}`);
   
-  console.log("Getting attendees for event ID:", id);
-  
-  // Updated query to remove references to the non-existent RegistrationDate column
+  // Updated query to include CheckedInAt field
   const query = `
-    SELECT ea.EventAttendeeID, ea.UserID, ea.CheckedIn,
+    SELECT ea.EventAttendeeID, ea.UserID, ea.CheckedIn, ea.CheckedInAt,
            u.FirstName, u.LastName, u.Email
     FROM event_attendee ea
     JOIN user u ON ea.UserID = u.UserID
     WHERE ea.EventID = ?
-    ORDER BY ea.EventAttendeeID ASC
+    ORDER BY ea.CheckedIn DESC, u.LastName ASC, u.FirstName ASC
   `;
   
   pool.query(query, [id], (err, results) => {
@@ -374,7 +365,7 @@ const checkInForEvent = async (req, res) => {
         const checkInData = JSON.parse(body);
         console.log("Received check-in data:", checkInData);
         
-        const { UserID, EventID } = checkInData;
+        const { UserID, EventID, CheckedInAt } = checkInData;
         
         if (!UserID || !EventID) {
           console.error("Missing required fields for check-in:", checkInData);
@@ -416,16 +407,19 @@ const checkInForEvent = async (req, res) => {
             });
           }
           
-          // Update the check-in status
+          // Use the timestamp from the client if provided, otherwise use current server time
+          const checkinTime = CheckedInAt || new Date().toISOString();
+          
+          // Update the check-in status and timestamp
           const updateQuery = `
             UPDATE event_attendee 
-            SET CheckedIn = 1 
+            SET CheckedIn = 1, CheckedInAt = ?
             WHERE UserID = ? AND EventID = ?
           `;
           
-          console.log(`Executing update query: ${updateQuery} with params [${UserID}, ${EventID}]`);
+          console.log(`Executing update query with params [${checkinTime}, ${UserID}, ${EventID}]`);
           
-          pool.query(updateQuery, [UserID, EventID], (updateErr, updateResults) => {
+          pool.query(updateQuery, [checkinTime, UserID, EventID], (updateErr, updateResults) => {
             if (updateErr) {
               console.error("Error updating check-in status:", updateErr);
               return sendJsonResponse(res, 500, {
@@ -447,11 +441,11 @@ const checkInForEvent = async (req, res) => {
             console.log(`Check-in successful: User ${UserID} at event ${EventID}`);
             sendJsonResponse(res, 200, {
               success: true,
-              message: "Successfully checked in to event"
+              message: "Successfully checked in to event",
+              checkedInAt: checkinTime
             });
           });
         });
-        
       } catch (err) {
         console.error("Error parsing check-in data:", err);
         sendJsonResponse(res, 400, {
@@ -682,7 +676,6 @@ module.exports = {
   registerForEvent,
   getEventAttendees,
   checkInForEvent,
-  getEventAttendeeCount,
-  updateEvent,
+};  updateEvent,
   deleteEvent
 };

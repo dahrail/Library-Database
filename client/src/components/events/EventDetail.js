@@ -24,6 +24,17 @@ const EventDetail = ({
   // Check if current user is registered and/or checked in
   const isUserRegistered = attendees.some(a => a.UserID === userData?.UserID);
   const isUserCheckedIn = attendees.some(a => a.UserID === userData?.UserID && a.CheckedIn === 1);
+
+  // Format check-in time
+  const formatCheckInTime = (dateString) => {
+    if (!dateString) return 'Not checked in';
+    
+    const date = new Date(dateString);
+    const dateOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+    
+    return `${date.toLocaleDateString(undefined, dateOptions)} at ${date.toLocaleTimeString(undefined, timeOptions)}`;
+  };
   
   return (
     <div className="event-detail-container">
@@ -64,6 +75,7 @@ const EventDetail = ({
             <h3>Attendance</h3>
             <p className={attendeeCount.total >= event.MaxAttendees ? 'low-availability' : ''}>
               {attendeeCount.total} of {event.MaxAttendees} spots filled
+              {attendeeCount.checked > 0 && ` (${attendeeCount.checked} Checked In)`}
             </p>
           </div>
           
@@ -112,14 +124,26 @@ const EventDetail = ({
             <div className="attendee-list">
               <h4>Registered Attendees ({attendeeCount.total})</h4>
               {attendees.length > 0 ? (
-                <ul>
-                  {attendees.map(attendee => (
-                    <li key={attendee.EventAttendeeID}>
-                      {attendee.FirstName} {attendee.LastName} 
-                      {attendee.CheckedIn === 1 ? ' (Checked In)' : ' (Not Checked In)'}
-                    </li>
-                  ))}
-                </ul>
+                <table className="attendees-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Check-in Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attendees.map(attendee => (
+                      <tr key={attendee.EventAttendeeID} className={attendee.CheckedIn === 1 ? 'checked-in' : ''}>
+                        <td>{attendee.FirstName} {attendee.LastName}</td>
+                        <td>{attendee.Email}</td>
+                        <td>{attendee.CheckedIn === 1 ? 'Checked In' : 'Registered'}</td>
+                        <td>{formatCheckInTime(attendee.CheckedInAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               ) : (
                 <p>No attendees yet.</p>
               )}

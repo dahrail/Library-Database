@@ -9,8 +9,6 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
     MaxAttendees: '',
     Category: '',
     Description: '',
-    RequiresApproval: false,
-    RestrictToRole: '',
     CreatedByAdmin: true
   });
   
@@ -150,34 +148,6 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
             placeholder="Provide details about the event"
             required
           ></textarea>
-        </div>
-        
-        {/* Admin-specific options */}
-        <div className="form-group admin-options">
-          <label>
-            <input
-              type="checkbox"
-              name="RequiresApproval"
-              checked={eventData.RequiresApproval}
-              onChange={(e) => setEventData({...eventData, RequiresApproval: e.target.checked})}
-            />
-            Require Admin Approval for Registration
-          </label>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="RestrictToRole">Restrict Access To:</label>
-          <select
-            id="RestrictToRole"
-            name="RestrictToRole"
-            value={eventData.RestrictToRole}
-            onChange={handleChange}
-          >
-            <option value="">Everyone</option>
-            <option value="Student">Students Only</option>
-            <option value="Faculty">Faculty Only</option>
-            <option value="Admin">Admins Only</option>
-          </select>
         </div>
         
         <div className="form-actions">
