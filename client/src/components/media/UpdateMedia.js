@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import "../../styles/media/media.css";
 
+// Genre options based on media type
+const genreOptions = {
+  Movie: ['Action', 'Comedy', 'Drama', 'Thriller', 'Crime'],
+  Music: ['Pop', 'Rock', 'Folk', 'Classical', 'Hip-Hop'],
+  Videogame: ['RPG', 'Action', 'Puzzle', 'Adventure', 'Sports']
+};
+
 const UpdateMedia = ({ mediaData, onUpdateMedia, navigateToHome }) => {
   const [media, setMedia] = useState({
     MediaID: '',
@@ -14,21 +21,37 @@ const UpdateMedia = ({ mediaData, onUpdateMedia, navigateToHome }) => {
     AvailableCopies: '',
   });
 
+  // Pre-fill the form with existing data
   useEffect(() => {
     if (mediaData) {
-      setMedia(mediaData); // Pre-fill form with existing data
+      setMedia(mediaData);
     }
   }, [mediaData]);
 
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setMedia(prev => ({ ...prev, [name]: value }));
+
+    // Reset genre if type changes
+    if (name === 'Type') {
+      setMedia(prev => ({
+        ...prev,
+        [name]: value,
+        Genre: ''
+      }));
+    } else {
+      setMedia(prev => ({ ...prev, [name]: value }));
+    }
   };
 
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    onUpdateMedia(media); // Send updated media data to parent
+    onUpdateMedia(media);
   };
+
+  // Get current genre options
+  const currentGenres = genreOptions[media.Type] || [];
 
   return (
     <div className="content-container">
@@ -41,6 +64,7 @@ const UpdateMedia = ({ mediaData, onUpdateMedia, navigateToHome }) => {
               name="Type"
               value={media.Type}
               onChange={handleChange}
+              required
             >
               <option value="">Select Type</option>
               <option value="Movie">Movies</option>
@@ -55,6 +79,7 @@ const UpdateMedia = ({ mediaData, onUpdateMedia, navigateToHome }) => {
               name="Title"
               value={media.Title}
               onChange={handleChange}
+              required
             />
           </div>
         </div>
@@ -67,16 +92,23 @@ const UpdateMedia = ({ mediaData, onUpdateMedia, navigateToHome }) => {
               name="Author"
               value={media.Author}
               onChange={handleChange}
+              required
             />
           </div>
           <div className="form-group">
             <label>Genre:</label>
-            <input
-              type="text"
+            <select
               name="Genre"
               value={media.Genre}
               onChange={handleChange}
-            />
+              required
+              disabled={!media.Type}
+            >
+              <option value="">Select Genre</option>
+              {currentGenres.map((genre, index) => (
+                <option key={index} value={genre}>{genre}</option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -111,6 +143,7 @@ const UpdateMedia = ({ mediaData, onUpdateMedia, navigateToHome }) => {
               name="TotalCopies"
               value={media.TotalCopies}
               onChange={handleChange}
+              required
             />
           </div>
           <div className="form-group">
@@ -120,13 +153,14 @@ const UpdateMedia = ({ mediaData, onUpdateMedia, navigateToHome }) => {
               name="AvailableCopies"
               value={media.AvailableCopies}
               onChange={handleChange}
+              required
             />
           </div>
         </div>
 
         <div className="button-group">
           <button type="button" onClick={navigateToHome} className="btn-secondary">Back</button>
-          <button type="submit" className="btn-primary">Update Media</button>
+          <button type="submit" className="btn-primary">Update</button>
         </div>
       </form>
     </div>

@@ -111,8 +111,8 @@ const UpdateDevice = ({ deviceData, onUpdateDevice, navigateToHome }) => {
         </div>
 
         <div className="button-group">
-          <button type="button" onClick={navigateToHome} className="btn-secondary">Back to Home</button>
-          <button type="submit" className="btn-primary">Update Device</button>
+          <button type="button" onClick={navigateToHome} className="btn-secondary">Back</button>
+          <button type="submit" className="btn-primary">Update</button>
         </div>
       </form>
     </div>

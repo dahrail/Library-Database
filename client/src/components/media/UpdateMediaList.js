@@ -6,6 +6,8 @@ const UpdateMediaList = ({ navigateToHome, navigateToUpdateMedia }) => {
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedType, setSelectedType] = useState('All');
+  const [selectedGenre, setSelectedGenre] = useState('All');
 
   useEffect(() => {
     const fetchMedia = async () => {
@@ -27,52 +29,118 @@ const UpdateMediaList = ({ navigateToHome, navigateToUpdateMedia }) => {
     fetchMedia();
   }, []);
 
+  // Static media types for filter
+  const mediaTypes = ['All', 'Movie', 'Music', 'VideoGame'];
+
+  // Extract unique genres for the dropdown, based on filtered media
+  const genres = [
+    'All',
+    ...new Set(
+      media
+        .filter((item) => selectedType === 'All' || item.Type === selectedType)
+        .map((item) => item.Genre)
+    ),
+  ];
+
+  // Filtered media based on selectedType and selectedGenre
+  const filteredMedia = media.filter((item) => {
+    const typeMatch = selectedType === 'All' || item.Type === selectedType;
+    const genreMatch = selectedGenre === 'All' || item.Genre === selectedGenre;
+    return typeMatch && genreMatch;
+  });
+
   return (
     <div className="content-container">
       <h2>Update Media</h2>
+
       {loading ? (
         <p>Loading media...</p>
       ) : error ? (
         <p style={{ color: 'red' }}>{error}</p>
       ) : (
-        <table className="media-table">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Title</th>
-              <th>Author</th>
-              <th>Genre</th>
-              <th>Publication Year</th>
-              <th>Language</th>
-              <th>Total Copies</th>
-              <th>Available Copies</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {media.map((media) => (
-              <tr key={media.DeviceID}>
-                <td>{media.Type}</td>
-                <td>{media.Title}</td>
-                <td>{media.Author}</td>
-                <td>{media.Genre}</td>
-                <td>{media.PublicationYear}</td>
-                <td>{media.Language}</td>
-                <td>{media.TotalCopies}</td>
-                <td>{media.AvailableCopies}</td>
-                <td>
-                  <button
-                    className="btn-primary"
-                    onClick={() => navigateToUpdateMedia(media)}
-                  >
-                    Update
-                  </button>
-                </td>
+        <>
+          {/* Filter by Type */}
+          <div className="filter-container">
+            <label htmlFor="typeFilter">Filter by Type: </label>
+            <select
+              id="typeFilter"
+              value={selectedType}
+              onChange={(e) => {
+                setSelectedType(e.target.value);
+                setSelectedGenre('All'); // Reset genre filter when type changes
+              }}
+            >
+              {mediaTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filter by Genre */}
+          <div className="filter-container">
+            <label htmlFor="genreFilter">Filter by Genre: </label>
+            <select
+              id="genreFilter"
+              value={selectedGenre}
+              onChange={(e) => setSelectedGenre(e.target.value)}
+            >
+              {genres.map((genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtered Table */}
+          <table className="media-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Publication Year</th>
+                <th>Language</th>
+                <th>Total Copies</th>
+                <th>Available Copies</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredMedia.length > 0 ? (
+                filteredMedia.map((mediaItem) => (
+                  <tr key={mediaItem.DeviceID}>
+                    <td>{mediaItem.Type}</td>
+                    <td>{mediaItem.Title}</td>
+                    <td>{mediaItem.Author}</td>
+                    <td>{mediaItem.Genre}</td>
+                    <td>{mediaItem.PublicationYear}</td>
+                    <td>{mediaItem.Language}</td>
+                    <td>{mediaItem.TotalCopies}</td>
+                    <td>{mediaItem.AvailableCopies}</td>
+                    <td>
+                      <button
+                        className="btn-primary"
+                        onClick={() => navigateToUpdateMedia(mediaItem)}
+                      >
+                        Update
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="9">No media items found for this type and genre.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </>
       )}
+
       <button onClick={navigateToHome} className="btn-secondary">
         Back to Home
       </button>
