@@ -190,12 +190,6 @@ const Home = ({
             </div>
           )}
         </div>
-
-        {isAdmin && (
-          <button onClick={navigateToDataReport} className="data-report-button">
-            View Data Report
-          </button>
-        )}
       </div>
     </div>
   );

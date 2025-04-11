@@ -419,9 +419,10 @@ const BookList = ({
       <div style={styles.contentSection}>
         <div id="books-grid" className="fade-in-items" style={styles.grid}>
           {displayedBooks.map((book) => {
-            let isOnHold = book.userHasHold || book.otherUserHasHold;
-            let isOutOfStock = book.copies === 0;
-            
+            const isOutOfStock = book.copies === 0;
+            const userHasHold = book.userHasHold; // Indicates if the current user has a hold on the book
+            const otherUserHasHold = book.otherUserHasHold; // Indicates if another user has a hold on the book
+
             return (
               <div
                 key={book.bookID}
@@ -460,32 +461,36 @@ const BookList = ({
                   <h3 style={styles.cardTitle}>{book.title}</h3>
                   <p style={styles.cardInfo}>Author: {book.author}</p>
                   <p style={styles.cardInfo}>Genre: {book.genre}</p>
-                  {/* {isOutOfStock ? (
-                    <p style={styles.cardInfo}><strong>Status: Out of Stock</strong></p>
-                  ) : isOnHold ? (
-                    <p style={styles.cardInfo}><strong>Status: On Hold</strong></p>
-                  ) : (
-                    <p style={styles.cardInfo}><strong>Status: Available</strong></p>
-                  )} */}
-                  
-                  {/* Conditional button rendering based on login status and availability */}
+
+                  {/* Conditional button rendering based on availability and holds */}
                   {isLoggedIn ? (
-                    // Logged in user buttons
                     isOutOfStock ? (
-                      <button style={styles.holdButton} onClick={() => handleHoldClick(book)}>
-                        Hold
-                      </button>
-                    ) : isOnHold ? (
+                      // If no copies are available, show the Hold button
                       <button style={styles.holdButton} onClick={() => handleHoldClick(book)}>
                         Hold
                       </button>
                     ) : (
-                      <button style={styles.button} onClick={() => handleLoanClick(book)}>
-                        Borrow
-                      </button>
+                      // Copies are available:
+                      book.holdUserID ? (
+                        // A hold exists—allow borrowing only if the current user placed it
+                        book.holdUserID === userData.UserID ? (
+                          <button style={styles.button} onClick={() => handleLoanClick(book)}>
+                            Borrow
+                          </button>
+                        ) : (
+                          <button style={{ ...styles.button, opacity: 0.5, cursor: 'not-allowed' }} disabled>
+                            Borrow
+                          </button>
+                        )
+                      ) : (
+                        // No hold exists—allow anyone to borrow
+                        <button style={styles.button} onClick={() => handleLoanClick(book)}>
+                          Borrow
+                        </button>
+                      )
                     )
                   ) : (
-                    // Not logged in - show login to borrow button
+                    // If the user is not logged in, show the Login to Borrow button
                     <button 
                       style={{
                         display: "inline-block",

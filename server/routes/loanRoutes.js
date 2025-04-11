@@ -53,8 +53,8 @@ WHERE L.UserID = ?
 const borrowBook = async (req, res) => {
   try {
     const { BookID, UserID, Role } = await parseRequestBody(req);
-    
-    // Check if the user has loaned the book and not returned it
+
+    // Check if the user has already borrowed the book and not returned it
     const activeLoanQuery = `
       SELECT * FROM LOAN 
       WHERE UserID = ? AND ItemID = ? AND ItemType = 'Book' AND ReturnedAt IS NULL
@@ -62,109 +62,62 @@ const borrowBook = async (req, res) => {
     const [activeLoan] = await pool.promise().query(activeLoanQuery, [UserID, BookID]);
 
     if (activeLoan.length > 0) {
-      return sendJsonResponse(res, 400, { success: false, error: "You have borrowed this item. You can only borrow this item once." });
+      return sendJsonResponse(res, 400, { 
+        success: false, 
+        error: "You have borrowed this item. You can only borrow this item once." 
+      });
     }
 
+    // Check if there is an active hold on this book
+    const holdQuery = `
+      SELECT * FROM HOLD
+      WHERE ItemID = ? AND ItemType = 'Book' AND HoldStatus = 'Pending'
+      ORDER BY RequestAt ASC LIMIT 1
+    `;
+    const [hold] = await pool.promise().query(holdQuery, [BookID]);
+
+    // If a hold exists and it doesn't belong to the current user, reject the borrow
+    if (hold.length > 0 && hold[0].UserID !== UserID) {
+      return sendJsonResponse(res, 400, { 
+        success: false, 
+        error: "This book is currently on hold by another user." 
+      });
+    }
+
+    // Decrement AvailableCopies in BOOK_INVENTORY
     const decrementQuery = `
       UPDATE BOOK_INVENTORY
       SET AvailableCopies = AvailableCopies - 1
       WHERE BookID = ? AND AvailableCopies > 0
     `;
+    const [updateResult] = await pool.promise().query(decrementQuery, [BookID]);
 
+    if (updateResult.affectedRows === 0) {
+      return sendJsonResponse(res, 400, { 
+        success: false, 
+        error: "No available copies to borrow." 
+      });
+    }
+
+    // Insert loan record
+    const loanPeriod = Role === "Student" ? 7 : 14;
     const insertLoanQuery = `
       INSERT INTO LOAN (UserID, ItemType, ItemID, BorrowedAt, DueAT)
       VALUES (?, 'Book', ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY))
     `;
+    await pool.promise().query(insertLoanQuery, [UserID, BookID, loanPeriod]);
 
-    // Determine the loan period based on the user's role
-    const loanPeriod = Role === "Student" ? 7 : 14;
-    const borrowLimit = Role === "Student" ? 2 : 3;
-
-    // Check if the user meet the borrow limit
-    const activeLoansQuery = `
-      SELECT COUNT(*) AS activeLoans
-      FROM LOAN
-      WHERE UserID = ? AND ItemType = 'Book' AND ReturnedAt IS NULL
-    `;
-    const [activeLoans] = await pool.promise().query(activeLoansQuery, [UserID]);
-
-    // If the number of active loans exceeds the borrow limit, reject the request
-    if (activeLoans[0].activeLoans >= borrowLimit) {
-      return sendJsonResponse(res, 400, { success: false, error: `You can only borrow up to ${borrowLimit} book at a time.` });
+    // If the current user had a hold, mark it as fulfilled
+    if (hold.length > 0 && hold[0].UserID === UserID) {
+      const updateHoldQuery = `
+        UPDATE HOLD
+        SET HoldStatus = 'Fulfilled'
+        WHERE HoldID = ?
+      `;
+      await pool.promise().query(updateHoldQuery, [hold[0].HoldID]);
     }
 
-    pool.getConnection((err, connection) => {
-      if (err) {
-        console.error("Error getting database connection:", err);
-        sendJsonResponse(res, 500, {
-          success: false,
-          error: "Database connection error",
-        });
-        return;
-      }
-
-      connection.beginTransaction((err) => {
-        if (err) {
-          console.error("Error starting transaction:", err);
-          connection.release();
-          sendJsonResponse(res, 500, {
-            success: false,
-            error: "Transaction error",
-          });
-          return;
-        }
-
-        // Decrement AvailableCopies
-        connection.query(decrementQuery, [BookID], (err, results) => {
-          if (err || results.affectedRows === 0) {
-            console.error(
-              "Error decrementing AvailableCopies or no rows affected:",
-              err
-            );
-            connection.rollback(() => connection.release());
-            sendJsonResponse(res, 400, {
-              success: false,
-              error: "No available copies to loan",
-            });
-            return;
-          }
-
-          // Insert into LOAN table
-          connection.query(
-            insertLoanQuery,
-            [UserID, BookID, loanPeriod],
-            (err, results) => {
-              if (err) {
-                console.error("Error inserting into LOAN table:", err);
-                connection.rollback(() => connection.release());
-                sendJsonResponse(res, 500, {
-                  success: false,
-                  error: "Failed to create loan record",
-                });
-                return;
-              }
-
-              // Commit the transaction
-              connection.commit((err) => {
-                if (err) {
-                  console.error("Error committing transaction:", err);
-                  connection.rollback(() => connection.release());
-                  sendJsonResponse(res, 500, {
-                    success: false,
-                    error: "Transaction commit error",
-                  });
-                  return;
-                }
-
-                connection.release();
-                console.log("Loan confirmed successfully for book ID:", BookID);
-                sendJsonResponse(res, 200, { success: true });
-              });
-            }
-          );
-        });
-      });
-    });
+    sendJsonResponse(res, 200, { success: true });
   } catch (error) {
     console.error("Error in borrowBook:", error);
     sendJsonResponse(res, 500, { success: false, error: "Server error" });
