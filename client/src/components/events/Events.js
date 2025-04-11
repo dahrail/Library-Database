@@ -30,7 +30,9 @@ const Events = ({
   const [filters, setFilters] = useState({
     dateFrom: '',
     dateTo: '',
-    location: '',
+    roomId: 'all',
+    searchTerm: '',
+    eventCategory: 'all',
   });
 
   const handleFilterChange = (e) => {
@@ -38,18 +40,36 @@ const Events = ({
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
+  const clearFilters = () => {
+    setFilters({
+      dateFrom: '',
+      dateTo: '',
+      roomId: 'all',
+      searchTerm: '',
+      eventCategory: 'all',
+    });
+  };
+
+  const eventCategories = ['all', 'Workshop', 'Seminar', 'Conference'];
+
   const filteredEvents = events.filter((event) => {
     const matchesDate =
       (!filters.dateFrom || new Date(event.StartAt) >= new Date(filters.dateFrom)) &&
       (!filters.dateTo || new Date(event.EndAt) <= new Date(filters.dateTo));
-    const matchesLocation = !filters.location || event.RoomNumber.includes(filters.location);
-    return matchesDate && matchesLocation;
+    const matchesRoom = filters.roomId === 'all' || Number(event.RoomID) === Number(filters.roomId);
+    const matchesCategory = 
+      filters.eventCategory === 'all' || 
+      (event.EventCategory && event.EventCategory.toLowerCase() === filters.eventCategory.toLowerCase());
+    const matchesSearch = 
+      !filters.searchTerm || 
+      event.EventName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+      (event.EventDescription && event.EventDescription.toLowerCase().includes(filters.searchTerm.toLowerCase()));
+    return matchesDate && matchesRoom && matchesCategory && matchesSearch;
   });
 
-  // Use the initialCategory prop on mount
   useEffect(() => {
     if (initialCategory) {
-      setSelectedCategory("all"); // Always use "all" since categories aren't needed
+      setSelectedCategory("all");
     }
   }, [initialCategory]);
 
@@ -57,25 +77,17 @@ const Events = ({
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        console.log("Fetching events...");
-        
         const response = await fetch('/api/events');
-        console.log("Response status:", response.status);
-        
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        
         const data = await response.json();
-        console.log("Fetched events data:", data);
-        
         if (data.success) {
           setEvents(data.events || []);
         } else {
           setError(data.error || "Failed to fetch events");
         }
       } catch (error) {
-        console.error("Error fetching events:", error);
         setError("Failed to load events. Please try again later.");
       } finally {
         setLoading(false);
@@ -88,14 +100,12 @@ const Events = ({
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        
         const data = await response.json();
         if (data.success) {
           setRooms(data.rooms || []);
         }
       } catch (error) {
         console.error("Error fetching rooms:", error);
-        // Not setting error state here as it's not critical
       }
     };
 
@@ -103,7 +113,6 @@ const Events = ({
     fetchRooms();
   }, []);
 
-  // Filter events when category changes
   useEffect(() => {
     if (events.length > 0) {
       if (selectedCategory === 'all') {
@@ -117,12 +126,10 @@ const Events = ({
   const handleAddEvent = async (eventData) => {
     try {
       setLoading(true);
-      // Add UserID to the event data from userData
       const eventWithUser = {
         ...eventData,
         UserID: userData?.UserID
       };
-      
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
@@ -130,12 +137,9 @@ const Events = ({
         },
         body: JSON.stringify(eventWithUser)
       });
-      
       const data = await response.json();
-      
       if (data.success) {
         alert('Event added successfully!');
-        // Refresh the events list
         const refreshResponse = await fetch('/api/events');
         const refreshData = await refreshResponse.json();
         if (refreshData.success) {
@@ -146,7 +150,6 @@ const Events = ({
         alert('Failed to add event: ' + data.error);
       }
     } catch (error) {
-      console.error('Error adding event:', error);
       alert('An error occurred while adding the event.');
     } finally {
       setLoading(false);
@@ -163,12 +166,9 @@ const Events = ({
         },
         body: JSON.stringify(eventData)
       });
-      
       const data = await response.json();
-      
       if (data.success) {
         alert('Event updated successfully!');
-        // Refresh the events list
         const refreshResponse = await fetch('/api/events');
         const refreshData = await refreshResponse.json();
         if (refreshData.success) {
@@ -179,7 +179,6 @@ const Events = ({
         alert('Failed to update event: ' + data.error);
       }
     } catch (error) {
-      console.error('Error updating event:', error);
       alert('An error occurred while updating the event.');
     } finally {
       setLoading(false);
@@ -190,41 +189,27 @@ const Events = ({
     if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
       try {
         setLoading(true);
-        console.log("Deleting event:", eventId);
-        
-        // Direct API call without using fetch
         const response = await fetch(`/api/events/${eventId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
           }
         });
-        
-        // Log the raw response for debugging
-        console.log("Delete response status:", response.status);
-        
         const responseText = await response.text();
-        console.log("Raw delete response:", responseText);
-        
         let data;
         try {
           data = JSON.parse(responseText);
         } catch (jsonError) {
-          console.error('Error parsing delete response:', responseText, jsonError);
           throw new Error(`Invalid server response: ${responseText}`);
         }
-        
         if (data.success) {
           alert('Event deleted successfully!');
-          // Remove the deleted event from state
           setEvents(prev => prev.filter(e => e.EventID !== eventId));
           setCurrentAction(null);
         } else {
-          console.error("Delete failed with error:", data.error);
           alert('Failed to delete event: ' + (data.error || 'Unknown error'));
         }
       } catch (error) {
-        console.error('Error deleting event:', error);
         alert('An error occurred while deleting the event: ' + (error.message || ''));
       } finally {
         setLoading(false);
@@ -236,55 +221,35 @@ const Events = ({
     try {
       setLoading(true);
       setSelectedEvent(event);
-      
-      console.log("Viewing details for event:", event.EventID);
-      
-      // Fetch attendees for this event
       const response = await fetch(`/api/events/${event.EventID}/attendees`);
       const responseText = await response.text();
-      
       try {
-        // Try to parse the response as JSON
         const data = JSON.parse(responseText);
-        
         if (data.success) {
-          console.log("Successfully fetched attendees:", data.attendees?.length || 0);
           setEventAttendees(data.attendees || []);
         } else {
-          console.error('Failed to fetch attendees:', data.error);
           setEventAttendees([]);
         }
       } catch (jsonError) {
-        console.error('Error parsing attendees response:', responseText, jsonError);
         setEventAttendees([]);
       }
-      
-      // Fetch check-in counts
       const countResponse = await fetch(`/api/events/${event.EventID}/count`);
       const countResponseText = await countResponse.text();
-      
       try {
-        // Try to parse the response as JSON
         const countData = JSON.parse(countResponseText);
-        
         if (countData.success) {
-          console.log("Successfully fetched attendee counts:", countData);
           setAttendeeCount({
             checked: countData.CheckedInCount || 0,
             total: countData.TotalRegistrations || 0
           });
         } else {
-          console.error('Failed to fetch attendee counts:', countData.error);
           setAttendeeCount({ checked: 0, total: 0 });
         }
       } catch (jsonError) {
-        console.error('Error parsing count response:', countResponseText, jsonError);
         setAttendeeCount({ checked: 0, total: 0 });
       }
-      
       setCurrentAction('detail');
     } catch (error) {
-      console.error('Error fetching event details:', error);
       alert('Error loading event details. Please try again.');
       setEventAttendees([]);
       setAttendeeCount({ checked: 0, total: 0 });
@@ -299,16 +264,13 @@ const Events = ({
         navigateToLogin();
         return;
       }
-      
       setLoading(true);
-      // Find the event to display registration form
       const eventToRegister = events.find(e => e.EventID === eventId);
       if (eventToRegister) {
         setSelectedEvent(eventToRegister);
         setCurrentAction('register');
       }
     } catch (error) {
-      console.error('Error preparing for registration:', error);
       alert('An error occurred while preparing registration.');
     } finally {
       setLoading(false);
@@ -321,43 +283,27 @@ const Events = ({
         alert('Missing user data or event information');
         return;
       }
-      
       setLoading(true);
-      console.log("Registering for event:", selectedEvent.EventID);
-      
-      // Use the API service for more consistent handling
       const response = await API.registerForEvent(userData.UserID, selectedEvent.EventID);
-      
       if (response.success) {
-        // Immediately update attendeeCount state to reflect the new registration
         setAttendeeCount(prev => ({
           ...prev,
           total: prev.total + 1
         }));
-        
-        // Refresh event data to get accurate counts
-        // Change API.getAllEvents() to API.getEvents() 
         const refreshData = await API.getEvents();
         if (refreshData.success) {
           setEvents(refreshData.events || []);
-          // Update selected event with refreshed data
           const updatedEvent = refreshData.events.find(e => e.EventID === selectedEvent.EventID);
           if (updatedEvent) {
             setSelectedEvent(updatedEvent);
           }
         }
-        
-        // Get attendee counts directly from API for accuracy
         const countResponse = await fetch(`/api/events/${selectedEvent.EventID}/count`);
         const countData = await countResponse.json();
-        
         if (countData.success) {
           const totalRegistered = countData.TotalRegistrations;
           const availableSpots = selectedEvent.MaxAttendees - totalRegistered;
-          
           alert(`Registration successful! You are now registered for this event. There are ${availableSpots > 0 ? availableSpots : 0} spots remaining.`);
-          
-          // Update attendee count state with the accurate data
           setAttendeeCount({
             checked: countData.CheckedInCount || 0,
             total: totalRegistered || 0
@@ -365,14 +311,11 @@ const Events = ({
         } else {
           alert('Registration successful! You are now registered for this event.');
         }
-        
-        // Go back to event details view with updated information
         setCurrentAction('detail');
       } else {
         alert('Failed to register: ' + response.error);
       }
     } catch (error) {
-      console.error('Error registering for event:', error);
       if (error.message && typeof error.message === 'string') {
         if (error.message.includes('already registered')) {
           alert('You are already registered for this event.');
@@ -396,11 +339,7 @@ const Events = ({
         navigateToLogin();
         return;
       }
-      
       setLoading(true);
-      console.log("Checking in for event:", eventId);
-      
-      // Use direct fetch instead of the API service for more control
       const response = await fetch('/api/events/checkin', {
         method: 'POST',
         headers: {
@@ -408,45 +347,32 @@ const Events = ({
         },
         body: JSON.stringify({
           UserID: userData.UserID,
-          EventID: eventId
+          EventID: eventId,
+          CheckedInAt: new Date().toISOString()
         })
       });
-      
       const responseText = await response.text();
-      console.log("Raw check-in response:", responseText);
-      
       let data;
       try {
         data = JSON.parse(responseText);
       } catch (jsonError) {
-        console.error('Error parsing check-in response:', responseText, jsonError);
         throw new Error(`Invalid server response: ${responseText}`);
       }
-      
       if (data.success) {
-        // Update local state to reflect the check-in
         setAttendeeCount(prev => ({
           ...prev,
           checked: prev.checked + 1
         }));
-        
         alert(`Check-in successful! You are now checked in for this event.`);
-        
-        // Refresh the events list and attendee data
         const refreshResponse = await fetch('/api/events');
         const refreshData = await refreshResponse.json();
         if (refreshData.success) {
           setEvents(refreshData.events || []);
         }
-        
-        // If we're in event detail view, refresh attendees
         if (currentAction === 'detail' && selectedEvent) {
           await handleViewEventDetails(selectedEvent);
         }
       } else {
-        console.error("Check-in failed with error:", data.error);
-        
-        // Handle specific error cases
         if (data.error.includes("need to register") || data.error.includes("not registered")) {
           alert('You need to register for this event before checking in.');
         } else if (data.error.includes("already checked in")) {
@@ -456,8 +382,6 @@ const Events = ({
         }
       }
     } catch (error) {
-      console.error('Error checking in for event:', error);
-      
       if (error.message && typeof error.message === 'string') {
         if (error.message.includes('already checked in')) {
           alert('You have already checked in for this event.');
@@ -474,7 +398,285 @@ const Events = ({
     }
   };
 
-  // Render based on current action
+  const filterStyles = {
+    filtersContainer: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "15px",
+      marginBottom: "30px",
+      padding: "20px",
+      backgroundColor: "#f5f5f7",
+      borderRadius: "12px",
+      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)",
+    },
+    filterHeader: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "15px",
+    },
+    filterTitle: {
+      fontSize: "18px",
+      fontWeight: "600",
+      color: "#1d1d1f",
+      margin: 0,
+    },
+    clearButton: {
+      padding: "6px 12px",
+      borderRadius: "6px",
+      border: "none",
+      backgroundColor: "#e1e1e1",
+      color: "#333",
+      fontSize: "14px",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    },
+    filterRow: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "15px",
+    },
+    filterGroup: {
+      flex: "1",
+      minWidth: "200px",
+    },
+    label: {
+      display: "block",
+      marginBottom: "8px",
+      fontWeight: "500",
+      color: "#333",
+      fontSize: "14px",
+    },
+    select: {
+      width: "100%",
+      padding: "10px 12px",
+      borderRadius: "8px",
+      border: "1px solid #ddd",
+      backgroundColor: "#fff",
+      fontSize: "15px",
+      appearance: "none",
+      backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"%23333\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>')",
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "right 10px center",
+      backgroundSize: "20px",
+      cursor: "pointer"
+    },
+    input: {
+      width: "100%",
+      padding: "10px 12px",
+      borderRadius: "8px",
+      border: "1px solid #ddd",
+      backgroundColor: "#fff",
+      fontSize: "15px",
+    },
+    dateInput: {
+      width: "100%",
+      padding: "10px 12px",
+      borderRadius: "8px",
+      border: "1px solid #ddd",
+      backgroundColor: "#fff",
+      fontSize: "15px",
+    },
+  };
+
+  const adminStyles = {
+    adminPanel: {
+      marginBottom: "25px",
+      padding: "15px",
+      backgroundColor: "#f8f9fa",
+      borderRadius: "10px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+    },
+    actionRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    heading: {
+      margin: "0 0 15px 0",
+      fontSize: "18px",
+      fontWeight: "600",
+    },
+    button: {
+      backgroundColor: "#0071e3",
+      color: "white",
+      border: "none",
+      borderRadius: "6px",
+      padding: "10px 16px",
+      fontSize: "15px",
+      fontWeight: "500",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    }
+  };
+
+  const eventCardStyles = {
+    card: {
+      borderRadius: "12px",
+      overflow: "hidden",
+      backgroundColor: "#fff",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+    },
+    header: {
+      background: "linear-gradient(135deg, #3a7bd5, #00d2ff)",
+      color: "white",
+      padding: "16px 20px",
+      position: "relative",
+    },
+    headerContent: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    title: {
+      margin: "0 0 5px 0",
+      fontSize: "18px",
+      fontWeight: "600",
+      lineHeight: "1.3",
+      flex: "1",
+    },
+    category: {
+      display: "inline-block",
+      fontSize: "12px",
+      fontWeight: "600",
+      padding: "3px 8px",
+      borderRadius: "20px",
+      backgroundColor: "rgba(255, 255, 255, 0.25)",
+      marginBottom: "5px",
+    },
+    body: {
+      padding: "16px 20px",
+      flex: "1",
+    },
+    detailsTable: {
+      width: "100%",
+      borderCollapse: "separate",
+      borderSpacing: "0 8px",
+    },
+    detailLabel: {
+      color: "#666",
+      fontWeight: "500",
+      fontSize: "13px",
+      width: "70px",
+      verticalAlign: "top",
+    },
+    detailValue: {
+      fontSize: "14px",
+      color: "#333",
+    },
+    footer: {
+      padding: "12px 20px",
+      borderTop: "1px solid #eee",
+      backgroundColor: "#fafafa",
+    },
+    actionButtons: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "8px",
+      alignItems: "center",
+    },
+    primaryButton: {
+      backgroundColor: "#0071e3",
+      color: "white",
+      border: "none",
+      borderRadius: "18px",
+      padding: "8px 16px",
+      fontSize: "14px",
+      fontWeight: "500",
+      cursor: "pointer",
+      flexGrow: "1",
+      textAlign: "center",
+      transition: "all 0.2s ease",
+    },
+    secondaryButton: {
+      backgroundColor: "#f5f5f7",
+      color: "#333",
+      border: "none",
+      borderRadius: "18px",
+      padding: "8px 16px",
+      fontSize: "13px",
+      fontWeight: "500",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    },
+    adminMenu: {
+      position: "absolute",
+      top: "12px",
+      right: "12px",
+      zIndex: "5",
+    },
+    menuButton: {
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
+      color: "white",
+      border: "none",
+      borderRadius: "50%",
+      width: "32px",
+      height: "32px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      fontSize: "18px",
+      transition: "all 0.2s ease",
+    },
+    menuDropdown: {
+      position: "absolute",
+      top: "40px",
+      right: "0",
+      backgroundColor: "white",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      borderRadius: "8px",
+      padding: "8px 0",
+      minWidth: "120px",
+      zIndex: "10",
+    },
+    menuItem: {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      padding: "8px 12px",
+      color: "#333",
+      fontSize: "14px",
+      cursor: "pointer",
+      transition: "background-color 0.2s ease",
+    },
+    menuItemEdit: {
+      color: "#2563eb",
+    },
+    menuItemDelete: {
+      color: "#dc2626",
+    },
+    statusTag: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "4px",
+      padding: "4px 8px",
+      borderRadius: "12px",
+      fontSize: "12px",
+      fontWeight: "500",
+      backgroundColor: "#e3f9e5",
+      color: "#1d8531",
+      marginLeft: "auto",
+    }
+  };
+
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  const toggleMenu = (eventId, e) => {
+    e.stopPropagation();
+    setOpenMenuId(openMenuId === eventId ? null : eventId);
+  };
+
+  useEffect(() => {
+    const closeMenus = () => setOpenMenuId(null);
+    document.addEventListener('click', closeMenus);
+    return () => document.removeEventListener('click', closeMenus);
+  }, []);
+
   if (currentAction === 'detail' && selectedEvent) {
     return (
       <EventDetail 
@@ -512,7 +714,6 @@ const Events = ({
 
   return (
     <div className="events-container">
-      {/* Hero Section with gradient background */}
       <div className="events-header">
         <div className="events-header-overlay">
           <h2>Library Events</h2>
@@ -522,74 +723,113 @@ const Events = ({
         </div>
       </div>
       
-      {/* Content Section */}
       <div className="events-section">
-        {/* Add Event button - only show for Admin users */}
         {userData?.Role === 'Admin' && (
-          <div className="events-actions">
+          <div style={adminStyles.adminPanel}>
+            <div style={adminStyles.actionRow}>
+              <h3 style={adminStyles.heading}>Admin Controls</h3>
+              <button 
+                style={adminStyles.button}
+                onClick={() => setShowAddForm(!showAddForm)}
+              >
+                {showAddForm ? 'Cancel' : 'Add New Event'}
+              </button>
+            </div>
+            {showAddForm && (
+              <AddEventForm 
+                onSubmit={handleAddEvent} 
+                rooms={rooms}
+                onCancel={() => setShowAddForm(false)}
+              />
+            )}
+          </div>
+        )}
+        
+        <div className="filters-section" style={filterStyles.filtersContainer}>
+          <div style={filterStyles.filterHeader}>
+            <h3 style={filterStyles.filterTitle}>Filter Events</h3>
             <button 
-              className="add-event-button"
-              onClick={() => setShowAddForm(!showAddForm)}
+              onClick={clearFilters} 
+              style={filterStyles.clearButton}
             >
-              {showAddForm ? 'Cancel' : 'Add New Event'}
+              Clear Filters
             </button>
           </div>
-        )}
-        
-        {/* Add Event Form */}
-        {showAddForm && (
-          <AddEventForm 
-            onSubmit={handleAddEvent} 
-            rooms={rooms}
-            onCancel={() => setShowAddForm(false)}
-          />
-        )}
-        
-        {/* Category Navigation */}
-        <div className="category-nav">
-          {categories.map(category => (
-            <button
-              key={category}
-              className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category === 'all' ? 'All Events' : category}
-            </button>
-          ))}
-        </div>
-        
-        {/* Filters Section */}
-        <div className="filters-section">
-          <div className="filter-group">
-            <label htmlFor="dateFrom">From:</label>
-            <input
-              type="date"
-              id="dateFrom"
-              name="dateFrom"
-              value={filters.dateFrom}
-              onChange={handleFilterChange}
-            />
+          
+          <div style={filterStyles.filterRow}>
+            <div style={{...filterStyles.filterGroup, flex: 2}}>
+              <label style={filterStyles.label} htmlFor="searchTerm">Search Events:</label>
+              <input
+                type="text"
+                id="searchTerm"
+                name="searchTerm"
+                placeholder="Search by name or description"
+                value={filters.searchTerm}
+                onChange={handleFilterChange}
+                style={filterStyles.input}
+              />
+            </div>
+            
+            <div style={filterStyles.filterGroup}>
+              <label style={filterStyles.label} htmlFor="eventCategory">Category:</label>
+              <select
+                id="eventCategory"
+                name="eventCategory"
+                value={filters.eventCategory}
+                onChange={handleFilterChange}
+                style={filterStyles.select}
+              >
+                {eventCategories.map(category => (
+                  <option key={category} value={category}>
+                    {category === 'all' ? 'All Categories' : category}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="filter-group">
-            <label htmlFor="dateTo">Until:</label>
-            <input
-              type="date"
-              id="dateTo"
-              name="dateTo"
-              value={filters.dateTo}
-              onChange={handleFilterChange}
-            />
-          </div>
-          <div className="filter-group">
-            <label htmlFor="location">Location:</label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              placeholder="Enter location"
-              value={filters.location}
-              onChange={handleFilterChange}
-            />
+          
+          <div style={filterStyles.filterRow}>
+            <div style={filterStyles.filterGroup}>
+              <label style={filterStyles.label} htmlFor="dateFrom">From Date:</label>
+              <input
+                type="date"
+                id="dateFrom"
+                name="dateFrom"
+                value={filters.dateFrom}
+                onChange={handleFilterChange}
+                style={filterStyles.dateInput}
+              />
+            </div>
+            
+            <div style={filterStyles.filterGroup}>
+              <label style={filterStyles.label} htmlFor="dateTo">To Date:</label>
+              <input
+                type="date"
+                id="dateTo"
+                name="dateTo"
+                value={filters.dateTo}
+                onChange={handleFilterChange}
+                style={filterStyles.dateInput}
+              />
+            </div>
+            
+            <div style={filterStyles.filterGroup}>
+              <label style={filterStyles.label} htmlFor="roomId">Location:</label>
+              <select
+                id="roomId"
+                name="roomId"
+                value={filters.roomId}
+                onChange={handleFilterChange}
+                style={filterStyles.select}
+              >
+                <option value="all">All Locations</option>
+                {rooms.map(room => (
+                  <option key={room.RoomID} value={room.RoomID}>
+                    {room.RoomName || `Room ${room.RoomNumber}`} (Capacity: {room.Capacity})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -602,47 +842,99 @@ const Events = ({
           </div>
         )}
         
-        {!loading && !error && displayedEvents.length === 0 && (
+        {!loading && !error && filteredEvents.length === 0 && (
           <div className="no-events-message">
-            <p>No upcoming events {selectedCategory !== 'all' ? `in category: ${selectedCategory}` : ''} at this time.</p>
-            {userData?.Role === 'Admin' && (
-              <p>Use the "Add New Event" button to create events.</p>
-            )}
+            <p>No events match your current filters</p>
+            <button 
+              onClick={clearFilters}
+              className="clear-filters-btn"
+            >
+              Clear All Filters
+            </button>
           </div>
         )}
         
-        {!loading && !error && displayedEvents.length > 0 && (
+        {!loading && !error && filteredEvents.length > 0 && (
           <div className="events-grid fade-in-items">
             {filteredEvents.map(event => (
-              <div key={event.EventID} className="event-card">
-                <div className="event-header">
-                  <h3>{event.EventName}</h3>
+              <div key={event.EventID} style={eventCardStyles.card}>
+                {/* Card Header */}
+                <div style={eventCardStyles.header}>
+                  <div style={eventCardStyles.headerContent}>
+                    <div>
+                      <div style={eventCardStyles.category}>
+                        {event.EventCategory || 'Event'}
+                      </div>
+                      <h3 style={eventCardStyles.title}>{event.EventName}</h3>
+                    </div>
+                  </div>
+                  
+                  {/* Admin Actions Menu */}
+                  {userData?.Role === 'Admin' && (
+                    <div style={eventCardStyles.adminMenu} onClick={e => e.stopPropagation()}>
+                      <button 
+                        style={eventCardStyles.menuButton}
+                        onClick={(e) => toggleMenu(event.EventID, e)}
+                        aria-label="Menu"
+                      >
+                        ⋮
+                      </button>
+                      
+                      {openMenuId === event.EventID && (
+                        <div style={eventCardStyles.menuDropdown}>
+                          <div 
+                            style={{...eventCardStyles.menuItem, ...eventCardStyles.menuItemEdit}}
+                            onClick={() => {
+                              setSelectedEvent(event);
+                              setCurrentAction('edit');
+                            }}
+                          >
+                            <span>✏️</span> Edit
+                          </div>
+                          <div 
+                            style={{...eventCardStyles.menuItem, ...eventCardStyles.menuItemDelete}}
+                            onClick={() => handleDeleteEvent(event.EventID)}
+                          >
+                            <span>🗑️</span> Delete
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
-                <div className="event-details">
-                  <div className="detail-item">
-                    <span className="detail-label">Date:</span>
-                    <span className="detail-value">
-                      {new Date(event.StartAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <span className="detail-label">Time:</span>
-                    <span className="detail-value">
-                      {new Date(event.StartAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
-                      {new Date(event.EndAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    </span>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <span className="detail-label">Location:</span>
-                    <span className="detail-value">{event.RoomNumber}</span>
-                  </div>
-                  
-                  <div className="event-actions">
+                {/* Card Body - Event Details */}
+                <div style={eventCardStyles.body}>
+                  <table style={eventCardStyles.detailsTable}>
+                    <tbody>
+                      <tr>
+                        <td style={eventCardStyles.detailLabel}>Date:</td>
+                        <td style={eventCardStyles.detailValue}>
+                          {new Date(event.StartAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={eventCardStyles.detailLabel}>Time:</td>
+                        <td style={eventCardStyles.detailValue}>
+                          {new Date(event.StartAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                          {new Date(event.EndAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={eventCardStyles.detailLabel}>Location:</td>
+                        <td style={eventCardStyles.detailValue}>
+                          {event.RoomNumber || 'TBA'}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Card Footer - Action Buttons */}
+                <div style={eventCardStyles.footer}>
+                  <div style={eventCardStyles.actionButtons}>
                     <button 
-                      className="btn-view-details"
+                      style={eventCardStyles.primaryButton}
                       onClick={() => handleViewEventDetails(event)}
                     >
                       View Details
@@ -650,50 +942,35 @@ const Events = ({
                     
                     {userData && (
                       <>
-                        <button
-                          className="btn-register"
-                          onClick={() => handleRegisterForEvent(event.EventID)}
-                        >
-                          Register
-                        </button>
-                        
-                        <button
-                          className="btn-checkin"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent event bubbling
-                            handleCheckInForEvent(event.EventID);
-                          }}
-                        >
-                          Check In
-                        </button>
-                        
-                        {/* Show checked-in status if the user has checked in */}
-                        {event.UserCheckedIn && (
-                          <div className="checked-in-message">
-                            You are checked in!
+                        {!event.UserCheckedIn ? (
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              style={eventCardStyles.secondaryButton}
+                              onClick={() => handleRegisterForEvent(event.EventID)}
+                            >
+                              Register
+                            </button>
+                            
+                            <button
+                              style={{
+                                ...eventCardStyles.secondaryButton,
+                                backgroundColor: '#d1fadf',
+                                color: '#15803d'
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCheckInForEvent(event.EventID);
+                              }}
+                            >
+                              Check In
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={eventCardStyles.statusTag}>
+                            <span>✓</span> Checked In
                           </div>
                         )}
                       </>
-                    )}
-                    
-                    {userData?.Role === 'Admin' && (
-                      <div className="admin-actions">
-                        <button
-                          className="btn-edit"
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setCurrentAction('edit');
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="btn-delete"
-                          onClick={() => handleDeleteEvent(event.EventID)}
-                        >
-                          Delete
-                        </button>
-                      </div>
                     )}
                   </div>
                 </div>

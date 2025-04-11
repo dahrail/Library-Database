@@ -25,17 +25,13 @@
 }
 
 .event-category {
-  margin-bottom: 24px;
-}
-
-.event-category-tag {
   display: inline-block;
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-  padding: 6px 12px;
+  background-color: #f0f0f0;
+  color: #666;
+  padding: 5px 12px;
   border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
 }
 
 .event-detail-info {
@@ -147,12 +143,12 @@
 
 .checked-in-message {
   background-color: #e3f9e5;
-  padding: 16px;
-  border-radius: 8px;
-  margin-top: 10px;
-  text-align: center;
   color: #1d8531;
-  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  margin-top: 15px;
+  text-align: center;
 }
 
 .past-event-message {
@@ -241,4 +237,85 @@
 
 .btn-back:hover {
   text-decoration: underline;
+}
+
+/* Attendee table styling */
+.attendees-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.attendees-table th {
+  background-color: #f5f5f7;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.attendees-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eaeaea;
+  color: #444;
+}
+
+.attendees-table tr:last-child td {
+  border-bottom: none;
+}
+
+.attendees-table tr.checked-in {
+  background-color: #f0f9f0;
+}
+
+.attendees-table tr:hover {
+  background-color: #f9f9fb;
+}
+
+/* Enhanced styling for actions */
+.registration-status {
+  margin-top: 25px;
+  padding: 15px;
+  background-color: #f9f9fb;
+  border-radius: 10px;
+  border: 1px solid #eaeaea;
+}
+
+.register-button, .checkin-button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.register-button {
+  background-color: #0071e3;
+  color: white;
+}
+
+.register-button:hover {
+  background-color: #0063c3;
+}
+
+.register-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.checkin-button {
+  background-color: #34c759;
+  color: white;
+}
+
+.checkin-button:hover {
+  background-color: #2cb24d;
 }

@@ -114,29 +114,31 @@ const borrowRoom = async (req, res) => {
 // Reserve a room
 const reserveRoom = async (req, res) => {
   try {
-    // Parse the request body
     let body = "";
     req.on("data", (chunk) => {
       body += chunk.toString();
     });
-
     req.on("end", async () => {
       const { RoomID, UserID, Duration } = JSON.parse(body);
 
       if (!RoomID || !UserID || !Duration) {
-        console.error("Missing required fields in request body:", {
-          RoomID,
-          UserID,
-          Duration,
-        });
+        console.error("Missing required fields in request body:", { RoomID, UserID, Duration });
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(
-          JSON.stringify({ success: false, error: "Invalid request body" })
-        );
+        res.end(JSON.stringify({ success: false, error: "Invalid request body" }));
         return;
       }
 
-      console.log("Reserving room:", { RoomID, UserID, Duration });
+      // NEW: Check if the user already has an active reservation
+      const checkUserReservationQuery = `
+        SELECT * FROM ROOM_RESERVATIONS 
+        WHERE UserID = ? AND EndAT > NOW()
+      `;
+      const [existingReservations] = await pool.promise().query(checkUserReservationQuery, [UserID]);
+      if (existingReservations.length > 0) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ success: false, error: "You already have a reserved room." }));
+        return;
+      }
 
       // Check if the room is available
       const checkQuery = `
