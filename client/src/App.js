@@ -29,6 +29,8 @@ import UpdateDeviceList from "./components/devices/UpdateDeviceList";
 import UpdateDevice from "./components/devices/UpdateDevice";
 import UpdateMediaList from "./components/media/UpdateMediaList";
 import UpdateMedia from "./components/media/UpdateMedia"; 
+import UpdateBookList from "./components/books/UpdateBookList";
+import UpdateBook from "./components/books/UpdateBook"; 
 
 // Import API service
 import API from "./services/api";
@@ -93,6 +95,22 @@ function App() {
     } catch (error) {
       console.error("Error updating media:", error);
       alert("An error occurred while updating the media.");
+    }
+  };
+
+  const handleUpdateBook = async (updatedBook) => { 
+    try {
+      const response = await API.updateBook(updatedBook);
+      if (response.success) {
+        alert("Book updated successfully!");
+        setSelectedBook(null); // Clear selected book
+        setCurrentScreen("books"); // Navigate back to books list
+      } else {
+        alert("Failed to update book: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error updating book:", error);
+      alert("An error occurred while updating the book.");
     }
   };
 
@@ -275,6 +293,17 @@ function App() {
     setSelectedMedia(media);
     setCurrentScreen("updateMedia");
   };
+
+  const navigateToUpdateBookList = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("updateBookList");
+  }
+
+  const navigateToUpdateBook = (book) => {
+    window.scrollTo(0, 0);
+    setSelectedBook(book);
+    setCurrentScreen("updateBook");
+  }
 
   // Books navigation and handlers
   const navigateToLoan = (book) => {
@@ -603,10 +632,11 @@ function App() {
           navigateToHome={navigateToHome}
           userData={userData} // Pass userData to check for admin role
           isLoggedIn={isLoggedIn} // Pass isLoggedIn state
-          navigateToAddBook={navigateToAddBook} // Pass the navigateToAddBook function
+          navigateToAddBook={navigateToAddBook}
+          navigateToUpdateBookList={navigateToUpdateBookList} // Pass the navigateToAddBook function
           navigateToLogin={navigateToLogin} // Pass navigateToLogin for non-logged-in users
           initialCategory={initialBookCategory} // Pass the initial category
-          navigateToLanding={navigateToLanding} // Add this prop
+          navigateToLanding={navigateToLanding} 
         />
       )}
 
@@ -781,6 +811,21 @@ function App() {
         <UpdateMedia
           mediaData={selectedMedia}
           onUpdateMedia={handleUpdateMedia}
+          navigateToHome={navigateToHome}
+        />
+      )}
+
+      {currentScreen === "updateBookList" && (
+        <UpdateBookList
+          navigateToHome={navigateToHome}
+          navigateToUpdateBook={navigateToUpdateBook}
+        />
+      )}
+
+      {currentScreen === "updateBook" && selectedBook && (
+        <UpdateBook
+          bookData={selectedBook}
+          onUpdateBook={handleUpdateBook}
           navigateToHome={navigateToHome}
         />
       )}

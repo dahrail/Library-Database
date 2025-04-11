@@ -2,6 +2,39 @@ const pool = require("../config/db");
 const { parseRequestBody, sendJsonResponse } = require("../utils/requestUtils");
 
 // Get all books
+const getRawBook = (req, res) => {
+  console.log("Fetching all book items");
+
+  const query = `
+    SELECT 
+      B.BookID, 
+      B.Title,
+      B.Author,
+      B.Genre,
+      B.PublicationYear,
+      B.Publisher,
+      B.Language,
+      B.Format,
+      B.ISBN,
+      I.TotalCopies, 
+      I.AvailableCopies,
+      I.ShelfLocation
+    FROM BOOK AS B
+    JOIN BOOK_INVENTORY AS I ON B.BookID = I.BookID
+  `;
+
+  pool.query(query, (err, results) => {
+    if (err) {
+      console.error("Error executing book query:", err);
+      sendJsonResponse(res, 500, { success: false, error: "Internal server error" });
+      return;
+    }
+
+    console.log("Query executed successfully. Results:", results);
+    sendJsonResponse(res, 200, { success: true, book: results });
+  });
+};
+
 const getAllBooks = (req, res) => {
   console.log("Fetching all books");
 
@@ -221,135 +254,77 @@ const deleteBook = async (req, res) => {
 //updateBook
 const updateBook = async (req, res) => {
   try {
-    const bookData = await parseRequestBody(req);
-    console.log("Updating book:", bookData.BookID);
+    const data = await parseRequestBody(req);
+    console.log("Updating book with data:", data);
 
-    const {
-      BookID,
-      Title,
-      Author,
-      Genre,
-      PublicationYear,
-      Publisher,
-      Language,
-      Format,
-      ISBN,
-      TotalCopies,
-      AvailableCopies,
-      ShelfLocation,
-    } = bookData;
-
-    // Initialize an array for the dynamic set of update fields and their values
-    let updateFields = [];
-    let queryParams = [];
-
-    // Add fields to update only if the user provided new values
-    if (Title) {
-      updateFields.push("Title = ?");
-      queryParams.push(Title);
-    }
-    if (Author) {
-      updateFields.push("Author = ?");
-      queryParams.push(Author);
-    }
-    if (Genre) {
-      updateFields.push("Genre = ?");
-      queryParams.push(Genre);
-    }
-    if (PublicationYear) {
-      updateFields.push("PublicationYear = ?");
-      queryParams.push(PublicationYear);
-    }
-    if (Publisher) {
-      updateFields.push("Publisher = ?");
-      queryParams.push(Publisher);
-    }
-    if (Language) {
-      updateFields.push("Language = ?");
-      queryParams.push(Language);
-    }
-    if (Format) {
-      updateFields.push("Format = ?");
-      queryParams.push(Format);
-    }
-    if (ISBN) {
-      updateFields.push("ISBN = ?");
-      queryParams.push(ISBN);
+    const { BookID } = data;
+    if (!BookID) {
+      sendJsonResponse(res, 400, { success: false, error: "BookID is required" });
+      return;
     }
 
-    // Construct the dynamic update query for the book details
-    const updateQuery = `UPDATE BOOK SET ${updateFields.join(
-      ", "
-    )} WHERE BookID = ?`;
-    queryParams.push(BookID); // Always include the BookID to target the correct book
+    const bookFields = ["Title", "Author", "Genre", "PublicationYear", "Publisher", "Language", "Format", "ISBN"];
+    const inventoryFields = ["TotalCopies", "AvailableCopies", "ShelfLocation"];
 
-    pool.query(updateQuery, queryParams, (err, results) => {
-      if (err) {
-        console.error("Error updating book:", err);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        return res.end(
-          JSON.stringify({ success: false, error: "Database error" })
-        );
-      }
-
-      // If there are inventory updates, handle them similarly
-      let inventoryUpdateFields = [];
-      let inventoryQueryParams = [];
-
-      if (TotalCopies !== undefined) {
-        inventoryUpdateFields.push("TotalCopies = ?");
-        inventoryQueryParams.push(TotalCopies);
-      }
-      if (AvailableCopies !== undefined) {
-        inventoryUpdateFields.push("AvailableCopies = ?");
-        inventoryQueryParams.push(AvailableCopies);
-      }
-      if (ShelfLocation) {
-        inventoryUpdateFields.push("ShelfLocation = ?");
-        inventoryQueryParams.push(ShelfLocation);
-      }
-
-      if (inventoryUpdateFields.length > 0) {
-        const inventoryQuery = `UPDATE BOOK_INVENTORY SET ${inventoryUpdateFields.join(
-          ", "
-        )} WHERE BookID = ?`;
-        inventoryQueryParams.push(BookID);
-
-        pool.query(
-          inventoryQuery,
-          inventoryQueryParams,
-          (err, inventoryResults) => {
-            if (err) {
-              console.error("Error updating inventory:", err);
-              res.writeHead(500, { "Content-Type": "application/json" });
-              return res.end(
-                JSON.stringify({
-                  success: false,
-                  error: "Failed to update inventory",
-                })
-              );
-            }
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true }));
-          }
-        );
-      } else {
-        // If no inventory update is needed, send a success response
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ success: true }));
+    const bookUpdates = [];
+    const bookValues = [];
+    bookFields.forEach(field => {
+      if (data[field] !== undefined) {
+        bookUpdates.push(`${field} = ?`);
+        bookValues.push(data[field]);
       }
     });
+
+    const inventoryUpdates = [];
+    const inventoryValues = [];
+    inventoryFields.forEach(field => {
+      if (data[field] !== undefined) {
+        inventoryUpdates.push(`${field} = ?`);
+        inventoryValues.push(data[field]);
+      }
+    });
+
+    const updateQueries = [];
+
+    if (bookUpdates.length > 0) {
+      const bookQuery = `UPDATE BOOK SET ${bookUpdates.join(", ")} WHERE BookID = ?`;
+      updateQueries.push(new Promise((resolve, reject) => {
+        pool.query(bookQuery, [...bookValues, BookID], (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      }));
+    }
+
+    if (inventoryUpdates.length > 0) {
+      const inventoryQuery = `UPDATE BOOK_INVENTORY SET ${inventoryUpdates.join(", ")} WHERE BookID = ?`;
+      updateQueries.push(new Promise((resolve, reject) => {
+        pool.query(inventoryQuery, [...inventoryValues, BookID], (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      }));
+    }
+
+    if (updateQueries.length === 0) {
+      sendJsonResponse(res, 400, { success: false, error: "No valid fields provided to update" });
+      return;
+    }
+
+    await Promise.all(updateQueries);
+
+    sendJsonResponse(res, 200, { success: true, message: "Book updated successfully" });
   } catch (error) {
     console.error("Error in updateBook:", error);
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ success: false, error: "Server error" }));
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
   }
 };
 
 module.exports = {
+  getRawBook,
   getAllBooks,
   getUserBooks,
   addBook,
-  deleteBook,
   updateBook,
+  deleteBook,
 };

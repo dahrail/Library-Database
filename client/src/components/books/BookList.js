@@ -8,6 +8,7 @@ const BookList = ({
   userData,
   isLoggedIn, // Added isLoggedIn prop
   navigateToAddBook,
+  navigateToUpdateBookList,
   navigateToLogin, // Added navigateToLogin prop
   initialCategory, // Add this prop
   navigateToLanding // Add this prop to fix the error
@@ -410,12 +411,10 @@ const BookList = ({
       <div style={styles.contentSection}>
         {/* Add Book Button for Admins */}
         {userData?.Role === "Admin" && (
-          <button 
-            onClick={navigateToAddBook} 
-            style={styles.addButton}
-          >
-            Add New Book
-          </button>
+        <>
+        <button onClick={navigateToAddBook} className="btn-primary">Add Book</button>
+        <button onClick={() => navigateToUpdateBookList()} className="btn-secondary">Update Book</button>
+      </>
         )}
 
         <div id="books-grid" className="fade-in-items" style={styles.grid}>

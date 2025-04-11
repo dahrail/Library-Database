@@ -31,6 +31,16 @@ const API = {
   },
 
   // Books API calls
+  getRawBook: async () => {
+    try {
+      const response = await fetch("/api/rawbook");
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching book:", error);
+      throw error;
+    }
+  },
+
   getBooks: async (userId) => {
     try {
       // If userId is provided, fetch user-specific book info

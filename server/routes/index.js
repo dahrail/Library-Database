@@ -55,6 +55,10 @@ const handleRequest = async (req, res) => {
       return bookRoutes.getAllBooks(req, res);
     }
 
+    if (method === "GET" && path === "/api/rawbook") {
+      return bookRoutes.getRawBook(req, res);
+    }
+
     if (method === "GET" && path.match(/^\/api\/books\/\d+$/)) {
       const userId = path.split("/").pop();
       return bookRoutes.getUserBooks(req, res, userId);
