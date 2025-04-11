@@ -4,7 +4,7 @@ import DeviceBorrowConfirmation from "./DeviceBorrowConfirmation";
 import DeviceHoldConfirmation from "./DeviceHoldConfirmation";
 import "../../styles/devices/devices.css";
 
-const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding, navigateToAddDevice }) => {
+const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding, navigateToAddDevice, navigateToUpdateDeviceList }) => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -298,11 +298,12 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
             <p style={styles.heroSubtitle}>Find the perfect device for your needs.</p>
           </div>
 
-          {/* Show "Add Device" button for admins */}
+          {/* Show "Add Device" and "Update Device" buttons for admins */}
           {isLoggedIn && userData?.Role === "Admin" && (
-            <button onClick={navigateToAddDevice} className="btn-primary">
-              Add Device
-            </button>
+            <>
+              <button onClick={navigateToAddDevice} className="btn-primary">Add Device</button>
+              <button onClick={() => navigateToUpdateDeviceList()} className="btn-secondary">Update Device</button>
+            </>
           )}
 
           {/* Category Navigation */}

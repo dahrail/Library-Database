@@ -90,6 +90,10 @@ const handleRequest = async (req, res) => {
       return await deviceRoutes.addDevice(req, res);
     }
 
+    if (method === "PUT" && path === "/api/updateDevice") {
+      return await deviceRoutes.updateDevice(req, res);
+    }
+
     if (method === "POST" && path === "/api/returnDevice") {
       return await deviceRoutes.returnDevice(req, res);
     }

@@ -25,6 +25,8 @@ import Devices from "./components/devices/Devices";
 import AddDevice from "./components/devices/AddDevice"; 
 import AddMedia from "./components/media/AddMedia";
 import AdminDashboard from "./components/admin/AdminDashboard"; // Add import for AdminDashboard
+import UpdateDeviceList from "./components/devices/UpdateDeviceList";
+import UpdateDevice from "./components/devices/UpdateDevice";
 
 // Import API service
 import API from "./services/api";
@@ -56,6 +58,24 @@ function App() {
   const [initialDevicesCategory, setInitialDevicesCategory] = useState(null);
   const [initialRoomCategory, setInitialRoomCategory] = useState(null);
   const [initialEventCategory, setInitialEventCategory] = useState(null);
+
+  const [selectedDevice, setSelectedDevice] = useState(null);
+
+  const handleUpdateDevice = async (updatedDevice) => {
+    try {
+      const response = await API.updateDevice(updatedDevice);
+      if (response.success) {
+        alert("Device updated successfully!");
+        setSelectedDevice(null); // Clear selected device
+        setCurrentScreen("devices"); // Navigate back to devices list
+      } else {
+        alert("Failed to update device: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error updating device:", error);
+      alert("An error occurred while updating the device.");
+    }
+  };
 
   // Login handler
   const handleLogin = async (email, password) => {
@@ -213,6 +233,17 @@ function App() {
   const navigateToAdminDashboard = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("adminDashboard");
+  };
+
+  const navigateToUpdateDeviceList = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("updateDeviceList");
+  };
+
+  const navigateToUpdateDevice = (device) => {
+    window.scrollTo(0, 0);
+    setSelectedDevice(device);
+    setCurrentScreen("updateDevice");
   };
 
   // Books navigation and handlers
@@ -445,6 +476,8 @@ function App() {
     }
   };
 
+
+
   // const handleConfirmReturn = async () => {
   //   try {
   //     console.log("Confirming return for LoanID:", selectedLoan.LoanID); // Debugging line
@@ -660,6 +693,7 @@ function App() {
           initialCategory={initialDevicesCategory} 
           navigateToLanding={navigateToLanding} 
           navigateToAddDevice={navigateToAddDevice} 
+          navigateToUpdateDeviceList={navigateToUpdateDeviceList} // Pass the function here
         />
       )}
 
@@ -686,6 +720,21 @@ function App() {
       {currentScreen === "adminDashboard" && userData?.Role === "Admin" && (
         <AdminDashboard 
           userData={userData}
+          navigateToHome={navigateToHome}
+        />
+      )}
+
+      {currentScreen === "updateDeviceList" && (
+        <UpdateDeviceList
+          navigateToHome={navigateToHome}
+          navigateToUpdateDevice={navigateToUpdateDevice}
+        />
+      )}
+
+      {currentScreen === "updateDevice" && selectedDevice && (
+        <UpdateDevice
+          deviceData={selectedDevice}
+          onUpdateDevice={handleUpdateDevice}
           navigateToHome={navigateToHome}
         />
       )}

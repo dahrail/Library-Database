@@ -57,6 +57,20 @@ const API = {
     }
   },
 
+  updateBook: async (bookData) => {
+    try {
+      const response = await fetch("/api/updateBook", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookData),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating book:", error);
+      throw error;
+    }
+  },
+
   borrowBook: async (bookId, userId, role) => {
     try {
       const response = await fetch("/api/borrowBook", {
@@ -399,6 +413,20 @@ const API = {
       return await response.json();
     } catch (error) {
       console.error("Error adding device:", error);
+      throw error;
+    }
+  },
+
+  updateDevice: async (deviceData) => {
+    try {
+      const response = await fetch("/api/updateDevice", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(deviceData),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating device:", error);
       throw error;
     }
   },

@@ -82,7 +82,77 @@ const addDevice = async (req, res) => {
   }
 };
 
+const updateDevice = async (req, res) => {
+  try {
+    const data = await parseRequestBody(req);
+    console.log("Updating device with data:", data);
+
+    const { DeviceID } = data;
+    if (!DeviceID) {
+      sendJsonResponse(res, 400, { success: false, error: "DeviceID is required" });
+      return;
+    }
+
+    const deviceFields = ["Type", "Brand", "Model", "SerialNumber"];
+    const inventoryFields = ["TotalCopies", "AvailableCopies", "ShelfLocation"];
+
+    const deviceUpdates = [];
+    const deviceValues = [];
+    deviceFields.forEach(field => {
+      if (data[field] !== undefined) {
+        deviceUpdates.push(`${field} = ?`);
+        deviceValues.push(data[field]);
+      }
+    });
+
+    const inventoryUpdates = [];
+    const inventoryValues = [];
+    inventoryFields.forEach(field => {
+      if (data[field] !== undefined) {
+        inventoryUpdates.push(`${field} = ?`);
+        inventoryValues.push(data[field]);
+      }
+    });
+
+    const updateQueries = [];
+
+    if (deviceUpdates.length > 0) {
+      const deviceQuery = `UPDATE DEVICE SET ${deviceUpdates.join(", ")} WHERE DeviceID = ?`;
+      updateQueries.push(new Promise((resolve, reject) => {
+        pool.query(deviceQuery, [...deviceValues, DeviceID], (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      }));
+    }
+
+    if (inventoryUpdates.length > 0) {
+      const inventoryQuery = `UPDATE DEVICE_INVENTORY SET ${inventoryUpdates.join(", ")} WHERE DeviceID = ?`;
+      updateQueries.push(new Promise((resolve, reject) => {
+        pool.query(inventoryQuery, [...inventoryValues, DeviceID], (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      }));
+    }
+
+    if (updateQueries.length === 0) {
+      sendJsonResponse(res, 400, { success: false, error: "No valid fields provided to update" });
+      return;
+    }
+
+    await Promise.all(updateQueries);
+
+    sendJsonResponse(res, 200, { success: true, message: "Device updated successfully" });
+  } catch (error) {
+    console.error("Error in updateDevice:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+  }
+};
+
+
 module.exports = {
   getAllDevice,
   addDevice,
+  updateDevice,
 };
