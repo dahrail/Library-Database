@@ -365,6 +365,20 @@ const API = {
     }
   },
 
+  updateMedia: async (mediaData) => {
+    try {
+      const response = await fetch("/api/updateMedia", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mediaData),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating media:", error);
+      throw error;
+    }
+  },
+
   borrowMedia: async (userId, mediaId) => {
     try {
       const response = await fetch("/api/borrowMedia", {

@@ -27,6 +27,8 @@ import AddMedia from "./components/media/AddMedia";
 import AdminDashboard from "./components/admin/AdminDashboard"; // Add import for AdminDashboard
 import UpdateDeviceList from "./components/devices/UpdateDeviceList";
 import UpdateDevice from "./components/devices/UpdateDevice";
+import UpdateMediaList from "./components/media/UpdateMediaList";
+import UpdateMedia from "./components/media/UpdateMedia"; 
 
 // Import API service
 import API from "./services/api";
@@ -37,6 +39,7 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState("landing"); // Change initial screen to landing
   const [books, setBooks] = useState([]);
   const [selectedBook, setSelectedBook] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState(null); // Initialize selectedMedia
   const [loans, setLoans] = React.useState([]); // Initialize loans as an empty array
   const [holds, setHolds] = useState([]);
   const [selectedLoan, setSelectedLoan] = useState(null);
@@ -74,6 +77,22 @@ function App() {
     } catch (error) {
       console.error("Error updating device:", error);
       alert("An error occurred while updating the device.");
+    }
+  };
+
+  const handleUpdateMedia = async (updatedMedia) => { 
+    try {
+      const response = await API.updateMedia(updatedMedia);
+      if (response.success) {
+        alert("Media updated successfully!");
+        setSelectedMedia(null); // Clear selected media
+        setCurrentScreen("media"); // Navigate back to media list
+      } else {
+        alert("Failed to update media: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error updating media:", error);
+      alert("An error occurred while updating the media.");
     }
   };
 
@@ -244,6 +263,17 @@ function App() {
     window.scrollTo(0, 0);
     setSelectedDevice(device);
     setCurrentScreen("updateDevice");
+  };
+
+  const navigateToUpdateMediaList = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("updateMediaList");
+  }; 
+
+  const navigateToUpdateMedia = (media) => {
+    window.scrollTo(0, 0);
+    setSelectedMedia(media);
+    setCurrentScreen("updateMedia");
   };
 
   // Books navigation and handlers
@@ -680,7 +710,8 @@ function App() {
           userData={userData} // Pass the userData
           initialCategory={initialMediaCategory} // Pass the initial category
           navigateToLanding={navigateToLanding} // Add this prop
-          navigateToAddMedia={navigateToAddMedia} // Pass the function
+          navigateToAddMedia={navigateToAddMedia}
+          navigateToUpdateMediaList={navigateToUpdateMediaList} // Pass the function here
         />
       )}
 
@@ -735,6 +766,21 @@ function App() {
         <UpdateDevice
           deviceData={selectedDevice}
           onUpdateDevice={handleUpdateDevice}
+          navigateToHome={navigateToHome}
+        />
+      )}
+
+      {currentScreen === "updateMediaList" && (
+        <UpdateMediaList
+          navigateToHome={navigateToHome}
+          navigateToUpdateMedia={navigateToUpdateMedia}
+        />
+      )}
+
+      {currentScreen === "updateMedia" && selectedMedia && (
+        <UpdateMedia
+          mediaData={selectedMedia}
+          onUpdateMedia={handleUpdateMedia}
           navigateToHome={navigateToHome}
         />
       )}

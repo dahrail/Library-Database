@@ -12,6 +12,7 @@ const getAllMedia = (req, res) => {
       M.Author, 
       M.Genre, 
       M.PublicationYear,
+      M.Language,
       M.Type,  
       I.TotalCopies, 
       I.AvailableCopies
@@ -82,7 +83,76 @@ const addMedia = async (req, res) => {
   }
 };
 
+const updateMedia = async (req, res) => {
+  try {
+    const data = await parseRequestBody(req);
+    console.log("Updating media with data:", data);
+
+    const { MediaID } = data;
+    if (!MediaID) {
+      sendJsonResponse(res, 400, { success: false, error: "MediaID is required" });
+      return;
+    }
+
+    const mediaFields = ["Type","Title", "Author", "Genre", "PublicationYear", "Language"];
+    const inventoryFields = ["TotalCopies", "AvailableCopies"];
+
+    const mediaUpdates = [];
+    const mediaValues = [];
+    mediaFields.forEach(field => {
+      if (data[field] !== undefined) {
+        mediaUpdates.push(`${field} = ?`);
+        mediaValues.push(data[field]);
+      }
+    });
+
+    const inventoryUpdates = [];
+    const inventoryValues = [];
+    inventoryFields.forEach(field => {
+      if (data[field] !== undefined) {
+        inventoryUpdates.push(`${field} = ?`);
+        inventoryValues.push(data[field]);
+      }
+    });
+
+    const updateQueries = [];
+
+    if (mediaUpdates.length > 0) {
+      const mediaQuery = `UPDATE MEDIA SET ${mediaUpdates.join(", ")} WHERE MediaID = ?`;
+      updateQueries.push(new Promise((resolve, reject) => {
+        pool.query(mediaQuery, [...mediaValues, MediaID], (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      }));
+    }
+
+    if (inventoryUpdates.length > 0) {
+      const inventoryQuery = `UPDATE MEDIA_INVENTORY SET ${inventoryUpdates.join(", ")} WHERE MediaID = ?`;
+      updateQueries.push(new Promise((resolve, reject) => {
+        pool.query(inventoryQuery, [...inventoryValues, MediaID], (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      }));
+    }
+
+    if (updateQueries.length === 0) {
+      sendJsonResponse(res, 400, { success: false, error: "No valid fields provided to update" });
+      return;
+    }
+
+    await Promise.all(updateQueries);
+
+    sendJsonResponse(res, 200, { success: true, message: "Media updated successfully" });
+  } catch (error) {
+    console.error("Error in updateMedia:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+  }
+};
+
 module.exports = {
   getAllMedia,
   addMedia,
+  updateMedia,
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import MediaBorrowConfirmation from "./MediaBorrowConfirmation";
 import MediaHoldConfirmation from "./MediaHoldConfirmation";
 
-const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding, navigateToAddMedia }) => {
+const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding, navigateToAddMedia, navigateToUpdateMediaList }) => {
   const [mediaItems, setMediaItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -516,9 +516,10 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
 
         {/* Show "Add Media" button for admins */}
         {isLoggedIn && userData?.Role === "Admin" && (
-            <button onClick={navigateToAddMedia} className="btn-primary">
-              Add Media
-            </button>
+          <>
+            <button onClick={navigateToAddMedia} className="btn-primary">Add Media</button>
+            <button onClick={() => navigateToUpdateMediaList()} className="btn-secondary">Update Media</button>
+          </>
           )}
 
       <div style={styles.navContainer}>
