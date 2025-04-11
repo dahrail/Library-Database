@@ -262,7 +262,7 @@ const BookList = ({
       backgroundColor: "#0071e3",
       color: "#ffffff",
       border: "none",
-      borderRadius: "8px",
+      borderRadius: "20px",
       padding: "12px 22px",
       fontSize: "17px",
       fontWeight: "500",
@@ -276,7 +276,7 @@ const BookList = ({
       backgroundColor: "#f7d774",
       color: "#000000",
       border: "none",
-      borderRadius: "8px",
+      borderRadius: "20px",
       padding: "12px 22px",
       fontSize: "17px",
       fontWeight: "500",
@@ -292,7 +292,7 @@ const BookList = ({
       backgroundColor: "#0071e3",
       color: "#ffffff",
       border: "none",
-      borderRadius: "8px",
+      borderRadius: "20px",
       padding: "15px 30px",
       fontSize: "17px",
       fontWeight: "500",
@@ -307,7 +307,7 @@ const BookList = ({
       border: "1px solid #86868b",
       color: "#1d1d1f",
       padding: "12px 24px",
-      borderRadius: "8px",
+      borderRadius: "20px",
       fontSize: "17px",
       fontWeight: "500",
       cursor: "pointer",
@@ -390,6 +390,14 @@ const BookList = ({
         )}
       </div>
 
+      {/* Admin Buttons for Book Management (for Admins) */}
+      {userData?.Role === "Admin" && (
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <button onClick={navigateToAddBook} className="admin-button">Add Book</button>
+          <button onClick={() => navigateToUpdateBookList()} className="admin-button">Update Book</button>
+        </div>
+      )}
+
       {/* Navigation */}
       <div style={styles.navContainer}>
         <div style={styles.nav}>
@@ -409,14 +417,6 @@ const BookList = ({
 
       {/* Content Section */}
       <div style={styles.contentSection}>
-        {/* Add Book Button for Admins */}
-        {userData?.Role === "Admin" && (
-        <>
-        <button onClick={navigateToAddBook} className="btn-primary">Add Book</button>
-        <button onClick={() => navigateToUpdateBookList()} className="btn-secondary">Update Book</button>
-      </>
-        )}
-
         <div id="books-grid" className="fade-in-items" style={styles.grid}>
           {displayedBooks.map((book) => {
             let isOnHold = book.userHasHold || book.otherUserHasHold;
@@ -492,7 +492,7 @@ const BookList = ({
                         backgroundColor: "#000000",
                         color: "#ffffff",
                         border: "none",
-                        borderRadius: "8px",
+                        borderRadius: "20px",
                         padding: "12px 22px",
                         fontSize: "17px",
                         fontWeight: "500",
