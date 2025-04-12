@@ -36,9 +36,9 @@ const AddDevice = ({ onAddDevice, navigateToHome }) => {
               required
             >
               <option value="">Select Type</option>
-              <option value="Headphone">Laptop</option>
+              <option value="Laptop">Laptop</option>
               <option value="Ipad">Ipad</option>
-              <option value="Laptop">Headphone</option>
+              <option value="Headphone">Headphone</option>
             </select>
           </div>
           <div className="form-group">
