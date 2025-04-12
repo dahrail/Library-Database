@@ -10,6 +10,7 @@ const roomRoutes = require("./roomRoutes");
 const eventRoutes = require("./eventRoutes");
 const deviceRoutes = require("./deviceRoutes");
 const mediaRoutes = require("./mediaRoutes");
+const finalreportRoutes = require("./finalreportRoutes")
 
 const parseRequestBody = async (req) => {
   return new Promise((resolve, reject) => {
@@ -171,6 +172,12 @@ const handleRequest = async (req, res) => {
     if (method === "GET" && path === "/api/fineReport") {
       return reportRoutes.getFineReport(req, res);
     }
+
+    // FINAL REPORT ROUTES
+    if (method === "GET" && path === "/api/itemReport") {
+      return finalreportRoutes.itemReport(req, res);
+    }
+
 
     // ROOM ROUTES
     if (method === "GET" && path === "/api/rooms") {
