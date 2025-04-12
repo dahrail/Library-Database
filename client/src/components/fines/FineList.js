@@ -28,7 +28,7 @@ const FineList = ({ fines, navigateToHome }) => {
                 <td>{fine.Author}</td>
                 <td>{new Date(fine.BorrowedAt).toLocaleString()}</td>
                 <td>{new Date(fine.DueAT).toLocaleString()}</td>
-                <td>${fine.Amount.toFixed(2)}</td>
+                <td>${parseFloat(fine.Amount).toFixed(2)}</td>
                 <td>{fine.Status}</td>
               </tr>
             ))}
