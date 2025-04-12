@@ -148,7 +148,7 @@ const Register = ({ onRegister, navigateToLogin, navigateToRegisterAsFaculty }) 
         </div>
 
         <div className="form-buttons">
-          <button type="submit" className="btn btn-primary">Register</button>
+          <button type="submit" className="btn btn-secondary">Register</button>
         </div>
         
         <div className="form-links">
