@@ -233,11 +233,17 @@ const handleRequest = async (req, res) => {
       return eventRoutes.getEventAttendeeCount(req, res);
     }
 
-    // Add this new route handler for updating events
     if (method === "PUT" && path.match(/^\/api\/events\/(\d+)$/)) {
       const eventId = path.match(/^\/api\/events\/(\d+)$/)[1];
       req.params = { eventId };
       return eventRoutes.updateEvent(req, res, eventId);
+    }
+
+    // Add this new route handler for deleting events
+    if (method === "DELETE" && path.match(/^\/api\/events\/(\d+)$/)) {
+      const eventId = path.match(/^\/api\/events\/(\d+)$/)[1];
+      req.params = { eventId };
+      return eventRoutes.deleteEvent(req, res, eventId);
     }
 
     // If we reach here, no route was matched
