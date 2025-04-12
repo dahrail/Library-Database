@@ -1,35 +1,71 @@
-require("dotenv").config();
+// Try to load dotenv if available
+let dotenvLoaded = false;
+try {
+  require("dotenv").config();
+  dotenvLoaded = true;
+} catch (err) {
+  console.warn("dotenv package not found. Using default email configuration.");
+  console.warn(
+    "To enable email with environment variables, run: npm install dotenv"
+  );
+}
 
-const nodemailer = require("nodemailer");
+// Try to load nodemailer if available
+let nodemailer;
+let emailAvailable = false;
+try {
+  nodemailer = require("nodemailer");
+  emailAvailable = true;
+} catch (err) {
+  console.warn(
+    "IMPORTANT: nodemailer package not found. Email functionality is disabled."
+  );
+  console.warn("To enable email functionality, run: npm install nodemailer");
+}
 
 function sendEmail(to, subject, text) {
+  // If nodemailer is not available, log the message but don't crash the application
+  if (!emailAvailable) {
+    console.log("EMAIL NOT SENT (nodemailer missing):");
+    console.log(`  To: ${to}`);
+    console.log(`  Subject: ${subject}`);
+    console.log(`  Text: ${text}`);
+    return Promise.resolve({
+      response: "Email not sent - nodemailer not installed",
+    });
+  }
+
+  // Use environment variables if dotenv loaded, otherwise use defaults
+  const emailUser = process.env.EMAIL_USER || "databaselibrary7@gmail.com";
+  const emailPass = process.env.EMAIL_PASS || "jldyebqoowhipxrf";
+
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, // Use the environment variable here
+      user: emailUser,
+      pass: emailPass,
     },
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: emailUser,
     to: to,
     subject: subject,
     text: text,
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Error sending email:", error);
-    } else {
-      console.log("Email sent:", info.response);
-    }
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        reject(error);
+      } else {
+        console.log("Email sent:", info.response);
+        resolve(info);
+      }
+    });
   });
 }
 
-const args = process.argv.slice(2);
-const to = args[0];
-const subject = args[1];
-const text = args[2];
-
-sendEmail(to, subject, text);
+// Export the function instead of running it directly
+module.exports = sendEmail;
