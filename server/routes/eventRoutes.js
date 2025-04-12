@@ -620,6 +620,15 @@ const updateEvent = async (req, res, eventId) => {
       try {
         const eventData = JSON.parse(body);
         console.log("Received update data for event:", eventData);
+        console.log("Looking for event with ID:", id);
+        console.log("Category values:", { 
+          EventCategory: eventData.EventCategory, 
+          Category: eventData.Category 
+        });
+        console.log("Description values:", { 
+          EventDescription: eventData.EventDescription, 
+          Description: eventData.Description 
+        });
         
         // Check if event exists
         const checkQuery = "SELECT EventID FROM event WHERE EventID = ?";
@@ -649,6 +658,7 @@ const updateEvent = async (req, res, eventId) => {
             WHERE EventID = ?
           `;
           
+          // Fix the malformed query execution
           pool.query(
             query,
             [
@@ -657,8 +667,8 @@ const updateEvent = async (req, res, eventId) => {
               eventData.StartAt, 
               eventData.EndAt, 
               eventData.MaxAttendees,
-              eventData.Category || null,
-              eventData.Description || null,
+              eventData.EventCategory || eventData.Category || null,
+              eventData.EventDescription || eventData.Description || null,
               id
             ],
             (updateErr, updateResults) => {

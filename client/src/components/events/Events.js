@@ -50,7 +50,7 @@ const Events = ({
     });
   };
 
-  const eventCategories = ['all', 'Workshop', 'Seminar', 'Conference'];
+  const eventCategories = ['all', 'Workshops', 'Seminar', 'Conference'];
 
   const filteredEvents = events.filter((event) => {
     const matchesDate =
@@ -69,7 +69,10 @@ const Events = ({
 
   useEffect(() => {
     if (initialCategory) {
-      setSelectedCategory("all");
+      setFilters(prev => ({
+        ...prev,
+        eventCategory: initialCategory
+      }));
     }
   }, [initialCategory]);
 
@@ -176,6 +179,9 @@ const Events = ({
   const handleEditEvent = async (eventData) => {
     try {
       setLoading(true);
+      console.log("Updating event with ID:", eventData.EventID);
+      
+      // Include both the original Category/Description and mapped EventCategory/EventDescription
       const response = await fetch(`/api/events/${eventData.EventID}`, {
         method: 'PUT',
         headers: {
@@ -183,7 +189,17 @@ const Events = ({
         },
         body: JSON.stringify(eventData)
       });
-      const data = await response.json();
+      
+      // Parse response before checking status to handle potential JSON parsing errors
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error("Failed to parse response:", text);
+        throw new Error("Invalid server response");
+      }
+      
       if (data.success) {
         alert('Event updated successfully!');
         const refreshResponse = await fetch('/api/events');
@@ -193,10 +209,11 @@ const Events = ({
         }
         setCurrentAction(null);
       } else {
-        alert('Failed to update event: ' + data.error);
+        alert('Failed to update event: ' + (data.error || "Unknown error"));
       }
     } catch (error) {
-      alert('An error occurred while updating the event.');
+      console.error("Update event error:", error);
+      alert('An error occurred while updating the event: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -363,6 +380,13 @@ const Events = ({
                 CheckedInCount: counts.checked
               }));
               
+              // Also update the event in the main events array
+              setEvents(prevEvents => prevEvents.map(e => 
+                e.EventID === selectedEvent.EventID 
+                  ? { ...e, AttendeeCount: counts.total, CheckedInCount: counts.checked }
+                  : e
+              ));
+              
               const availableSpots = selectedEvent.MaxAttendees - counts.total;
               alert(`Registration successful! You are now registered for this event. There are ${availableSpots > 0 ? availableSpots : 0} spots remaining.`);
             } else {
@@ -473,6 +497,31 @@ const Events = ({
                 AttendeeCount: counts.total,
                 CheckedInCount: counts.checked
               }));
+              
+              // Also update the event in the main events array
+              setEvents(prevEvents => prevEvents.map(e => 
+                e.EventID === selectedEvent.EventID 
+                  ? { ...e, AttendeeCount: counts.total, CheckedInCount: counts.checked }
+                  : e
+              ));
+            }
+          } else {
+            // If not in detail view, find the event in the array and update its counts
+            // This handles the case when checking in from the main events list
+            const countResponse = await fetch(`/api/events/${eventId}/count`);
+            const countData = await countResponse.json();
+            if (countData.success) {
+              const counts = {
+                checked: countData.CheckedInCount || 0,
+                total: countData.TotalRegistrations || 0
+              };
+              
+              // Update the specific event in the array
+              setEvents(prevEvents => prevEvents.map(e => 
+                e.EventID === eventId 
+                  ? { ...e, AttendeeCount: counts.total, CheckedInCount: counts.checked }
+                  : e
+              ));
             }
           }
         }
