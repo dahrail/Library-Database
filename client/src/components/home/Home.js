@@ -137,7 +137,7 @@ const Home = ({
             </div>
             <div className="menu-item-content">
               <h3>Devices</h3>
-              <p>Borrow Ipad, laptops, and headphone</p>
+              <p>Borrow iPad, laptops, and headphone</p>
             </div>
           </div>
 

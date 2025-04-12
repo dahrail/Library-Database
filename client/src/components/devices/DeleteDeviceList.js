@@ -29,7 +29,7 @@ const DeleteDeviceList = ({ navigateToHome, navigateToDeleteDevice }) => {
   }, []);
 
   // Static device types for filter
-  const deviceTypes = ['All', 'Laptop', 'Ipad', 'Headphone']; // Example types, adjust as needed
+  const deviceTypes = ['All', 'Laptop', 'iPad', 'Headphone']; // Example types, adjust as needed
 
   // Filtered devices based on selectedType
   const filteredDevices =
