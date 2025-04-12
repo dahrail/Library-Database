@@ -26,6 +26,9 @@ const HoldList = ({ holds, handleCancelHold, navigateToHome }) => {
   return (
     <div className="content-container">
       <h2>Your Holds</h2>
+      <button onClick={navigateToHome} className="btn-back-title">
+        Back to Home
+      </button>
 
       {/* Filters */}
       <div className="filter-container">
@@ -99,10 +102,6 @@ const HoldList = ({ holds, handleCancelHold, navigateToHome }) => {
           </tbody>
         </table>
       )}
-
-      <button onClick={navigateToHome} className="btn-back">
-        Back to Home
-      </button>
     </div>
   );
 };
