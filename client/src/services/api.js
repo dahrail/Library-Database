@@ -81,6 +81,20 @@ const API = {
     }
   },
 
+  deleteBook: async (bookId) => {
+    try {
+      const response = await fetch("/api/deleteBook", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ BookID: bookId }),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error deleting book:", error);
+      throw error;
+    }
+  },
+
   borrowBook: async (bookId, userId, role) => {
     try {
       const response = await fetch("/api/borrowBook", {

@@ -9,9 +9,11 @@ const BookList = ({
   isLoggedIn, // Added isLoggedIn prop
   navigateToAddBook,
   navigateToUpdateBookList,
+  navigateToDeleteBookList,
   navigateToLogin, // Added navigateToLogin prop
   initialCategory, // Add this prop
-  navigateToLanding // Add this prop to fix the error
+  navigateToLanding, // Add this prop to fix the error
+  navigateToDeleteBook // Ensure navigateToDeleteBook is correctly passed to the DeleteBookList component
 }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [displayedBooks, setDisplayedBooks] = useState([]);
@@ -395,6 +397,7 @@ const BookList = ({
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <button onClick={navigateToAddBook} className="admin-button">Add Book</button>
           <button onClick={() => navigateToUpdateBookList()} className="admin-button">Update Book</button>
+          <button onClick={() => navigateToDeleteBookList()} className="admin-button">Delete Book</button>
         </div>
       )}
 

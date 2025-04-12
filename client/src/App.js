@@ -35,6 +35,8 @@ import DeleteDeviceList from "./components/devices/DeleteDeviceList";
 import DeleteDevice from "./components/devices/DeleteDevice"; 
 import DeleteMediaList from "./components/media/DeleteMediaList";
 import DeleteMedia from "./components/media/DeleteMedia";
+import DeleteBookList from "./components/books/DeleteBookList";
+import DeleteBook from "./components/books/DeleteBook";
 
 // Import API service
 import API from "./services/api";
@@ -149,6 +151,23 @@ function App() {
     } catch (error) {
       console.error("Error deleting media:", error);
       alert("An error occurred while deleting the media.");
+    }
+  };
+
+  const handleDeleteBook = async (bookID) => {  
+    try {
+      const response = await API.deleteBook(bookID);
+      if (response.success) {
+        alert("Book deleted successfully!");
+        const updatedBooks = await API.getBooks(userData.UserID);
+        setBooks(updatedBooks);
+        setCurrentScreen("books"); 
+      } else {
+        alert("Failed to delete book: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error deleting book:", error);
+      alert("An error occurred while deleting the book.");
     }
   };
 
@@ -364,6 +383,17 @@ function App() {
     setSelectedMedia(media);
     setCurrentScreen("deleteMedia");
   }
+
+  const navigateToDeleteBookList = () => { 
+    window.scrollTo(0, 0);
+    setCurrentScreen("deleteBookList");
+  }
+
+  // Ensure the navigateToDeleteBook function navigates to the DeleteBook component
+  const navigateToDeleteBook = (book) => {
+    setSelectedBook(book);
+    setCurrentScreen("deleteBook");
+  };
 
   // Books navigation and handlers
   const navigateToLoan = (book) => {
@@ -595,29 +625,6 @@ function App() {
     }
   };
 
-
-
-  // const handleConfirmReturn = async () => {
-  //   try {
-  //     console.log("Confirming return for LoanID:", selectedLoan.LoanID); // Debugging line
-  //     const data = await API.confirmReturn(selectedLoan.LoanID); // Pass the correct LoanID
-  //     if (data.success) {
-  //       alert(
-  //         `The item "${selectedLoan.Title}" has been successfully returned.`
-  //       );
-  //       // Refresh the loan list
-  //       const updatedLoans = await API.getLoans(userData.UserID);
-  //       setLoans(updatedLoans);
-  //       setCurrentScreen("loans");
-  //     } else {
-  //       alert("Failed to return the item: " + data.error);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error returning the item:", error);
-  //     alert("An error occurred while returning the item.");
-  //   }
-  // };
-
   return (
     <div className="app-container">
       {/* Show TopBar on all screens */}
@@ -690,12 +697,14 @@ function App() {
           navigateToHold={navigateToHold}
           handleReturn={handleReturn}
           navigateToHome={navigateToHome}
-          userData={userData} // Pass userData to check for admin role
-          isLoggedIn={isLoggedIn} // Pass isLoggedIn state
+          userData={userData} 
+          isLoggedIn={isLoggedIn} 
           navigateToAddBook={navigateToAddBook}
-          navigateToUpdateBookList={navigateToUpdateBookList} // Pass the navigateToAddBook function
-          navigateToLogin={navigateToLogin} // Pass navigateToLogin for non-logged-in users
-          initialCategory={initialBookCategory} // Pass the initial category
+          navigateToUpdateBookList={navigateToUpdateBookList} 
+          navigateToDeleteBook={navigateToDeleteBook}
+          navigateToDeleteBookList={navigateToDeleteBookList}
+          navigateToLogin={navigateToLogin} 
+          initialCategory={initialBookCategory} 
           navigateToLanding={navigateToLanding} 
         />
       )}
@@ -919,6 +928,21 @@ function App() {
         <DeleteMedia
           mediaData={selectedMedia}
           onDeleteMedia={handleDeleteMedia}
+          navigateToHome={navigateToHome}
+        />
+      )}
+
+      {currentScreen === "deleteBookList" && (
+        <DeleteBookList
+          navigateToHome={navigateToHome}
+          navigateToDeleteBook={navigateToDeleteBook}
+        />
+      )}
+
+      {currentScreen === "deleteBook" && selectedBook && (
+        <DeleteBook
+          bookData={selectedBook}
+          onDeleteBook={handleDeleteBook}
           navigateToHome={navigateToHome}
         />
       )}

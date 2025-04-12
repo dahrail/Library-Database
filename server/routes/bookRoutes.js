@@ -210,47 +210,6 @@ const addBook = async (req, res) => {
   }
 };
 
-//Delete book
-const deleteBook = async (req, res) => {
-  try {
-    const { BookID } = await parseRequestBody(req);
-    pool.query(
-      "DELETE FROM BOOK_INVENTORY WHERE BookId = ?",
-      [BookID],
-      (err) => {
-        if (err) {
-          console.error("Error delete inventory", err);
-          res.writeHead(500, { "Content-Type": "application/json" });
-          return res.end(
-            JSON.stringify({ success: false, error: "Database error" })
-          );
-        }
-        pool.query("DELETE FROM BOOK WHERE BookID = ?", [BookID], (err) => {
-          if (err) {
-            console.error("Error deleting book", err);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            return res.end(
-              JSON.stringify({ success: false, error: "Failed to delete book" })
-            );
-          }
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(
-            JSON.stringify({
-              success: true,
-              message: "Book deleted successfully",
-            })
-          );
-        });
-      }
-    );
-  } catch (error) {
-    // If there's an error during the parsing or any other part
-    console.error("Error in deleteBook:", error);
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ success: false, error: "Server error" }));
-  }
-};
-
 //updateBook
 const updateBook = async (req, res) => {
   try {
@@ -316,6 +275,43 @@ const updateBook = async (req, res) => {
     sendJsonResponse(res, 200, { success: true, message: "Book updated successfully" });
   } catch (error) {
     console.error("Error in updateBook:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+  }
+};
+
+const deleteBook = async (req, res) => {
+  try {
+    const data = await parseRequestBody(req);
+    const { BookID } = data;
+
+    if (!BookID) {
+      sendJsonResponse(res, 400, { success: false, error: "BookID is required" });
+      return;
+    }
+
+    console.log(`Deleting book with BookID: ${BookID}`);
+
+    const deleteQuery = "DELETE FROM BOOK WHERE BookID = ?";
+    pool.query(deleteQuery, [BookID], (err, result) => {
+      if (err) {
+        console.error("Error deleting book:", err);
+        sendJsonResponse(res, 500, { success: false, error: "Failed to delete book" });
+        return;
+      }
+
+      if (result.affectedRows === 0) {
+        sendJsonResponse(res, 404, { success: false, error: "Book not found" });
+        return;
+      }
+
+      sendJsonResponse(res, 200, {
+        success: true,
+        message: "Book deleted successfully",
+        deletedDeviceId: BookID,
+      });
+    });
+  } catch (error) {
+    console.error("Error in deleteBook:", error);
     sendJsonResponse(res, 500, { success: false, error: "Server error" });
   }
 };
