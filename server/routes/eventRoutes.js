@@ -8,15 +8,21 @@ const getAllEvents = (req, res) => {
   // Try an extremely simple approach first - just get the events without any JOINs
   const simpleEventQuery = `
     SELECT 
-      EventID, 
-      EventName, 
-      StartAt,
-      EndAt,
-      MaxAttendees,
-      RoomID,
-      UserID
-    FROM event
-    ORDER BY StartAt ASC
+      e.EventID, 
+      e.EventName, 
+      e.StartAt,
+      e.EndAt,
+      e.MaxAttendees,
+      e.RoomID,
+      e.UserID,
+      e.EventCategory,
+      e.EventDescription,
+      COUNT(ea.EventAttendeeID) AS AttendeeCount,
+      COUNT(CASE WHEN ea.CheckedIn = 1 THEN 1 END) AS CheckedInCount
+    FROM event e
+    LEFT JOIN event_attendee ea ON e.EventID = ea.EventID
+    GROUP BY e.EventID, e.EventName, e.StartAt, e.EndAt, e.MaxAttendees, e.RoomID, e.UserID, e.EventCategory, e.EventDescription
+    ORDER BY e.StartAt ASC
   `;
 
   // Add this right after the simpleEventQuery to debug database state
@@ -110,7 +116,10 @@ const getAllEvents = (req, res) => {
             LastName: user.LastName || 'User',
             Organizer: (user.FirstName && user.LastName) 
               ? `${user.FirstName} ${user.LastName}` 
-              : 'Unknown Organizer'
+              : 'Unknown Organizer',
+            // Ensure AttendeeCount and CheckedInCount are always numbers (not NULL)
+            AttendeeCount: event.AttendeeCount || 0, 
+            CheckedInCount: event.CheckedInCount || 0
           };
         });
         

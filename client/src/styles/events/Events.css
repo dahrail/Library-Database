@@ -105,10 +105,24 @@
   color: var(--error-color);
 }
 
+/* Refined card styling */
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+/* Smooth animation for event cards */
+.fade-in-items > div {
+  animation: fadeIn 0.5s ease-in-out;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fade-in-items > div:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .event-card {
@@ -469,11 +483,13 @@
 }
 
 .registered-message {
-  background-color: #e3f9e5;
-  padding: 16px;
+  background-color: #e0f2fe;
+  padding: 10px 15px;
   border-radius: 8px;
-  margin-top: 10px;
+  margin-top: 15px;
   text-align: center;
+  color: #0369a1;
+  font-weight: 500;
 }
 
 .registration-actions {
@@ -694,7 +710,7 @@
 
 .btn-checkin {
   padding: 10px 16px;
-  background-color: #34c759;
+  background-color: #10b981;
   color: white;
   border: none;
   border-radius: 8px;
@@ -713,23 +729,13 @@
 }
 
 .checked-in-message {
-  background-color: #e3f9e5;
-  padding: 16px;
+  background-color: #dcfce7;
+  padding: 10px 15px;
   border-radius: 8px;
-  margin-top: 10px;
+  margin-top: 15px;
   text-align: center;
-  color: #1d8531;
-  font-weight: 600;
-}
-
-.checked-in-message {
-  background-color: #e3f9e5;
-  padding: 16px;
-  border-radius: 8px;
-  margin-top: 10px;
-  text-align: center;
-  color: #1d8531;
-  font-weight: 600;
+  color: #15803d;
+  font-weight: 500;
 }
 
 /* Filters Section */
@@ -826,7 +832,7 @@
   height: 8px;
   background-color: #e5e7eb;
   border-radius: 4px;
-  margin-top: 10px;
+  margin-top: 8px;
   overflow: hidden;
 }
 
@@ -847,13 +853,13 @@
 }
 
 .registered-message {
-  background-color: #e3f9e5;
-  padding: 16px;
+  background-color: #e0f2fe;
+  padding: 10px 15px;
   border-radius: 8px;
-  margin-top: 16px;
+  margin-top: 15px;
   text-align: center;
-  color: #1d8531;
-  font-weight: 600;
+  color: #0369a1;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -861,12 +867,12 @@
 
 .checked-in-message {
   background-color: #dcfce7;
-  padding: 16px;
+  padding: 10px 15px;
   border-radius: 8px;
-  margin-top: 12px;
+  margin-top: 15px;
   text-align: center;
   color: #15803d;
-  font-weight: 600;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -874,18 +880,15 @@
 
 /* Enhanced button styles */
 .btn-register, .btn-checkin {
-  width: 100%;
-  padding: 14px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 16px;
+  border-radius: 24px;
+  font-size: 15px;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-top: 15px;
+  margin-right: 10px;
 }
 
 .btn-register {
@@ -899,7 +902,7 @@
 }
 
 .btn-checkin {
-  background-color: #15803d;
+  background-color: #10b981;
   color: white;
 }
 
@@ -939,6 +942,25 @@
   border-radius: 20px;
   font-size: 14px;
   margin-top: 8px;
+}
+
+.event-detail-section {
+  padding: 20px;
+}
+
+.detail-row {
+  margin-bottom: 15px;
+  display: flex;
+}
+
+.detail-label {
+  font-weight: 500;
+  min-width: 100px;
+  color: #4b5563;
+}
+
+.detail-value {
+  color: #111827;
 }
 
 .attendees-table {

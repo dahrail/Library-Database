@@ -59,7 +59,8 @@ const Events = ({
     const matchesRoom = filters.roomId === 'all' || Number(event.RoomID) === Number(filters.roomId);
     const matchesCategory = 
       filters.eventCategory === 'all' || 
-      (event.EventCategory && event.EventCategory.toLowerCase() === filters.eventCategory.toLowerCase());
+      (event.EventCategory && 
+       String(event.EventCategory).toLowerCase() === String(filters.eventCategory).toLowerCase());
     const matchesSearch = 
       !filters.searchTerm || 
       event.EventName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
@@ -76,6 +77,22 @@ const Events = ({
     }
   }, [initialCategory]);
 
+  const isUserRegisteredForEvent = (event) => {
+    if (!userData || !userData.UserID) return false;
+    if (eventAttendees.length > 0 && selectedEvent && selectedEvent.EventID === event.EventID) {
+      return eventAttendees.some(a => a.UserID === userData.UserID);
+    }
+    return event.userRegistered === true;
+  };
+
+  const isUserCheckedInForEvent = (event) => {
+    if (!userData || !userData.UserID || !isUserRegisteredForEvent(event)) return false;
+    if (eventAttendees.length > 0 && selectedEvent && selectedEvent.EventID === event.EventID) {
+      return eventAttendees.some(a => a.UserID === userData.UserID && a.CheckedIn === 1);
+    }
+    return event.userCheckedIn === true;
+  };
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -86,16 +103,28 @@ const Events = ({
         }
         const data = await response.json();
         if (data.success) {
-          // Fetch attendee counts for all events
           const eventsWithCounts = await Promise.all(
             (data.events || []).map(async (event) => {
               try {
                 const countResponse = await fetch(`/api/events/${event.EventID}/count`);
                 const countData = await countResponse.json();
+                let userRegistered = false;
+                let userCheckedIn = false;
+                if (userData?.UserID) {
+                  const attendeesResponse = await fetch(`/api/events/${event.EventID}/attendees`);
+                  const attendeesData = await attendeesResponse.json();
+                  if (attendeesData.success && attendeesData.attendees) {
+                    const userAttendee = attendeesData.attendees.find(a => a.UserID === userData.UserID);
+                    userRegistered = !!userAttendee;
+                    userCheckedIn = userAttendee ? userAttendee.CheckedIn === 1 : false;
+                  }
+                }
                 return {
                   ...event,
                   AttendeeCount: countData.success ? countData.TotalRegistrations : 0,
-                  CheckedInCount: countData.success ? countData.CheckedInCount : 0
+                  CheckedInCount: countData.success ? countData.CheckedInCount : 0,
+                  userRegistered,
+                  userCheckedIn
                 };
               } catch (error) {
                 console.error(`Error fetching counts for event ${event.EventID}:`, error);
@@ -131,7 +160,7 @@ const Events = ({
 
     fetchEvents();
     fetchRooms();
-  }, []);
+  }, [userData]);
 
   useEffect(() => {
     if (events.length > 0) {
@@ -181,7 +210,6 @@ const Events = ({
       setLoading(true);
       console.log("Updating event with ID:", eventData.EventID);
       
-      // Include both the original Category/Description and mapped EventCategory/EventDescription
       const response = await fetch(`/api/events/${eventData.EventID}`, {
         method: 'PUT',
         headers: {
@@ -190,7 +218,6 @@ const Events = ({
         body: JSON.stringify(eventData)
       });
       
-      // Parse response before checking status to handle potential JSON parsing errors
       const text = await response.text();
       let data;
       try {
@@ -251,44 +278,98 @@ const Events = ({
     }
   };
 
+  const refreshEventCounts = async (eventId) => {
+    try {
+      if (!eventId) {
+        console.error("Invalid event ID in refreshEventCounts");
+        return null;
+      }
+      
+      const countResponse = await fetch(`/api/events/${eventId}/count`);
+      if (!countResponse.ok) {
+        console.error(`Event count fetch failed: ${countResponse.status} ${countResponse.statusText}`);
+        return null;
+      }
+      
+      const countData = await countResponse.json();
+      if (countData.success) {
+        setEvents(prevEvents => prevEvents.map(e => 
+          e.EventID === eventId 
+            ? { 
+                ...e, 
+                AttendeeCount: countData.TotalRegistrations || 0, 
+                CheckedInCount: countData.CheckedInCount || 0 
+              }
+            : e
+        ));
+        return {
+          total: countData.TotalRegistrations || 0,
+          checked: countData.CheckedInCount || 0
+        };
+      } else {
+        console.warn(`Server returned error for counts: ${countData.error || 'Unknown error'}`);
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error refreshing counts for event ${eventId}:`, error);
+      return null;
+    }
+  };
+
   const handleViewEventDetails = async (event) => {
     try {
+      if (!event || !event.EventID) {
+        throw new Error("Invalid event or missing event ID");
+      }
+
       setLoading(true);
       setSelectedEvent(event);
       
-      // First get the attendee list
-      const response = await fetch(`/api/events/${event.EventID}/attendees`);
-      const attendeeData = await response.json();
-      if (attendeeData.success) {
-        setEventAttendees(attendeeData.attendees || []);
-      } else {
+      // Fetch attendees with better error handling
+      try {
+        const response = await fetch(`/api/events/${event.EventID}/attendees`);
+        if (!response.ok) {
+          console.error(`Attendees fetch failed: ${response.status} ${response.statusText}`);
+          setEventAttendees([]);
+        } else {
+          const attendeeData = await response.json();
+          if (attendeeData.success) {
+            setEventAttendees(attendeeData.attendees || []);
+          } else {
+            console.warn(`Server returned error for attendees: ${attendeeData.error || 'Unknown error'}`);
+            setEventAttendees([]);
+          }
+        }
+      } catch (attendeesError) {
+        console.error('Error fetching attendees:', attendeesError);
         setEventAttendees([]);
+        // Continue execution rather than throwing error
       }
       
-      // Then get the current attendee counts
-      const countResponse = await fetch(`/api/events/${event.EventID}/count`);
-      const countData = await countResponse.json();
-      if (countData.success) {
-        const counts = {
-          checked: countData.CheckedInCount || 0,
-          total: countData.TotalRegistrations || 0
-        };
-        setAttendeeCount(counts);
-        
-        // Also update the selected event with current attendance info
-        setSelectedEvent(prev => ({
-          ...prev,
-          AttendeeCount: counts.total,
-          CheckedInCount: counts.checked
-        }));
-      } else {
+      // Fetch counts with better error handling
+      try {
+        const counts = await refreshEventCounts(event.EventID);
+        if (counts) {
+          setAttendeeCount(counts);
+          setSelectedEvent(prev => ({
+            ...prev,
+            AttendeeCount: counts.total,
+            CheckedInCount: counts.checked
+          }));
+        } else {
+          setAttendeeCount({ checked: 0, total: 0 });
+        }
+      } catch (countsError) {
+        console.error('Error fetching counts:', countsError);
         setAttendeeCount({ checked: 0, total: 0 });
+        // Continue execution rather than throwing error
       }
       
+      // Continue to detail view even if some data failed to load
       setCurrentAction('detail');
     } catch (error) {
       console.error('Error loading event details:', error);
-      alert('Error loading event details. Please try again.');
+      alert(`Error loading event details: ${error.message}. Please try again.`);
       setEventAttendees([]);
       setAttendeeCount({ checked: 0, total: 0 });
     } finally {
@@ -323,7 +404,6 @@ const Events = ({
       }
       setLoading(true);
       
-      // Simple API call with just the required IDs
       const response = await fetch('/api/events/register', {
         method: 'POST',
         headers: {
@@ -351,56 +431,95 @@ const Events = ({
       }
       
       if (data.success) {
-        // Refresh the event details completely
-        const refreshResponse = await fetch('/api/events');
-        const refreshData = await refreshResponse.json();
-        if (refreshData.success) {
-          // Update the main events list
-          setEvents(refreshData.events || []);
+        const updatedSelectedEvent = {
+          ...selectedEvent,
+          AttendeeCount: (selectedEvent.AttendeeCount || 0) + 1
+        };
+        setSelectedEvent(updatedSelectedEvent);
+        
+        setEvents(prevEvents => prevEvents.map(e => 
+          e.EventID === selectedEvent.EventID 
+            ? { ...e, AttendeeCount: (e.AttendeeCount || 0) + 1 }
+            : e
+        ));
+        
+        try {
+          const refreshResponse = await fetch('/api/events');
+          const refreshData = await refreshResponse.json();
           
-          // Find the updated event
-          const updatedEvent = refreshData.events.find(e => e.EventID === selectedEvent.EventID);
-          if (updatedEvent) {
-            setSelectedEvent(updatedEvent);
+          if (refreshData.success) {
+            const currentAttendeeMap = {};
+            events.forEach(event => {
+              currentAttendeeMap[event.EventID] = event.AttendeeCount || 0;
+            });
             
-            // Get updated counts
-            const countResponse = await fetch(`/api/events/${selectedEvent.EventID}/count`);
-            const countData = await countResponse.json();
-            if (countData.success) {
-              const counts = {
-                checked: countData.CheckedInCount || 0,
-                total: countData.TotalRegistrations || 0
+            const updatedEvents = refreshData.events.map(serverEvent => {
+              const currentCount = currentAttendeeMap[serverEvent.EventID] || 0;
+              const serverCount = serverEvent.AttendeeCount || 0;
+              
+              return {
+                ...serverEvent,
+                AttendeeCount: Math.max(currentCount, serverCount)
               };
-              setAttendeeCount(counts);
-              
-              // Update selected event with attendee counts
-              setSelectedEvent(prev => ({
-                ...prev,
-                AttendeeCount: counts.total,
-                CheckedInCount: counts.checked
-              }));
-              
-              // Also update the event in the main events array
-              setEvents(prevEvents => prevEvents.map(e => 
-                e.EventID === selectedEvent.EventID 
-                  ? { ...e, AttendeeCount: counts.total, CheckedInCount: counts.checked }
-                  : e
-              ));
-              
-              const availableSpots = selectedEvent.MaxAttendees - counts.total;
-              alert(`Registration successful! You are now registered for this event. There are ${availableSpots > 0 ? availableSpots : 0} spots remaining.`);
-            } else {
-              alert('Registration successful! You are now registered for this event.');
-            }
+            });
             
-            // Refresh the attendee list too
-            const attendeeResponse = await fetch(`/api/events/${selectedEvent.EventID}/attendees`);
-            const attendeeData = await attendeeResponse.json();
-            if (attendeeData.success) {
-              setEventAttendees(attendeeData.attendees || []);
+            setEvents(updatedEvents);
+            
+            const updatedEvent = updatedEvents.find(e => e.EventID === selectedEvent.EventID);
+            if (updatedEvent) {
+              setSelectedEvent(updatedEvent);
+              
+              try {
+                const countResponse = await fetch(`/api/events/${selectedEvent.EventID}/count`);
+                const countData = await countResponse.json();
+                
+                if (countData.success) {
+                  const counts = {
+                    checked: countData.CheckedInCount || 0,
+                    total: countData.TotalRegistrations || 0
+                  };
+                  
+                  counts.total = Math.max(counts.total, updatedSelectedEvent.AttendeeCount || 0);
+                  
+                  setAttendeeCount(counts);
+                  
+                  setSelectedEvent(prev => ({
+                    ...prev,
+                    AttendeeCount: counts.total,
+                    CheckedInCount: counts.checked
+                  }));
+                  
+                  setEvents(prevEvents => prevEvents.map(e => 
+                    e.EventID === selectedEvent.EventID 
+                      ? { ...e, AttendeeCount: counts.total, CheckedInCount: counts.checked }
+                      : e
+                  ));
+                  
+                  const availableSpots = selectedEvent.MaxAttendees - counts.total;
+                  alert(`Registration successful! You are now registered for this event. There are ${availableSpots > 0 ? availableSpots : 0} spots remaining.`);
+                } else {
+                  alert('Registration successful! You are now registered for this event.');
+                }
+              } catch (countError) {
+                console.error('Error fetching updated counts:', countError);
+                alert('Registration successful! You are now registered for this event.');
+              }
+              
+              try {
+                const attendeeResponse = await fetch(`/api/events/${selectedEvent.EventID}/attendees`);
+                const attendeeData = await attendeeResponse.json();
+                if (attendeeData.success) {
+                  setEventAttendees(attendeeData.attendees || []);
+                }
+              } catch (attendeeError) {
+                console.error('Error fetching attendees:', attendeeError);
+              }
             }
           }
+        } catch (refreshError) {
+          console.error('Error refreshing events data:', refreshError);
         }
+        
         setCurrentAction('detail');
       } else {
         alert('Failed to register: ' + (data.error || 'Unknown error'));
@@ -432,8 +551,6 @@ const Events = ({
       }
       setLoading(true);
       
-      // Add the current timestamp directly when checking in
-      // Use ISO format that MySQL can handle
       const currentTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
       
       const response = await fetch('/api/events/checkin', {
@@ -461,27 +578,23 @@ const Events = ({
       }
       
       if (data.success) {
-        // Refresh all event data completely
         const refreshResponse = await fetch('/api/events');
         const refreshData = await refreshResponse.json();
         if (refreshData.success) {
           setEvents(refreshData.events || []);
           
-          // If in detail view, refresh that specific event's data
           if (currentAction === 'detail' && selectedEvent) {
             const updatedEvent = refreshData.events.find(e => e.EventID === selectedEvent.EventID);
             if (updatedEvent) {
               setSelectedEvent(updatedEvent);
             }
             
-            // Get fresh attendee data
             const attendeeResponse = await fetch(`/api/events/${selectedEvent.EventID}/attendees`);
             const attendeeData = await attendeeResponse.json();
             if (attendeeData.success) {
               setEventAttendees(attendeeData.attendees || []);
             }
             
-            // Get fresh count data
             const countResponse = await fetch(`/api/events/${selectedEvent.EventID}/count`);
             const countData = await countResponse.json();
             if (countData.success) {
@@ -491,14 +604,12 @@ const Events = ({
               };
               setAttendeeCount(counts);
               
-              // Update selected event with the counts
               setSelectedEvent(prev => ({
                 ...prev,
                 AttendeeCount: counts.total,
                 CheckedInCount: counts.checked
               }));
               
-              // Also update the event in the main events array
               setEvents(prevEvents => prevEvents.map(e => 
                 e.EventID === selectedEvent.EventID 
                   ? { ...e, AttendeeCount: counts.total, CheckedInCount: counts.checked }
@@ -506,8 +617,6 @@ const Events = ({
               ));
             }
           } else {
-            // If not in detail view, find the event in the array and update its counts
-            // This handles the case when checking in from the main events list
             const countResponse = await fetch(`/api/events/${eventId}/count`);
             const countData = await countResponse.json();
             if (countData.success) {
@@ -516,7 +625,6 @@ const Events = ({
                 total: countData.TotalRegistrations || 0
               };
               
-              // Update the specific event in the array
               setEvents(prevEvents => prevEvents.map(e => 
                 e.EventID === eventId 
                   ? { ...e, AttendeeCount: counts.total, CheckedInCount: counts.checked }
@@ -819,10 +927,10 @@ const Events = ({
     },
     badge: {
       display: "inline-block",
-      padding: "3px 8px",
+      padding: "4px 10px",
       borderRadius: "12px",
-      fontSize: "11px",
-      fontWeight: "600",
+      fontSize: "12px",
+      fontWeight: "500",
       marginBottom: "8px",
     },
     upcomingBadge: {
@@ -840,27 +948,6 @@ const Events = ({
     icon: {
       marginRight: "6px",
       fontSize: "14px",
-    },
-    availabilityIndicator: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: "4px 0",
-      fontSize: "13px",
-      color: "#4b5563",
-      marginTop: "8px",
-      marginBottom: "8px",
-    },
-    spotCounter: {
-      fontWeight: "500",
-      display: "inline-flex",
-      alignItems: "center",
-    },
-    lowSpots: {
-      color: "#b91c1c",
-    },
-    manySpots: {
-      color: "#15803d",
     },
   };
 
@@ -890,6 +977,12 @@ const Events = ({
     document.addEventListener('click', closeMenus);
     return () => document.removeEventListener('click', closeMenus);
   }, []);
+
+  const getBookedRoomIDs = (excludeEventId = null) => {
+    return events
+      .filter(event => event.EventID !== excludeEventId)
+      .map(event => event.RoomID);
+  };
 
   if (currentAction === 'detail' && selectedEvent) {
     return (
@@ -922,6 +1015,7 @@ const Events = ({
         rooms={rooms}
         onSubmit={handleEditEvent}
         onCancel={() => setCurrentAction(null)}
+        bookedRooms={getBookedRoomIDs(selectedEvent.EventID)}
       />
     );
   }
@@ -929,11 +1023,30 @@ const Events = ({
   return (
     <div className="events-container">
       <div className="events-header">
-        <div className="events-header-overlay">
+        <div className="events-header-overlay" style={{textAlign: 'center'}}>
           <h2>Library Events</h2>
-          <p className="hero-subtitle">
-            Discover upcoming library events and activities
-          </p>
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%"
+          }}>
+            <div style={{
+              padding: "10px 20px",
+              margin: "20px auto 0",
+              textAlign: "center",
+              maxWidth: "fit-content"
+            }}>
+              <p style={{
+                margin: 0,
+                color: "white",
+                fontSize: "24px",
+                fontWeight: "400",
+                textAlign: "center"
+              }}>
+                Discover upcoming library events and activities
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -954,6 +1067,7 @@ const Events = ({
                 onSubmit={handleAddEvent} 
                 rooms={rooms}
                 onCancel={() => setShowAddForm(false)}
+                bookedRooms={getBookedRoomIDs()}
               />
             )}
           </div>
@@ -995,7 +1109,7 @@ const Events = ({
               >
                 {eventCategories.map(category => (
                   <option key={category} value={category}>
-                    {category === 'all' ? 'All Categories' : category}
+                    {category === 'all' ? 'All Events' : category}
                   </option>
                 ))}
               </select>
@@ -1072,13 +1186,18 @@ const Events = ({
           <div className="events-grid fade-in-items">
             {filteredEvents.map(event => {
               const timeStatus = getEventTimeStatus(event.StartAt, event.EndAt);
-              const registeredCount = event.AttendeeCount || 0;
-              const remainingSpots = event.MaxAttendees - registeredCount;
+              const registeredCount = event.AttendeeCount !== undefined ? event.AttendeeCount : 0;
+              const remainingSpots = Math.max(0, event.MaxAttendees - registeredCount);
               const isFull = remainingSpots <= 0;
+              const userIsRegistered = isUserRegisteredForEvent(event);
+              const userIsCheckedIn = isUserCheckedInForEvent(event);
               
               return (
-                <div key={event.EventID} style={eventCardStyles.card}>
-                  {/* Card Header */}
+                <div 
+                  key={event.EventID} 
+                  style={eventCardStyles.card}
+                  onClick={() => handleViewEventDetails(event)}
+                >
                   <div style={eventCardStyles.header}>
                     <div style={eventCardStyles.headerContent}>
                       <div>
@@ -1087,26 +1206,24 @@ const Events = ({
                         </div>
                         <h3 style={eventCardStyles.title}>{event.EventName}</h3>
                         
-                        {/* Event timing status badge */}
                         {timeStatus === "past" && (
                           <span style={{...eventCardStyles.badge, ...eventCardStyles.pastBadge}}>
-                            <span style={eventCardStyles.icon}>⌛</span>Past Event
+                            Past Event
                           </span>
                         )}
                         {timeStatus === "today" && (
                           <span style={{...eventCardStyles.badge, ...eventCardStyles.todayBadge}}>
-                            <span style={eventCardStyles.icon}>⭐</span>Today
+                            Today
                           </span>
                         )}
                         {timeStatus === "upcoming" && (
                           <span style={{...eventCardStyles.badge, ...eventCardStyles.upcomingBadge}}>
-                            <span style={eventCardStyles.icon}>📅</span>Upcoming
+                            Upcoming
                           </span>
                         )}
                       </div>
                     </div>
                     
-                    {/* Admin Actions Menu */}
                     {userData?.Role === 'Admin' && (
                       <div style={eventCardStyles.adminMenu} onClick={e => e.stopPropagation()}>
                         <button 
@@ -1140,95 +1257,93 @@ const Events = ({
                     )}
                   </div>
                   
-                  {/* Card Body - Event Details */}
                   <div style={eventCardStyles.body}>
                     <table style={eventCardStyles.detailsTable}>
                       <tbody>
                         <tr>
-                          <td style={eventCardStyles.detailLabel}><span style={eventCardStyles.icon}>📆</span>Date:</td>
+                          <td style={eventCardStyles.detailLabel}>Date:</td>
                           <td style={eventCardStyles.detailValue}>
                             {new Date(event.StartAt).toLocaleDateString()}
                           </td>
                         </tr>
                         <tr>
-                          <td style={eventCardStyles.detailLabel}><span style={eventCardStyles.icon}>⏰</span>Time:</td>
+                          <td style={eventCardStyles.detailLabel}>Time:</td>
                           <td style={eventCardStyles.detailValue}>
                             {new Date(event.StartAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
                             {new Date(event.EndAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                           </td>
                         </tr>
                         <tr>
-                          <td style={eventCardStyles.detailLabel}><span style={eventCardStyles.icon}>📍</span>Location:</td>
+                          <td style={eventCardStyles.detailLabel}>Location:</td>
                           <td style={eventCardStyles.detailValue}>
                             {event.RoomNumber || 'TBA'}
                           </td>
                         </tr>
                       </tbody>
                     </table>
-                    
-                    {/* Availability indicator */}
-                    <div style={eventCardStyles.availabilityIndicator}>
-                      <span>Attendance</span>
-                      <span 
-                        style={{
-                          ...eventCardStyles.spotCounter, 
-                          ...(remainingSpots <= 3 ? eventCardStyles.lowSpots : eventCardStyles.manySpots)
-                        }}
-                      >
-                        {isFull ? (
-                          <span>Full</span>
-                        ) : (
-                          <span>
-                            <span style={eventCardStyles.icon}>👤</span>
-                            {remainingSpots} spots left
-                          </span>
-                        )}
-                      </span>
-                    </div>
                   </div>
                   
-                  {/* Card Footer - Action Buttons */}
                   <div style={eventCardStyles.footer}>
                     <div style={eventCardStyles.actionButtons}>
                       <button 
                         style={eventCardStyles.primaryButton}
-                        onClick={() => handleViewEventDetails(event)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewEventDetails(event);
+                        }}
                       >
                         View Details
                       </button>
                       
                       {userData && timeStatus !== "past" && (
                         <>
-                          {!event.UserCheckedIn ? (
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                              <button
-                                style={{
-                                  ...eventCardStyles.secondaryButton,
-                                  opacity: isFull ? '0.7' : '1'
-                                }}
-                                onClick={() => handleRegisterForEvent(event.EventID)}
-                                disabled={isFull}
-                              >
-                                {isFull ? 'Full' : 'Register'}
-                              </button>
-                              
-                              <button
-                                style={{
-                                  ...eventCardStyles.secondaryButton,
-                                  backgroundColor: '#d1fadf',
-                                  color: '#15803d'
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCheckInForEvent(event.EventID);
-                                }}
-                              >
-                                Check In
-                              </button>
+                          {userIsCheckedIn ? (
+                            <div style={eventCardStyles.statusTag}>
+                              Checked In
                             </div>
                           ) : (
-                            <div style={eventCardStyles.statusTag}>
-                              <span>✓</span> Checked In
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              {!userIsRegistered && (
+                                <button
+                                  style={{
+                                    ...eventCardStyles.secondaryButton,
+                                    opacity: isFull ? '0.7' : '1'
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRegisterForEvent(event.EventID);
+                                  }}
+                                  disabled={isFull}
+                                >
+                                  {isFull ? 'Full' : 'Register'}
+                                </button>
+                              )}
+                              
+                              {userIsRegistered && !userIsCheckedIn && (
+                                <button
+                                  style={{
+                                    ...eventCardStyles.secondaryButton,
+                                    backgroundColor: '#d1fadf',
+                                    color: '#15803d'
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCheckInForEvent(event.EventID);
+                                  }}
+                                >
+                                  Check In
+                                </button>
+                              )}
+                              
+                              {userIsRegistered && !userIsCheckedIn && (
+                                <div style={{
+                                  ...eventCardStyles.statusTag,
+                                  backgroundColor: '#e0f2fe',
+                                  color: '#0369a1'
+                                }}>
+                                  Registered
+                                </div>
+                              )}
                             </div>
                           )}
                         </>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
+const AddEventForm = ({ onSubmit, rooms, onCancel, bookedRooms = [] }) => {
   const [eventData, setEventData] = useState({
     EventName: '',
     RoomID: '',
@@ -37,6 +37,9 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
     'Seminar',
     'Conference'
   ];
+  
+  // Filter out rooms that are already booked
+  const availableRooms = rooms.filter(room => !bookedRooms.includes(room.RoomID));
   
   return (
     <div className="add-event-form-container">
@@ -83,12 +86,17 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
             required
           >
             <option value="">Select a Room</option>
-            {rooms.map(room => (
+            {availableRooms.map(room => (
               <option key={room.RoomID} value={room.RoomID}>
                 {room.RoomName || room.RoomNumber} (Capacity: {room.Capacity})
               </option>
             ))}
           </select>
+          {availableRooms.length === 0 && (
+            <p style={{ color: '#dc2626', fontSize: '0.9rem', marginTop: '5px' }}>
+              No rooms available for this time slot
+            </p>
+          )}
         </div>
         
         <div className="form-row">

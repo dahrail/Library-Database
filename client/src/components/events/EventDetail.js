@@ -13,6 +13,13 @@ const EventDetail = ({
   // Add local state for attendance that can be updated immediately on user actions
   const [localAttendeeCount, setLocalAttendeeCount] = useState(attendeeCount);
   
+  // Validate the event has basic required properties
+  useEffect(() => {
+    if (event && (!event.EventName || !event.StartAt || !event.EndAt)) {
+      console.warn("Event is missing required properties:", event);
+    }
+  }, [event]);
+
   // Calculate accurate counts from the attendees array when it changes
   useEffect(() => {
     if (Array.isArray(attendees) && attendees.length > 0) {
@@ -61,7 +68,8 @@ const EventDetail = ({
   const isUserCheckedIn = attendees.some(a => a.UserID === userData?.UserID && a.CheckedIn === 1);
 
   // Calculate remaining spots using local state
-  const remainingSpots = event.MaxAttendees - localAttendeeCount.total;
+  const remainingSpots = Math.max(0, event && event.MaxAttendees ? 
+    event.MaxAttendees - localAttendeeCount.total : 0);
   const isFull = remainingSpots <= 0;
   
   // Check if event is past, today, or upcoming
@@ -126,7 +134,7 @@ const EventDetail = ({
           <h2>{event.EventName}</h2>
           {event.EventCategory && <div className="event-detail-category">{event.EventCategory}</div>}
           
-          {/* Event status badge */}
+          {/* Event status badge - simplified */}
           <div className="event-status-badge">
             {timeStatus === "past" && <span className="badge past-event">Past Event</span>}
             {timeStatus === "today" && <span className="badge today-event">Today</span>}
@@ -137,39 +145,44 @@ const EventDetail = ({
         <div className="event-detail-section">
           <h3>Event Details</h3>
           <div className="detail-row">
-            <span className="detail-label"><i className="event-icon">📆</i>Date:</span>
+            <span className="detail-label">Date:</span>
             <span className="detail-value">{new Date(event.StartAt).toLocaleDateString()}</span>
           </div>
           <div className="detail-row">
-            <span className="detail-label"><i className="event-icon">⏰</i>Time:</span>
+            <span className="detail-label">Time:</span>
             <span className="detail-value">
               {new Date(event.StartAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
               {new Date(event.EndAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
             </span>
           </div>
           <div className="detail-row">
-            <span className="detail-label"><i className="event-icon">📍</i>Location:</span>
+            <span className="detail-label">Location:</span>
             <span className="detail-value">{event.RoomNumber}</span>
           </div>
           <div className="detail-row">
-            <span className="detail-label"><i className="event-icon">👤</i>Organizer:</span>
+            <span className="detail-label">Organizer:</span>
             <span className="detail-value">{event.Organizer || 'Library Staff'}</span>
           </div>
           
           {/* Display event description if available */}
           {event.EventDescription && (
             <div className="event-description">
-              <h3><i className="event-icon">📝</i>Description</h3>
-              <p>{event.EventDescription}</p>
+              <h3>Description</h3>
+              <div className="description-content">
+                {/* Split description by line breaks to preserve formatting */}
+                {event.EventDescription.split('\n').map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
             </div>
           )}
           
           <div className="event-capacity">
-            <h3><i className="event-icon">👥</i>Attendance</h3>
+            <h3>Attendance</h3>
             <div className="capacity-stats">
               <div className="capacity-row">
                 <span>Registered:</span>
-                <span>{localAttendeeCount.total} of {event.MaxAttendees} spots filled</span>
+                <span>{localAttendeeCount.total} of {event.MaxAttendees} {isFull ? '(Full)' : ''}</span>
               </div>
               <div className="capacity-row">
                 <span>Checked In:</span>
@@ -178,7 +191,7 @@ const EventDetail = ({
               <div className="capacity-row">
                 <span>Availability:</span>
                 <span className={isFull ? 'full-event' : (remainingSpots <= 3 ? 'low-spots' : 'available-spots')}>
-                  {isFull ? 'Full' : `${remainingSpots} spots remaining`}
+                  {isFull ? 'Full' : `${remainingSpots} spot${remainingSpots !== 1 ? 's' : ''} remaining`}
                 </span>
               </div>
               <div className="capacity-progress">
@@ -196,32 +209,35 @@ const EventDetail = ({
           {userData && timeStatus !== "past" && (
             <div className="registration-status">
               {isUserRegistered ? (
-                <div className="registered-message">
-                  <i className="event-icon">✅</i> You are registered for this event.
-                </div>
+                <>
+                  <div className="registered-message">
+                    You are registered for this event.
+                  </div>
+                  
+                  {!isUserCheckedIn && (
+                    <button 
+                      className="btn-checkin"
+                      onClick={handleCheckIn}
+                    >
+                      Check In Now
+                    </button>
+                  )}
+                  
+                  {isUserCheckedIn && (
+                    <div className="checked-in-message">
+                      You are checked in for this event.
+                    </div>
+                  )}
+                </>
               ) : (
                 <button 
                   className="btn-register"
                   onClick={handleRegister}
                   disabled={isFull}
+                  style={isFull ? { opacity: '0.7', cursor: 'not-allowed' } : {}}
                 >
                   {isFull ? 'Event Full' : 'Register for this Event'}
                 </button>
-              )}
-              
-              {isUserRegistered && !isUserCheckedIn && (
-                <button 
-                  className="btn-checkin"
-                  onClick={handleCheckIn}
-                >
-                  <i className="event-icon">🎟️</i> Check In Now
-                </button>
-              )}
-              
-              {isUserCheckedIn && (
-                <div className="checked-in-message">
-                  <i className="event-icon">✓</i> You are checked in for this event.
-                </div>
               )}
             </div>
           )}
@@ -234,13 +250,13 @@ const EventDetail = ({
           
           {!userData && (
             <p className="login-prompt">
-              <i className="event-icon">🔒</i> Please log in to register for this event.
+              Please log in to register for this event.
             </p>
           )}
           
           {userData?.Role === 'Admin' && (
             <div className="attendee-list">
-              <h4><i className="event-icon">👥</i> Registered Attendees ({localAttendeeCount.total})</h4>
+              <h4>Registered Attendees ({localAttendeeCount.total})</h4>
               {attendees.length > 0 ? (
                 <table className="attendees-table">
                   <thead>
