@@ -15,32 +15,20 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
     AvailableCopies: '',
     ShelfLocation: ''
   });
-  const [coverImage, setCoverImage] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewBook(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setCoverImage(e.target.files[0]);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Create a FormData to include text fields and the file
-    const formData = new FormData();
-    Object.entries(newBook).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-    if (coverImage) {
-      formData.append('coverImage', coverImage);
-    }
-    // Pass formData to the add book API endpoint
+    // Prepare JSON instead of FormData since there is no file upload anymore
     try {
       const response = await fetch("/api/addBook", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBook),
       });
       const data = await response.json();
       if (data.success) {
@@ -63,35 +51,18 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
         <div className="form-row">
           <div className="form-group">
             <label>Title:</label>
-            <input
-              type="text"
-              name="Title"
-              value={newBook.Title}
-              onChange={handleChange}
-              required
-            />
+            <input type="text" name="Title" value={newBook.Title} onChange={handleChange} required />
           </div>
           <div className="form-group">
             <label>Author:</label>
-            <input
-              type="text"
-              name="Author"
-              value={newBook.Author}
-              onChange={handleChange}
-              required
-            />
+            <input type="text" name="Author" value={newBook.Author} onChange={handleChange} required />
           </div>
         </div>
         
         <div className="form-row">
           <div className="form-group">
             <label>Genre:</label>
-            <select
-              name="Genre"
-              value={newBook.Genre}
-              onChange={handleChange}
-              required
-            >
+            <select name="Genre" value={newBook.Genre} onChange={handleChange} required>
               <option value="">Select Genre</option>
               <option value="Fiction">Fiction</option>
               <option value="Fantasy">Fantasy</option>
@@ -102,100 +73,46 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
           </div>
           <div className="form-group">
             <label>Publication Year:</label>
-            <input
-              type="number"
-              name="PublicationYear"
-              value={newBook.PublicationYear}
-              onChange={handleChange}
-            />
+            <input type="number" name="PublicationYear" value={newBook.PublicationYear} onChange={handleChange} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>Publisher:</label>
-            <input
-              type="text"
-              name="Publisher"
-              value={newBook.Publisher}
-              onChange={handleChange}
-            />
+            <input type="text" name="Publisher" value={newBook.Publisher} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label>Language:</label>
-            <input
-              type="text"
-              name="Language"
-              value={newBook.Language}
-              onChange={handleChange}
-            />
+            <input type="text" name="Language" value={newBook.Language} onChange={handleChange} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>Format:</label>
-            <input
-              type="text"
-              name="Format"
-              value={newBook.Format}
-              onChange={handleChange}
-            />
+            <input type="text" name="Format" value={newBook.Format} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label>ISBN:</label>
-            <input
-              type="text"
-              name="ISBN"
-              value={newBook.ISBN}
-              onChange={handleChange}
-              required
-            />
+            <input type="text" name="ISBN" value={newBook.ISBN} onChange={handleChange} required />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>Total Copies:</label>
-            <input
-              type="number"
-              name="TotalCopies"
-              value={newBook.TotalCopies}
-              onChange={handleChange}
-              required
-            />
+            <input type="number" name="TotalCopies" value={newBook.TotalCopies} onChange={handleChange} required />
           </div>
           <div className="form-group">
             <label>Available Copies:</label>
-            <input
-              type="number"
-              name="AvailableCopies"
-              value={newBook.AvailableCopies}
-              onChange={handleChange}
-              required
-            />
+            <input type="number" name="AvailableCopies" value={newBook.AvailableCopies} onChange={handleChange} required />
           </div>
         </div>
 
         <div className="form-group">
           <label>Shelf Location:</label>
-          <input
-            type="text"
-            name="ShelfLocation"
-            value={newBook.ShelfLocation}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Cover Image:</label>
-          <input
-            type="file"
-            name="coverImage"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
+          <input type="text" name="ShelfLocation" value={newBook.ShelfLocation} onChange={handleChange} required />
         </div>
 
         <div className="button-group">
