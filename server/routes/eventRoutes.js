@@ -676,6 +676,6 @@ module.exports = {
   registerForEvent,
   getEventAttendees,
   checkInForEvent,
-};  updateEvent,
+  updateEvent,
   deleteEvent
 };
