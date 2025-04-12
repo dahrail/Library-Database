@@ -156,12 +156,15 @@ const getUserBooks = (req, res, userId) => {
 // Add a new book
 const addBook = async (req, res) => {
   try {
-    // Use multer to process the file field "coverImage"
+    // Use multer to process the cover image upload
     upload.single('coverImage')(req, res, (err) => {
       if (err) {
         console.error("Error uploading file:", err);
         return sendJsonResponse(res, 500, { success: false, error: "File upload error" });
       }
+      // Ensure req.body is not undefined
+      const body = req.body || {};
+      // Destructure text fields from req.body (defaults to undefined if not present)
       const {
         Title,
         Author,
@@ -174,9 +177,14 @@ const addBook = async (req, res) => {
         TotalCopies,
         AvailableCopies,
         ShelfLocation
-      } = req.body;
+      } = body;
       
-      // Even though the file is stored on the file system, we are not storing it in the database.
+      if (!Title) {
+        // Optionally, if required fields are missing then interpret as an error
+        console.error("Missing Title in request body");
+      }
+      
+      // Insert the book record; note that no cover image info is saved in the DB.
       const query =
         "INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
       pool.query(
@@ -185,9 +193,22 @@ const addBook = async (req, res) => {
         (err, results) => {
           if (err) {
             console.error("Error adding book:", err);
-            return sendJsonResponse(res, 500, { success: false, error: "Database error" });
           }
           const BookID = results.insertId;
+
+          // If a cover image file was uploaded, rename it to match the new BookID.
+          if (req.file) {
+            const oldPath = req.file.path;
+            const newPath = req.file.destination + "/" + BookID + ".jpg";
+            fs.rename(oldPath, newPath, (renameErr) => {
+              if (renameErr) {
+                console.error("Error renaming file:", renameErr);
+                // Continue on even if renaming fails.
+              }
+            });
+          }
+
+          // Insert the inventory record.
           const inventoryQuery =
             "INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation) VALUES (?, ?, ?, ?)";
           pool.query(

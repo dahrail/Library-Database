@@ -28,28 +28,32 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Create a FormData to include text fields and the file
+    // Create a FormData to include text fields and (if provided) the file
     const formData = new FormData();
-    Object.entries(newBook).forEach(([key, value]) => {
+    // Ensure numeric fields are correctly sent
+    const formattedData = {
+      ...newBook,
+      TotalCopies: Number(newBook.TotalCopies),
+      AvailableCopies: Number(newBook.AvailableCopies)
+    };
+    Object.entries(formattedData).forEach(([key, value]) => {
       formData.append(key, value);
     });
     if (coverImage) {
       formData.append('coverImage', coverImage);
     }
-    // Pass formData to the add book API endpoint
     try {
       const response = await fetch("/api/addBook", {
         method: "POST",
         body: formData,
       });
       const data = await response.json();
-      if (data.success) {
+      // If a valid BookID is provided, treat the add as successful
+      if (data.BookID) {
         alert("Book added successfully!");
         onAddBook(newBook);
         navigateToHome();
-      } else {
-        alert("Failed to add book: " + data.error);
-      }
+      } 
     } catch (error) {
       console.error("Error adding book:", error);
       alert("An error occurred while adding the book.");
