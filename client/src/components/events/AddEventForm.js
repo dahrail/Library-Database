@@ -31,15 +31,11 @@ const AddEventForm = ({ onSubmit, rooms, onCancel }) => {
     return d.toISOString().slice(0, 16); // Format as YYYY-MM-DDTHH:MM
   };
   
+  // Update eventCategories to match the database enum values
   const eventCategories = [
-    'All Events',
-    'Workshop',
-    'Lecture',
-    'Book Club',
-    'Author Meet & Greet',
-    'Reading Group',
-    'Tech Workshop',
-    'Educational Seminar'
+    'Workshops',
+    'Seminar',
+    'Conference'
   ];
   
   return (

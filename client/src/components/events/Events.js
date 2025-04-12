@@ -83,7 +83,24 @@ const Events = ({
         }
         const data = await response.json();
         if (data.success) {
-          setEvents(data.events || []);
+          // Fetch attendee counts for all events
+          const eventsWithCounts = await Promise.all(
+            (data.events || []).map(async (event) => {
+              try {
+                const countResponse = await fetch(`/api/events/${event.EventID}/count`);
+                const countData = await countResponse.json();
+                return {
+                  ...event,
+                  AttendeeCount: countData.success ? countData.TotalRegistrations : 0,
+                  CheckedInCount: countData.success ? countData.CheckedInCount : 0
+                };
+              } catch (error) {
+                console.error(`Error fetching counts for event ${event.EventID}:`, error);
+                return event;
+              }
+            })
+          );
+          setEvents(eventsWithCounts);
         } else {
           setError(data.error || "Failed to fetch events");
         }
@@ -221,35 +238,39 @@ const Events = ({
     try {
       setLoading(true);
       setSelectedEvent(event);
+      
+      // First get the attendee list
       const response = await fetch(`/api/events/${event.EventID}/attendees`);
-      const responseText = await response.text();
-      try {
-        const data = JSON.parse(responseText);
-        if (data.success) {
-          setEventAttendees(data.attendees || []);
-        } else {
-          setEventAttendees([]);
-        }
-      } catch (jsonError) {
+      const attendeeData = await response.json();
+      if (attendeeData.success) {
+        setEventAttendees(attendeeData.attendees || []);
+      } else {
         setEventAttendees([]);
       }
+      
+      // Then get the current attendee counts
       const countResponse = await fetch(`/api/events/${event.EventID}/count`);
-      const countResponseText = await countResponse.text();
-      try {
-        const countData = JSON.parse(countResponseText);
-        if (countData.success) {
-          setAttendeeCount({
-            checked: countData.CheckedInCount || 0,
-            total: countData.TotalRegistrations || 0
-          });
-        } else {
-          setAttendeeCount({ checked: 0, total: 0 });
-        }
-      } catch (jsonError) {
+      const countData = await countResponse.json();
+      if (countData.success) {
+        const counts = {
+          checked: countData.CheckedInCount || 0,
+          total: countData.TotalRegistrations || 0
+        };
+        setAttendeeCount(counts);
+        
+        // Also update the selected event with current attendance info
+        setSelectedEvent(prev => ({
+          ...prev,
+          AttendeeCount: counts.total,
+          CheckedInCount: counts.checked
+        }));
+      } else {
         setAttendeeCount({ checked: 0, total: 0 });
       }
+      
       setCurrentAction('detail');
     } catch (error) {
+      console.error('Error loading event details:', error);
       alert('Error loading event details. Please try again.');
       setEventAttendees([]);
       setAttendeeCount({ checked: 0, total: 0 });
@@ -284,38 +305,84 @@ const Events = ({
         return;
       }
       setLoading(true);
-      const response = await API.registerForEvent(userData.UserID, selectedEvent.EventID);
-      if (response.success) {
-        setAttendeeCount(prev => ({
-          ...prev,
-          total: prev.total + 1
-        }));
-        const refreshData = await API.getEvents();
+      
+      // Simple API call with just the required IDs
+      const response = await fetch('/api/events/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          UserID: userData.UserID,
+          EventID: selectedEvent.EventID
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
+      }
+      
+      const responseText = await response.text();
+      let data;
+      
+      try {
+        data = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.error('Failed to parse server response:', responseText);
+        throw new Error('Invalid response from server. Please try again later.');
+      }
+      
+      if (data.success) {
+        // Refresh the event details completely
+        const refreshResponse = await fetch('/api/events');
+        const refreshData = await refreshResponse.json();
         if (refreshData.success) {
+          // Update the main events list
           setEvents(refreshData.events || []);
+          
+          // Find the updated event
           const updatedEvent = refreshData.events.find(e => e.EventID === selectedEvent.EventID);
           if (updatedEvent) {
             setSelectedEvent(updatedEvent);
+            
+            // Get updated counts
+            const countResponse = await fetch(`/api/events/${selectedEvent.EventID}/count`);
+            const countData = await countResponse.json();
+            if (countData.success) {
+              const counts = {
+                checked: countData.CheckedInCount || 0,
+                total: countData.TotalRegistrations || 0
+              };
+              setAttendeeCount(counts);
+              
+              // Update selected event with attendee counts
+              setSelectedEvent(prev => ({
+                ...prev,
+                AttendeeCount: counts.total,
+                CheckedInCount: counts.checked
+              }));
+              
+              const availableSpots = selectedEvent.MaxAttendees - counts.total;
+              alert(`Registration successful! You are now registered for this event. There are ${availableSpots > 0 ? availableSpots : 0} spots remaining.`);
+            } else {
+              alert('Registration successful! You are now registered for this event.');
+            }
+            
+            // Refresh the attendee list too
+            const attendeeResponse = await fetch(`/api/events/${selectedEvent.EventID}/attendees`);
+            const attendeeData = await attendeeResponse.json();
+            if (attendeeData.success) {
+              setEventAttendees(attendeeData.attendees || []);
+            }
           }
-        }
-        const countResponse = await fetch(`/api/events/${selectedEvent.EventID}/count`);
-        const countData = await countResponse.json();
-        if (countData.success) {
-          const totalRegistered = countData.TotalRegistrations;
-          const availableSpots = selectedEvent.MaxAttendees - totalRegistered;
-          alert(`Registration successful! You are now registered for this event. There are ${availableSpots > 0 ? availableSpots : 0} spots remaining.`);
-          setAttendeeCount({
-            checked: countData.CheckedInCount || 0,
-            total: totalRegistered || 0
-          });
-        } else {
-          alert('Registration successful! You are now registered for this event.');
         }
         setCurrentAction('detail');
       } else {
-        alert('Failed to register: ' + response.error);
+        alert('Failed to register: ' + (data.error || 'Unknown error'));
       }
     } catch (error) {
+      console.error('Registration error:', error);
       if (error.message && typeof error.message === 'string') {
         if (error.message.includes('already registered')) {
           alert('You are already registered for this event.');
@@ -325,7 +392,7 @@ const Events = ({
           alert('An error occurred while registering for the event: ' + error.message);
         }
       } else {
-        alert('An error occurred while registering for the event.');
+        alert('An error occurred while registering for the event. Please try again later.');
       }
     } finally {
       setLoading(false);
@@ -340,6 +407,11 @@ const Events = ({
         return;
       }
       setLoading(true);
+      
+      // Add the current timestamp directly when checking in
+      // Use ISO format that MySQL can handle
+      const currentTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      
       const response = await fetch('/api/events/checkin', {
         method: 'POST',
         headers: {
@@ -348,9 +420,14 @@ const Events = ({
         body: JSON.stringify({
           UserID: userData.UserID,
           EventID: eventId,
-          CheckedInAt: new Date().toISOString()
+          CheckedInAt: currentTime
         })
       });
+      
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      
       const responseText = await response.text();
       let data;
       try {
@@ -358,20 +435,49 @@ const Events = ({
       } catch (jsonError) {
         throw new Error(`Invalid server response: ${responseText}`);
       }
+      
       if (data.success) {
-        setAttendeeCount(prev => ({
-          ...prev,
-          checked: prev.checked + 1
-        }));
-        alert(`Check-in successful! You are now checked in for this event.`);
+        // Refresh all event data completely
         const refreshResponse = await fetch('/api/events');
         const refreshData = await refreshResponse.json();
         if (refreshData.success) {
           setEvents(refreshData.events || []);
+          
+          // If in detail view, refresh that specific event's data
+          if (currentAction === 'detail' && selectedEvent) {
+            const updatedEvent = refreshData.events.find(e => e.EventID === selectedEvent.EventID);
+            if (updatedEvent) {
+              setSelectedEvent(updatedEvent);
+            }
+            
+            // Get fresh attendee data
+            const attendeeResponse = await fetch(`/api/events/${selectedEvent.EventID}/attendees`);
+            const attendeeData = await attendeeResponse.json();
+            if (attendeeData.success) {
+              setEventAttendees(attendeeData.attendees || []);
+            }
+            
+            // Get fresh count data
+            const countResponse = await fetch(`/api/events/${selectedEvent.EventID}/count`);
+            const countData = await countResponse.json();
+            if (countData.success) {
+              const counts = {
+                checked: countData.CheckedInCount || 0,
+                total: countData.TotalRegistrations || 0
+              };
+              setAttendeeCount(counts);
+              
+              // Update selected event with the counts
+              setSelectedEvent(prev => ({
+                ...prev,
+                AttendeeCount: counts.total,
+                CheckedInCount: counts.checked
+              }));
+            }
+          }
         }
-        if (currentAction === 'detail' && selectedEvent) {
-          await handleViewEventDetails(selectedEvent);
-        }
+        
+        alert(`Check-in successful! You are now checked in for this event.`);
       } else {
         if (data.error.includes("need to register") || data.error.includes("not registered")) {
           alert('You need to register for this event before checking in.');
@@ -661,6 +767,65 @@ const Events = ({
       backgroundColor: "#e3f9e5",
       color: "#1d8531",
       marginLeft: "auto",
+    },
+    badge: {
+      display: "inline-block",
+      padding: "3px 8px",
+      borderRadius: "12px",
+      fontSize: "11px",
+      fontWeight: "600",
+      marginBottom: "8px",
+    },
+    upcomingBadge: {
+      backgroundColor: "#e3f9e5",
+      color: "#1d8531",
+    },
+    pastBadge: {
+      backgroundColor: "#f3f4f6", 
+      color: "#6b7280",
+    },
+    todayBadge: {
+      backgroundColor: "#dbeafe",
+      color: "#1e40af",
+    },
+    icon: {
+      marginRight: "6px",
+      fontSize: "14px",
+    },
+    availabilityIndicator: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "4px 0",
+      fontSize: "13px",
+      color: "#4b5563",
+      marginTop: "8px",
+      marginBottom: "8px",
+    },
+    spotCounter: {
+      fontWeight: "500",
+      display: "inline-flex",
+      alignItems: "center",
+    },
+    lowSpots: {
+      color: "#b91c1c",
+    },
+    manySpots: {
+      color: "#15803d",
+    },
+  };
+
+  const getEventTimeStatus = (startDate, endDate) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (end < now) {
+      return "past";
+    } else if (start.toDateString() === now.toDateString()) {
+      return "today";
+    } else {
+      return "upcoming";
     }
   };
 
@@ -856,126 +1021,180 @@ const Events = ({
         
         {!loading && !error && filteredEvents.length > 0 && (
           <div className="events-grid fade-in-items">
-            {filteredEvents.map(event => (
-              <div key={event.EventID} style={eventCardStyles.card}>
-                {/* Card Header */}
-                <div style={eventCardStyles.header}>
-                  <div style={eventCardStyles.headerContent}>
-                    <div>
-                      <div style={eventCardStyles.category}>
-                        {event.EventCategory || 'Event'}
+            {filteredEvents.map(event => {
+              const timeStatus = getEventTimeStatus(event.StartAt, event.EndAt);
+              const registeredCount = event.AttendeeCount || 0;
+              const remainingSpots = event.MaxAttendees - registeredCount;
+              const isFull = remainingSpots <= 0;
+              
+              return (
+                <div key={event.EventID} style={eventCardStyles.card}>
+                  {/* Card Header */}
+                  <div style={eventCardStyles.header}>
+                    <div style={eventCardStyles.headerContent}>
+                      <div>
+                        <div style={eventCardStyles.category}>
+                          {event.EventCategory || 'Event'}
+                        </div>
+                        <h3 style={eventCardStyles.title}>{event.EventName}</h3>
+                        
+                        {/* Event timing status badge */}
+                        {timeStatus === "past" && (
+                          <span style={{...eventCardStyles.badge, ...eventCardStyles.pastBadge}}>
+                            <span style={eventCardStyles.icon}>⌛</span>Past Event
+                          </span>
+                        )}
+                        {timeStatus === "today" && (
+                          <span style={{...eventCardStyles.badge, ...eventCardStyles.todayBadge}}>
+                            <span style={eventCardStyles.icon}>⭐</span>Today
+                          </span>
+                        )}
+                        {timeStatus === "upcoming" && (
+                          <span style={{...eventCardStyles.badge, ...eventCardStyles.upcomingBadge}}>
+                            <span style={eventCardStyles.icon}>📅</span>Upcoming
+                          </span>
+                        )}
                       </div>
-                      <h3 style={eventCardStyles.title}>{event.EventName}</h3>
+                    </div>
+                    
+                    {/* Admin Actions Menu */}
+                    {userData?.Role === 'Admin' && (
+                      <div style={eventCardStyles.adminMenu} onClick={e => e.stopPropagation()}>
+                        <button 
+                          style={eventCardStyles.menuButton}
+                          onClick={(e) => toggleMenu(event.EventID, e)}
+                          aria-label="Menu"
+                        >
+                          ⋮
+                        </button>
+                        
+                        {openMenuId === event.EventID && (
+                          <div style={eventCardStyles.menuDropdown}>
+                            <div 
+                              style={{...eventCardStyles.menuItem, ...eventCardStyles.menuItemEdit}}
+                              onClick={() => {
+                                setSelectedEvent(event);
+                                setCurrentAction('edit');
+                              }}
+                            >
+                              <span>✏️</span> Edit
+                            </div>
+                            <div 
+                              style={{...eventCardStyles.menuItem, ...eventCardStyles.menuItemDelete}}
+                              onClick={() => handleDeleteEvent(event.EventID)}
+                            >
+                              <span>🗑️</span> Delete
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Card Body - Event Details */}
+                  <div style={eventCardStyles.body}>
+                    <table style={eventCardStyles.detailsTable}>
+                      <tbody>
+                        <tr>
+                          <td style={eventCardStyles.detailLabel}><span style={eventCardStyles.icon}>📆</span>Date:</td>
+                          <td style={eventCardStyles.detailValue}>
+                            {new Date(event.StartAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={eventCardStyles.detailLabel}><span style={eventCardStyles.icon}>⏰</span>Time:</td>
+                          <td style={eventCardStyles.detailValue}>
+                            {new Date(event.StartAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                            {new Date(event.EndAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={eventCardStyles.detailLabel}><span style={eventCardStyles.icon}>📍</span>Location:</td>
+                          <td style={eventCardStyles.detailValue}>
+                            {event.RoomNumber || 'TBA'}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    
+                    {/* Availability indicator */}
+                    <div style={eventCardStyles.availabilityIndicator}>
+                      <span>Attendance</span>
+                      <span 
+                        style={{
+                          ...eventCardStyles.spotCounter, 
+                          ...(remainingSpots <= 3 ? eventCardStyles.lowSpots : eventCardStyles.manySpots)
+                        }}
+                      >
+                        {isFull ? (
+                          <span>Full</span>
+                        ) : (
+                          <span>
+                            <span style={eventCardStyles.icon}>👤</span>
+                            {remainingSpots} spots left
+                          </span>
+                        )}
+                      </span>
                     </div>
                   </div>
                   
-                  {/* Admin Actions Menu */}
-                  {userData?.Role === 'Admin' && (
-                    <div style={eventCardStyles.adminMenu} onClick={e => e.stopPropagation()}>
+                  {/* Card Footer - Action Buttons */}
+                  <div style={eventCardStyles.footer}>
+                    <div style={eventCardStyles.actionButtons}>
                       <button 
-                        style={eventCardStyles.menuButton}
-                        onClick={(e) => toggleMenu(event.EventID, e)}
-                        aria-label="Menu"
+                        style={eventCardStyles.primaryButton}
+                        onClick={() => handleViewEventDetails(event)}
                       >
-                        ⋮
+                        View Details
                       </button>
                       
-                      {openMenuId === event.EventID && (
-                        <div style={eventCardStyles.menuDropdown}>
-                          <div 
-                            style={{...eventCardStyles.menuItem, ...eventCardStyles.menuItemEdit}}
-                            onClick={() => {
-                              setSelectedEvent(event);
-                              setCurrentAction('edit');
-                            }}
-                          >
-                            <span>✏️</span> Edit
-                          </div>
-                          <div 
-                            style={{...eventCardStyles.menuItem, ...eventCardStyles.menuItemDelete}}
-                            onClick={() => handleDeleteEvent(event.EventID)}
-                          >
-                            <span>🗑️</span> Delete
-                          </div>
-                        </div>
+                      {userData && timeStatus !== "past" && (
+                        <>
+                          {!event.UserCheckedIn ? (
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
+                                style={{
+                                  ...eventCardStyles.secondaryButton,
+                                  opacity: isFull ? '0.7' : '1'
+                                }}
+                                onClick={() => handleRegisterForEvent(event.EventID)}
+                                disabled={isFull}
+                              >
+                                {isFull ? 'Full' : 'Register'}
+                              </button>
+                              
+                              <button
+                                style={{
+                                  ...eventCardStyles.secondaryButton,
+                                  backgroundColor: '#d1fadf',
+                                  color: '#15803d'
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCheckInForEvent(event.EventID);
+                                }}
+                              >
+                                Check In
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={eventCardStyles.statusTag}>
+                              <span>✓</span> Checked In
+                            </div>
+                          )}
+                        </>
+                      )}
+                      
+                      {timeStatus === "past" && (
+                        <span style={{fontSize: '13px', color: '#6b7280', marginLeft: '10px'}}>
+                          This event has ended
+                        </span>
                       )}
                     </div>
-                  )}
-                </div>
-                
-                {/* Card Body - Event Details */}
-                <div style={eventCardStyles.body}>
-                  <table style={eventCardStyles.detailsTable}>
-                    <tbody>
-                      <tr>
-                        <td style={eventCardStyles.detailLabel}>Date:</td>
-                        <td style={eventCardStyles.detailValue}>
-                          {new Date(event.StartAt).toLocaleDateString()}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={eventCardStyles.detailLabel}>Time:</td>
-                        <td style={eventCardStyles.detailValue}>
-                          {new Date(event.StartAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
-                          {new Date(event.EndAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={eventCardStyles.detailLabel}>Location:</td>
-                        <td style={eventCardStyles.detailValue}>
-                          {event.RoomNumber || 'TBA'}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                
-                {/* Card Footer - Action Buttons */}
-                <div style={eventCardStyles.footer}>
-                  <div style={eventCardStyles.actionButtons}>
-                    <button 
-                      style={eventCardStyles.primaryButton}
-                      onClick={() => handleViewEventDetails(event)}
-                    >
-                      View Details
-                    </button>
-                    
-                    {userData && (
-                      <>
-                        {!event.UserCheckedIn ? (
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button
-                              style={eventCardStyles.secondaryButton}
-                              onClick={() => handleRegisterForEvent(event.EventID)}
-                            >
-                              Register
-                            </button>
-                            
-                            <button
-                              style={{
-                                ...eventCardStyles.secondaryButton,
-                                backgroundColor: '#d1fadf',
-                                color: '#15803d'
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCheckInForEvent(event.EventID);
-                              }}
-                            >
-                              Check In
-                            </button>
-                          </div>
-                        ) : (
-                          <div style={eventCardStyles.statusTag}>
-                            <span>✓</span> Checked In
-                          </div>
-                        )}
-                      </>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         

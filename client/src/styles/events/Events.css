@@ -757,3 +757,214 @@
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
+/* New styles for event badges and capacity indicators */
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.past-event {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.today-event {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.upcoming-event {
+  background-color: #e3f9e5;
+  color: #1d8531;
+}
+
+.event-icon {
+  margin-right: 6px;
+  font-style: normal;
+}
+
+.event-status-badge {
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.capacity-stats {
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 10px;
+}
+
+.capacity-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.low-spots {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.full-event {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.available-spots {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.capacity-progress {
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.past-event-message {
+  background-color: #f3f4f6;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  color: #6b7280;
+  text-align: center;
+  font-style: italic;
+}
+
+.registered-message {
+  background-color: #e3f9e5;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  text-align: center;
+  color: #1d8531;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checked-in-message {
+  background-color: #dcfce7;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 12px;
+  text-align: center;
+  color: #15803d;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Enhanced button styles */
+.btn-register, .btn-checkin {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-register {
+  background-color: #0071e3;
+  color: white;
+}
+
+.btn-register:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-checkin {
+  background-color: #15803d;
+  color: white;
+}
+
+.btn-register:hover:not(:disabled),
+.btn-checkin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced event detail styling */
+.event-detail-card {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.event-detail-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.event-detail-header h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #111827;
+}
+
+.event-detail-category {
+  display: inline-block;
+  background-color: #f3f4f6;
+  color: #374151;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.attendees-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 16px;
+}
+
+.attendees-table th,
+.attendees-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.attendees-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #4b5563;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.attendees-table tr.checked-in {
+  background-color: #f0fdf4;
+}
+
+.attendees-table tr:hover {
+  background-color: #f9fafb;
+}

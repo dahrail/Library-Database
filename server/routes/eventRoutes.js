@@ -138,7 +138,7 @@ const addEvent = async (req, res) => {
         const eventData = JSON.parse(body);
         console.log("Received event data:", eventData);
         
-        const { UserID, EventName, RoomID, StartAt, EndAt, MaxAttendees } = eventData;
+        const { UserID, EventName, RoomID, StartAt, EndAt, MaxAttendees, Category, Description } = eventData;
         
         // Validate required fields
         if (!UserID || !EventName || !RoomID || !StartAt || !EndAt || !MaxAttendees) {
@@ -149,15 +149,15 @@ const addEvent = async (req, res) => {
           });
         }
         
-        // Lowercase 'event' to match your database table name
+        // Use the correct column names from your database schema
         const query = `
-          INSERT INTO event (UserID, EventName, RoomID, StartAt, EndAt, MaxAttendees)
-          VALUES (?, ?, ?, ?, ?, ?)
+          INSERT INTO event (UserID, EventName, RoomID, StartAt, EndAt, MaxAttendees, EventCategory, EventDescription)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
         
         pool.query(
           query,
-          [UserID, EventName, RoomID, StartAt, EndAt, MaxAttendees],
+          [UserID, EventName, RoomID, StartAt, EndAt, MaxAttendees, Category || null, Description || null],
           (err, results) => {
             if (err) {
               console.error("Error adding event:", err);
@@ -408,7 +408,32 @@ const checkInForEvent = async (req, res) => {
           }
           
           // Use the timestamp from the client if provided, otherwise use current server time
-          const checkinTime = CheckedInAt || new Date().toISOString();
+          // Format it for MySQL datetime (YYYY-MM-DD HH:MM:SS)
+          const now = new Date();
+          let checkinTime;
+          
+          if (CheckedInAt) {
+            // Try to use the provided timestamp if valid
+            try {
+              // If it already has the MySQL format (YYYY-MM-DD HH:MM:SS)
+              if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(CheckedInAt)) {
+                checkinTime = CheckedInAt;
+              } 
+              // If it's an ISO string, convert it
+              else {
+                const date = new Date(CheckedInAt);
+                checkinTime = date.toISOString().slice(0, 19).replace('T', ' ');
+              }
+            } catch (e) {
+              console.error("Invalid CheckedInAt format:", e);
+              checkinTime = now.toISOString().slice(0, 19).replace('T', ' ');
+            }
+          } else {
+            // Use current time
+            checkinTime = now.toISOString().slice(0, 19).replace('T', ' ');
+          }
+          
+          console.log("Using check-in time:", checkinTime);
           
           // Update the check-in status and timestamp
           const updateQuery = `
@@ -620,7 +645,7 @@ const updateEvent = async (req, res, eventId) => {
           const query = `
             UPDATE event 
             SET EventName = ?, RoomID = ?, StartAt = ?, EndAt = ?, 
-                MaxAttendees = ?, Category = ?, Description = ?
+                MaxAttendees = ?, EventCategory = ?, EventDescription = ?
             WHERE EventID = ?
           `;
           
