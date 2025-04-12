@@ -455,6 +455,20 @@ const API = {
     }
   },
 
+  deleteDevice: async (deviceId) => {
+    try {
+      const response = await fetch("/api/deleteDevice", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ DeviceID: deviceId }),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error deleting device:", error);
+      throw error;
+    }
+  },
+
   borrowDevice: async (userId, deviceId) => {
     try {
       const response = await fetch("/api/borrowDevice", {

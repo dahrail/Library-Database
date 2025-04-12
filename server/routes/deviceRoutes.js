@@ -150,9 +150,47 @@ const updateDevice = async (req, res) => {
   }
 };
 
+const deleteDevice = async (req, res) => {
+  try {
+    const data = await parseRequestBody(req);
+    const { DeviceID } = data;
+
+    if (!DeviceID) {
+      sendJsonResponse(res, 400, { success: false, error: "DeviceID is required" });
+      return;
+    }
+
+    console.log(`Deleting device with DeviceID: ${DeviceID}`);
+
+    const deleteQuery = "DELETE FROM DEVICE WHERE DeviceID = ?";
+    pool.query(deleteQuery, [DeviceID], (err, result) => {
+      if (err) {
+        console.error("Error deleting device:", err);
+        sendJsonResponse(res, 500, { success: false, error: "Failed to delete device" });
+        return;
+      }
+
+      if (result.affectedRows === 0) {
+        sendJsonResponse(res, 404, { success: false, error: "Device not found" });
+        return;
+      }
+
+      sendJsonResponse(res, 200, {
+        success: true,
+        message: "Device deleted successfully",
+        deletedDeviceId: DeviceID,
+      });
+    });
+  } catch (error) {
+    console.error("Error in deleteDevice:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+  }
+};
+
 
 module.exports = {
   getAllDevice,
   addDevice,
   updateDevice,
+  deleteDevice,
 };

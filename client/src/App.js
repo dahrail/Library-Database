@@ -24,13 +24,15 @@ import LandingPage from "./components/landing/LandingPage";
 import Devices from "./components/devices/Devices"; 
 import AddDevice from "./components/devices/AddDevice"; 
 import AddMedia from "./components/media/AddMedia";
-import AdminDashboard from "./components/admin/AdminDashboard"; // Add import for AdminDashboard
+import AdminDashboard from "./components/admin/AdminDashboard";
 import UpdateDeviceList from "./components/devices/UpdateDeviceList";
 import UpdateDevice from "./components/devices/UpdateDevice";
 import UpdateMediaList from "./components/media/UpdateMediaList";
 import UpdateMedia from "./components/media/UpdateMedia"; 
 import UpdateBookList from "./components/books/UpdateBookList";
-import UpdateBook from "./components/books/UpdateBook"; 
+import UpdateBook from "./components/books/UpdateBook";
+import DeleteDeviceList from "./components/devices/DeleteDeviceList";
+import DeleteDevice from "./components/devices/DeleteDevice"; 
 
 // Import API service
 import API from "./services/api";
@@ -111,6 +113,23 @@ function App() {
     } catch (error) {
       console.error("Error updating book:", error);
       alert("An error occurred while updating the book.");
+    }
+  };
+
+  const handleDeleteDevice = async (deviceID) => {
+    try {
+      const response = await API.deleteDevice(deviceID);
+      if (response.success) {
+        alert("Device deleted successfully!");
+        // Refresh the device list
+        const updatedDevices = await API.getDevices();
+        setCurrentScreen("devices"); // Navigate back to devices list
+      } else {
+        alert("Failed to delete device: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error deleting device:", error);
+      alert("An error occurred while deleting the device.");
     }
   };
 
@@ -303,6 +322,17 @@ function App() {
     window.scrollTo(0, 0);
     setSelectedBook(book);
     setCurrentScreen("updateBook");
+  }
+
+  const navigateToDeleteDeviceList = () => {
+    window.scrollTo(0, 0);
+    setCurrentScreen("deleteDeviceList");
+  }
+
+  const navigateToDeleteDevice = (device) => {
+    window.scrollTo(0, 0);
+    setSelectedDevice(device);
+    setCurrentScreen("deleteDevice");
   }
 
   // Books navigation and handlers
@@ -737,11 +767,11 @@ function App() {
           navigateToHome={navigateToHome} 
           isLoggedIn={isLoggedIn} 
           navigateToLogin={navigateToLogin}
-          userData={userData} // Pass the userData
-          initialCategory={initialMediaCategory} // Pass the initial category
-          navigateToLanding={navigateToLanding} // Add this prop
+          userData={userData} 
+          initialCategory={initialMediaCategory} 
+          navigateToLanding={navigateToLanding} 
           navigateToAddMedia={navigateToAddMedia}
-          navigateToUpdateMediaList={navigateToUpdateMediaList} // Pass the function here
+          navigateToUpdateMediaList={navigateToUpdateMediaList} 
         />
       )}
 
@@ -754,7 +784,8 @@ function App() {
           initialCategory={initialDevicesCategory} 
           navigateToLanding={navigateToLanding} 
           navigateToAddDevice={navigateToAddDevice} 
-          navigateToUpdateDeviceList={navigateToUpdateDeviceList} // Pass the function here
+          navigateToUpdateDeviceList={navigateToUpdateDeviceList} 
+          navigateToDeleteDeviceList={navigateToDeleteDeviceList}
         />
       )}
 
@@ -826,6 +857,21 @@ function App() {
         <UpdateBook
           bookData={selectedBook}
           onUpdateBook={handleUpdateBook}
+          navigateToHome={navigateToHome}
+        />
+      )}
+
+      {currentScreen === "deleteDeviceList" && (
+        <DeleteDeviceList
+          navigateToHome={navigateToHome}
+          navigateToDeleteDevice={navigateToDeleteDevice}
+        />
+      )}
+
+      {currentScreen === "deleteDevice" && selectedDevice && (
+        <DeleteDevice
+          deviceData={selectedDevice}
+          onDeleteDevice={handleDeleteDevice}
           navigateToHome={navigateToHome}
         />
       )}

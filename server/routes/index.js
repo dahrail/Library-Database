@@ -102,6 +102,10 @@ const handleRequest = async (req, res) => {
       return await deviceRoutes.updateDevice(req, res);
     }
 
+    if (method === "DELETE" && path === "/api/deleteDevice") {
+      return await deviceRoutes.deleteDevice(req, res);
+    }
+
     if (method === "POST" && path === "/api/returnDevice") {
       return await deviceRoutes.returnDevice(req, res);
     }

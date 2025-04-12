@@ -4,7 +4,17 @@ import DeviceBorrowConfirmation from "./DeviceBorrowConfirmation";
 import DeviceHoldConfirmation from "./DeviceHoldConfirmation";
 import "../../styles/devices/devices.css";
 
-const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding, navigateToAddDevice, navigateToUpdateDeviceList }) => {
+const Devices = ({ 
+  navigateToHome, 
+  isLoggedIn, 
+  navigateToLogin, 
+  userData, 
+  initialCategory, 
+  navigateToLanding, 
+  navigateToAddDevice, 
+  navigateToUpdateDeviceList,
+  navigateToDeleteDeviceList,
+}) => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -131,6 +141,22 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
     } catch (error) {
       console.error("Error placing hold on device:", error);
       alert("An error occurred while placing the hold.");
+    }
+  };
+
+  const handleDeleteDevice = async (deviceID) => {
+    try {
+      const response = await API.deleteDevice(deviceID);
+      if (response.success) {
+        alert("Device deleted successfully!");
+        const updatedDevices = await API.getDevices();
+        setDevices(updatedDevices.devices);
+      } else {
+        alert("Failed to delete device: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error deleting device:", error);
+      alert("An error occurred while deleting the device.");
     }
   };
 
@@ -303,6 +329,7 @@ const Devices = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initia
             <div className="button-group">
               <button onClick={navigateToAddDevice} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Add Device</button>
               <button onClick={() => navigateToUpdateDeviceList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Update Device</button>
+              <button onClick={() => navigateToDeleteDeviceList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Delete Device</button>
             </div>
           )}
 
