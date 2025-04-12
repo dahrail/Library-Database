@@ -236,6 +236,19 @@ const handleRequest = async (req, res) => {
       return eventRoutes.getEventAttendeeCount(req, res);
     }
 
+    if (method === "PUT" && path.match(/^\/api\/events\/(\d+)$/)) {
+      const eventId = path.match(/^\/api\/events\/(\d+)$/)[1];
+      req.params = { eventId };
+      return eventRoutes.updateEvent(req, res, eventId);
+    }
+
+    // Add this new route handler for deleting events
+    if (method === "DELETE" && path.match(/^\/api\/events\/(\d+)$/)) {
+      const eventId = path.match(/^\/api\/events\/(\d+)$/)[1];
+      req.params = { eventId };
+      return eventRoutes.deleteEvent(req, res, eventId);
+    }
+
     // If we reach here, no route was matched
     console.log("No route matched for:", path);
     sendJsonResponse(res, 404, { error: "Not found" });

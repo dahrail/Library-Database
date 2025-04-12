@@ -1,5 +1,21 @@
 const pool = require("../config/db");
 const { parseRequestBody, sendJsonResponse } = require("../utils/requestUtils");
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer storage – files will be stored in a 'public/images/books' folder
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../../client/public/images/books'));
+  },
+  filename: (req, file, cb) => {
+    // Use Date.now() to generate a unique filename
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + Date.now() + ext);
+  }
+});
+const upload = multer({ storage });
 
 // Get all books
 const getRawBook = (req, res) => {
@@ -140,9 +156,7 @@ const getUserBooks = (req, res, userId) => {
 // Add a new book
 const addBook = async (req, res) => {
   try {
-    const bookData = await parseRequestBody(req);
-    console.log("Adding new book:", bookData.Title);
-
+    // Parse the request body (no file processing needed)
     const {
       Title,
       Author,
@@ -154,59 +168,42 @@ const addBook = async (req, res) => {
       ISBN,
       TotalCopies,
       AvailableCopies,
-      ShelfLocation,
-    } = bookData;
-
+      ShelfLocation
+    } = await parseRequestBody(req);
+    
+    // Insert the book without a cover image (the default image will be used)
     const query =
       "INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     pool.query(
       query,
-      [
-        Title,
-        Author,
-        Genre,
-        PublicationYear,
-        Publisher,
-        Language,
-        Format,
-        ISBN,
-      ],
+      [Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
       (err, results) => {
         if (err) {
           console.error("Error adding book:", err);
-          res.writeHead(500, { "Content-Type": "application/json" });
-          return res.end(
-            JSON.stringify({ success: false, error: "Database error" })
-          );
+          return sendJsonResponse(res, 500, { success: false, error: "Database error" });
         }
-
         const BookID = results.insertId;
+        
+        // No file processing; the default image (e.g. default-book.jpg) will be used by the client when "/images/books/{BookID}.jpg" is missing
+        
         const inventoryQuery =
           "INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation) VALUES (?, ?, ?, ?)";
         pool.query(
           inventoryQuery,
           [BookID, TotalCopies, AvailableCopies, ShelfLocation],
-          (err, inventoryResults) => {
-            if (err) {
-              console.error("Error updating inventory:", err);
-              res.writeHead(500, { "Content-Type": "application/json" });
-              return res.end(
-                JSON.stringify({
-                  success: false,
-                  error: "Failed to update inventory",
-                })
-              );
+          (invErr, inventoryResults) => {
+            if (invErr) {
+              console.error("Error updating inventory:", invErr);
+              return sendJsonResponse(res, 500, { success: false, error: "Failed to update inventory" });
             }
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true, BookID }));
+            sendJsonResponse(res, 200, { success: true, BookID });
           }
         );
       }
     );
   } catch (error) {
     console.error("Error in addBook:", error);
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ success: false, error: "Server error" }));
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
   }
 };
 

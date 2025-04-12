@@ -8,8 +8,8 @@ const EditEventForm = ({ event, rooms, onSubmit, onCancel }) => {
     StartAt: formatDateTimeForInput(event.StartAt),
     EndAt: formatDateTimeForInput(event.EndAt),
     MaxAttendees: event.MaxAttendees,
-    Category: event.Category || '',
-    Description: event.Description || '',
+    Category: event.EventCategory || '', // Fix: Use EventCategory from database
+    Description: event.EventDescription || '', // Fix: Use EventDescription from database
     UserID: event.UserID
   });
   
@@ -23,7 +23,20 @@ const EditEventForm = ({ event, rooms, onSubmit, onCancel }) => {
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(eventData);
+    // Explicitly include all required fields to ensure nothing is missing
+    const updatedEventData = {
+      EventID: eventData.EventID, // Explicitly include EventID
+      EventName: eventData.EventName,
+      RoomID: Number(eventData.RoomID), // Ensure RoomID is a number
+      StartAt: eventData.StartAt,
+      EndAt: eventData.EndAt,
+      MaxAttendees: Number(eventData.MaxAttendees), // Ensure MaxAttendees is a number
+      EventCategory: eventData.Category,
+      EventDescription: eventData.Description,
+      UserID: eventData.UserID
+    };
+    console.log("Submitting event update:", updatedEventData); // Add logging for debugging
+    onSubmit(updatedEventData);
   };
   
   // Format datetime for input fields
@@ -35,15 +48,11 @@ const EditEventForm = ({ event, rooms, onSubmit, onCancel }) => {
     return localISOTime;
   }
   
+  // Update eventCategories to match the database enum values
   const eventCategories = [
-    'Workshop',
-    'Lecture',
-    'Book Club',
-    'Kids Event',
-    'Author Visit',
-    'Exhibition',
-    'Movie Screening',
-    'Other'
+    'Workshops',
+    'Seminar',
+    'Conference'
   ];
   
   return (

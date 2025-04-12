@@ -52,9 +52,9 @@ const TopBar = ({
       { label: 'All Devices', action: () => navigateToDevices('all') }
     ],
     events: [
-      { label: 'Workshops', action: () => navigateToEvents('workshops') },
-      { label: 'Lectures', action: () => navigateToEvents('lectures') },
-      { label: 'Book Clubs', action: () => navigateToEvents('book-clubs') },
+      { label: 'Workshops', action: () => navigateToEvents('Workshops') },
+      { label: 'Seminar', action: () => navigateToEvents('Seminar') },
+      { label: 'Conference', action: () => navigateToEvents('Conference') },
       { label: 'All Events', action: () => navigateToEvents() }
     ]
   });
