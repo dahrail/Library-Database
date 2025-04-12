@@ -1,5 +1,21 @@
 const pool = require("../config/db");
 const { parseRequestBody, sendJsonResponse } = require("../utils/requestUtils");
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer storage – files will be stored in a 'public/images/books' folder
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../../client/public/images/books'));
+  },
+  filename: (req, file, cb) => {
+    // Use Date.now() to generate a unique filename
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + Date.now() + ext);
+  }
+});
+const upload = multer({ storage });
 
 // Get all books
 const getRawBook = (req, res) => {
@@ -140,28 +156,13 @@ const getUserBooks = (req, res, userId) => {
 // Add a new book
 const addBook = async (req, res) => {
   try {
-    const bookData = await parseRequestBody(req);
-    console.log("Adding new book:", bookData.Title);
-
-    const {
-      Title,
-      Author,
-      Genre,
-      PublicationYear,
-      Publisher,
-      Language,
-      Format,
-      ISBN,
-      TotalCopies,
-      AvailableCopies,
-      ShelfLocation,
-    } = bookData;
-
-    const query =
-      "INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    pool.query(
-      query,
-      [
+    // Use multer to process the file field "coverImage"
+    upload.single('coverImage')(req, res, (err) => {
+      if (err) {
+        console.error("Error uploading file:", err);
+        return sendJsonResponse(res, 500, { success: false, error: "File upload error" });
+      }
+      const {
         Title,
         Author,
         Genre,
@@ -170,43 +171,56 @@ const addBook = async (req, res) => {
         Language,
         Format,
         ISBN,
-      ],
-      (err, results) => {
-        if (err) {
-          console.error("Error adding book:", err);
-          res.writeHead(500, { "Content-Type": "application/json" });
-          return res.end(
-            JSON.stringify({ success: false, error: "Database error" })
+        TotalCopies,
+        AvailableCopies,
+        ShelfLocation
+      } = req.body;
+      
+      // Insert the book without storing the coverImage field in the database.
+      const query =
+        "INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+      pool.query(
+        query,
+        [Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
+        (err, results) => {
+          if (err) {
+            console.error("Error adding book:", err);
+            return sendJsonResponse(res, 500, { success: false, error: "Database error" });
+          }
+          const BookID = results.insertId;
+          
+          // If a cover image was uploaded, rename it to match the BookID (e.g. BookID.jpg)
+          if (req.file) {
+            const oldPath = req.file.path;
+            const newPath = req.file.destination + "/" + `${BookID}.jpg`;
+            fs.rename(oldPath, newPath, (renameErr) => {
+              if (renameErr) {
+                console.error("Error renaming file:", renameErr);
+              } else {
+                console.log("Cover image renamed to:", newPath);
+              }
+            });
+          }
+          
+          const inventoryQuery =
+            "INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation) VALUES (?, ?, ?, ?)";
+          pool.query(
+            inventoryQuery,
+            [BookID, TotalCopies, AvailableCopies, ShelfLocation],
+            (invErr, inventoryResults) => {
+              if (invErr) {
+                console.error("Error updating inventory:", invErr);
+                return sendJsonResponse(res, 500, { success: false, error: "Failed to update inventory" });
+              }
+              sendJsonResponse(res, 200, { success: true, BookID });
+            }
           );
         }
-
-        const BookID = results.insertId;
-        const inventoryQuery =
-          "INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation) VALUES (?, ?, ?, ?)";
-        pool.query(
-          inventoryQuery,
-          [BookID, TotalCopies, AvailableCopies, ShelfLocation],
-          (err, inventoryResults) => {
-            if (err) {
-              console.error("Error updating inventory:", err);
-              res.writeHead(500, { "Content-Type": "application/json" });
-              return res.end(
-                JSON.stringify({
-                  success: false,
-                  error: "Failed to update inventory",
-                })
-              );
-            }
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true, BookID }));
-          }
-        );
-      }
-    );
+      );
+    });
   } catch (error) {
     console.error("Error in addBook:", error);
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ success: false, error: "Server error" }));
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
   }
 };
 
