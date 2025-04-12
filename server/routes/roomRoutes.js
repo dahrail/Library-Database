@@ -122,9 +122,15 @@ const reserveRoom = async (req, res) => {
       const { RoomID, UserID, Duration } = JSON.parse(body);
 
       if (!RoomID || !UserID || !Duration) {
-        console.error("Missing required fields in request body:", { RoomID, UserID, Duration });
+        console.error("Missing required fields in request body:", {
+          RoomID,
+          UserID,
+          Duration,
+        });
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ success: false, error: "Invalid request body" }));
+        res.end(
+          JSON.stringify({ success: false, error: "Invalid request body" })
+        );
         return;
       }
 
@@ -133,10 +139,17 @@ const reserveRoom = async (req, res) => {
         SELECT * FROM ROOM_RESERVATIONS 
         WHERE UserID = ? AND EndAT > NOW()
       `;
-      const [existingReservations] = await pool.promise().query(checkUserReservationQuery, [UserID]);
+      const [existingReservations] = await pool
+        .promise()
+        .query(checkUserReservationQuery, [UserID]);
       if (existingReservations.length > 0) {
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ success: false, error: "You already have a reserved room." }));
+        res.end(
+          JSON.stringify({
+            success: false,
+            error: "You already have a reserved room.",
+          })
+        );
         return;
       }
 
@@ -309,18 +322,21 @@ const cancelReservation = async (req, res) => {
 
 const updateRoom = async (req, res) => {
   try {
-    let body = '';
-    req.on('data', (chunk) => {
+    let body = "";
+    req.on("data", (chunk) => {
       body += chunk.toString();
     });
 
-    req.on('end', async () => {
-      const { RoomID, RoomName, Capacity, Notes, IsAvailable } = JSON.parse(body);
+    req.on("end", async () => {
+      const { RoomID, RoomName, Capacity, Notes, IsAvailable } =
+        JSON.parse(body);
 
       if (!RoomID) {
         console.error("RoomID is required to update a room.");
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ success: false, error: "RoomID is required." }));
+        res.end(
+          JSON.stringify({ success: false, error: "RoomID is required." })
+        );
         return;
       }
 
@@ -337,12 +353,19 @@ const updateRoom = async (req, res) => {
           if (err || results.affectedRows === 0) {
             console.error("Error updating room or no rows affected:", err);
             res.writeHead(404, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, error: "Room not found" }));
+            res.end(
+              JSON.stringify({ success: false, error: "Room not found" })
+            );
             return;
           }
 
           res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ success: true, message: "Room updated successfully." }));
+          res.end(
+            JSON.stringify({
+              success: true,
+              message: "Room updated successfully.",
+            })
+          );
         }
       );
     });
@@ -353,6 +376,42 @@ const updateRoom = async (req, res) => {
   }
 };
 
+// Get user's active room reservations
+const getUserReservations = (req, res) => {
+  // Extract userId from the URL path
+  const urlParts = req.url.split("/");
+  const userId = urlParts[urlParts.length - 1];
+
+  if (!userId || isNaN(parseInt(userId))) {
+    sendJsonResponse(res, 400, {
+      success: false,
+      error: "Valid User ID is required",
+    });
+    return;
+  }
+
+  const query = `
+    SELECT r.RoomID, r.RoomNumber, r.RoomName, r.Capacity, r.Notes,
+           res.RoomReservationID, res.UserID, res.StartAT, res.EndAT
+    FROM ROOM_RESERVATIONS res
+    JOIN ROOMS r ON res.RoomID = r.RoomID
+    WHERE res.UserID = ? AND res.EndAT > NOW()
+    ORDER BY res.StartAT ASC
+  `;
+
+  pool.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("Error fetching user reservations:", err);
+      sendJsonResponse(res, 500, {
+        success: false,
+        error: "Failed to fetch reservations",
+      });
+      return;
+    }
+    sendJsonResponse(res, 200, { success: true, reservations: results });
+  });
+};
+
 module.exports = {
   getRooms,
   addRoom,
@@ -360,5 +419,6 @@ module.exports = {
   reserveRoom,
   releaseExpiredReservations,
   cancelReservation,
-  updateRoom, // Ensure this is exported
+  updateRoom,
+  getUserReservations, // Add this new export
 };

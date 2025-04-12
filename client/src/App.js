@@ -4,7 +4,7 @@ import "./App.css";
 // Import components
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
-import RegisterAsFaculty from "./components/auth/RegisterAsFaculty"; 
+import RegisterAsFaculty from "./components/auth/RegisterAsFaculty";
 import Welcome from "./components/home/Welcome";
 import Home from "./components/home/Home";
 import BookList from "./components/books/BookList";
@@ -16,27 +16,28 @@ import ReturnConfirmation from "./components/loans/ReturnConfirmation";
 import HoldList from "./components/holds/HoldList";
 import FineList from "./components/fines/FineList";
 import TopBar from "./components/layout/TopBar";
-import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn"; 
-import Media from "./components/media/Media"; 
-import RoomReservation from "./components/rooms/RoomReservation"; 
-import Events from "./components/events/Events"; 
-import LandingPage from "./components/landing/LandingPage"; 
-import Devices from "./components/devices/Devices"; 
-import AddDevice from "./components/devices/AddDevice"; 
+import BooksNotLoggedIn from "./components/books/BooksNotLoggedIn";
+import Media from "./components/media/Media";
+import RoomReservation from "./components/rooms/RoomReservation";
+import Events from "./components/events/Events";
+import LandingPage from "./components/landing/LandingPage";
+import Devices from "./components/devices/Devices";
+import AddDevice from "./components/devices/AddDevice";
 import AddMedia from "./components/media/AddMedia";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import UpdateDeviceList from "./components/devices/UpdateDeviceList";
 import UpdateDevice from "./components/devices/UpdateDevice";
 import UpdateMediaList from "./components/media/UpdateMediaList";
-import UpdateMedia from "./components/media/UpdateMedia"; 
+import UpdateMedia from "./components/media/UpdateMedia";
 import UpdateBookList from "./components/books/UpdateBookList";
 import UpdateBook from "./components/books/UpdateBook";
 import DeleteDeviceList from "./components/devices/DeleteDeviceList";
-import DeleteDevice from "./components/devices/DeleteDevice"; 
+import DeleteDevice from "./components/devices/DeleteDevice";
 import DeleteMediaList from "./components/media/DeleteMediaList";
 import DeleteMedia from "./components/media/DeleteMedia";
 import DeleteBookList from "./components/books/DeleteBookList";
 import DeleteBook from "./components/books/DeleteBook";
+import RoomManagement from "./components/rooms/RoomManagement"; // Import the RoomManagement component
 
 // Import API service
 import API from "./services/api";
@@ -54,15 +55,15 @@ function App() {
   const [fines, setFines] = useState([]);
   const [reportData, setReportData] = useState(null); // State to store data report results
   const [bookGenres, setBookGenres] = useState([
-    'fiction', 
-    'fantasy', 
-    'romance', 
-    'thriller', 
-    'novel', 
-    'mystery/Thriller',
-    'all Books'
+    "fiction",
+    "fantasy",
+    "romance",
+    "thriller",
+    "novel",
+    "mystery/Thriller",
+    "all Books",
   ]); // Add default genres
-  
+
   // Add state variables for initial categories
   const [initialBookCategory, setInitialBookCategory] = useState(null);
   const [initialMediaCategory, setInitialMediaCategory] = useState(null);
@@ -73,7 +74,7 @@ function App() {
   const [selectedDevice, setSelectedDevice] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
@@ -81,7 +82,7 @@ function App() {
         setUserData(user);
       } catch (error) {
         console.error("Failed to parse stored user data:", error);
-        localStorage.removeItem('user'); // Clear invalid data
+        localStorage.removeItem("user"); // Clear invalid data
       }
     }
   }, []);
@@ -102,7 +103,7 @@ function App() {
     }
   };
 
-  const handleUpdateMedia = async (updatedMedia) => { 
+  const handleUpdateMedia = async (updatedMedia) => {
     try {
       const response = await API.updateMedia(updatedMedia);
       if (response.success) {
@@ -118,7 +119,7 @@ function App() {
     }
   };
 
-  const handleUpdateBook = async (updatedBook) => { 
+  const handleUpdateBook = async (updatedBook) => {
     try {
       const response = await API.updateBook(updatedBook);
       if (response.success) {
@@ -151,7 +152,7 @@ function App() {
     }
   };
 
-  const handleDeleteMedia = async (mediaID) => {  
+  const handleDeleteMedia = async (mediaID) => {
     try {
       const response = await API.deleteMedia(mediaID);
       if (response.success) {
@@ -168,14 +169,14 @@ function App() {
     }
   };
 
-  const handleDeleteBook = async (bookID) => {  
+  const handleDeleteBook = async (bookID) => {
     try {
       const response = await API.deleteBook(bookID);
       if (response.success) {
         alert("Book deleted successfully!");
         const updatedBooks = await API.getBooks(userData.UserID);
         setBooks(updatedBooks);
-        setCurrentScreen("books"); 
+        setCurrentScreen("books");
       } else {
         alert("Failed to delete book: " + response.error);
       }
@@ -191,7 +192,7 @@ function App() {
       const data = await API.login(email, password);
 
       if (data.success) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
         setIsLoggedIn(true);
         setUserData(data.user);
         // Redirect directly to homepage (Library services)
@@ -207,7 +208,7 @@ function App() {
 
   // Logout handler
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
     setUserData(null);
     setCurrentScreen("landing");
@@ -249,29 +250,33 @@ function App() {
       if (isLoggedIn && userData) {
         const data = await API.getBooks(userData.UserID);
         setBooks(data);
-        
+
         // Extract unique genres, but put 'all' at the end
-        const uniqueGenres = [...new Set(data.map(book => book.genre).filter(Boolean))];
-        const genres = [...uniqueGenres, 'all']; // Put 'all' at the end
+        const uniqueGenres = [
+          ...new Set(data.map((book) => book.genre).filter(Boolean)),
+        ];
+        const genres = [...uniqueGenres, "all"]; // Put 'all' at the end
         setBookGenres(genres);
       } else {
         // If not logged in, fetch books without user-specific info
         const data = await API.getBooks();
         setBooks(data);
-        
+
         // Extract unique genres, but put 'all' at the end
-        const uniqueGenres = [...new Set(data.map(book => book.genre).filter(Boolean))];
-        const genres = [...uniqueGenres, 'all']; // Put 'all' at the end
+        const uniqueGenres = [
+          ...new Set(data.map((book) => book.genre).filter(Boolean)),
+        ];
+        const genres = [...uniqueGenres, "all"]; // Put 'all' at the end
         setBookGenres(genres);
       }
-      
+
       // Set the initial category if provided, ensure it's a string
       if (category) {
         setInitialBookCategory(String(category));
       } else {
-        setInitialBookCategory('all');
+        setInitialBookCategory("all");
       }
-      
+
       setCurrentScreen("books");
     } catch (error) {
       console.error("Error fetching books:", error);
@@ -282,30 +287,30 @@ function App() {
   // Media navigation with optional category parameter
   const navigateToMedia = (category) => {
     window.scrollTo(0, 0);
-    setInitialMediaCategory(category || 'all');
+    setInitialMediaCategory(category || "all");
     setCurrentScreen("media");
   };
 
   const navigateToAddMedia = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("addMedia");
-  }
+  };
 
   // Room reservation navigation with optional category parameter
   const navigateToRooms = (category) => {
     window.scrollTo(0, 0);
-    setInitialRoomCategory(category || 'all');
+    setInitialRoomCategory(category || "all");
     setCurrentScreen("rooms");
   };
 
   // Events navigation with optional category parameter
   const navigateToEvents = (category) => {
     window.scrollTo(0, 0);
-    setInitialEventCategory(category || 'all');
+    setInitialEventCategory(category || "all");
     setCurrentScreen("events");
   };
 
-  const navigateToDevices = (category = 'all') => {
+  const navigateToDevices = (category = "all") => {
     window.scrollTo(0, 0);
     setInitialDevicesCategory(category);
     setCurrentScreen("devices");
@@ -359,7 +364,7 @@ function App() {
   const navigateToUpdateMediaList = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("updateMediaList");
-  }; 
+  };
 
   const navigateToUpdateMedia = (media) => {
     window.scrollTo(0, 0);
@@ -370,40 +375,40 @@ function App() {
   const navigateToUpdateBookList = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("updateBookList");
-  }
+  };
 
   const navigateToUpdateBook = (book) => {
     window.scrollTo(0, 0);
     setSelectedBook(book);
     setCurrentScreen("updateBook");
-  }
+  };
 
   const navigateToDeleteDeviceList = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("deleteDeviceList");
-  }
+  };
 
   const navigateToDeleteDevice = (device) => {
     window.scrollTo(0, 0);
     setSelectedDevice(device);
     setCurrentScreen("deleteDevice");
-  }
+  };
 
-  const navigateToDeleteMediaList = () => { 
+  const navigateToDeleteMediaList = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("deleteMediaList");
-  }
+  };
 
-  const navigateToDeleteMedia = (media) => {  
+  const navigateToDeleteMedia = (media) => {
     window.scrollTo(0, 0);
     setSelectedMedia(media);
     setCurrentScreen("deleteMedia");
-  }
+  };
 
-  const navigateToDeleteBookList = () => { 
+  const navigateToDeleteBookList = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("deleteBookList");
-  }
+  };
 
   // Ensure the navigateToDeleteBook function navigates to the DeleteBook component
   const navigateToDeleteBook = (book) => {
@@ -425,10 +430,10 @@ function App() {
   const handleReturn = async (loans) => {
     try {
       console.log("Returning loan with LoanID:", loans.LoanID); // Debugging line
-  
+
       // Call the API to confirm the return
       const data = await API.confirmReturn(loans.LoanID); // Pass the correct LoanID
-  
+
       if (data.success) {
         alert(`The item "${loans.Title}" has been successfully returned.`);
 
@@ -436,11 +441,11 @@ function App() {
         setLoans((prevLoans) =>
           prevLoans.map((l) => (l.LoanID === loans.LoanID ? updatedLoan : l))
         );
-        
+
         // Fetch the updated loan list from the API after the return
         const updatedLoans = await API.getLoans(userData.UserID);
-        setLoans(updatedLoans);  // Update state with the fresh data from the server
-  
+        setLoans(updatedLoans); // Update state with the fresh data from the server
+
         // Navigate to the loans page to display the updated loan list
         navigateToLoans(); // Assuming this function takes the user to the loan page
       } else {
@@ -455,7 +460,7 @@ function App() {
       alert("An error occurred while returning the item.");
     }
   };
-  
+
   // Loans navigation and handlers
   const navigateToLoans = async () => {
     window.scrollTo(0, 0);
@@ -641,6 +646,10 @@ function App() {
     }
   };
 
+  const navigateToRoomManagement = () => {
+    setCurrentScreen("roomManagement");
+  };
+
   return (
     <div className="app-container">
       {/* Show TopBar on all screens */}
@@ -649,8 +658,8 @@ function App() {
         userData={userData}
         handleLogout={handleLogout}
         navigateToBooks={navigateToBooks} // Always pass navigateToBooks
-        navigateToMedia={navigateToMedia} 
-        navigateToDevices={navigateToDevices}// Add this line to pass the function
+        navigateToMedia={navigateToMedia}
+        navigateToDevices={navigateToDevices} // Add this line to pass the function
         navigateToLogin={navigateToLogin} // Add this line to pass the navigateToLogin function
         navigateToRegister={navigateToRegister} // Make sure this prop is included
         navigateToRooms={navigateToRooms} // Pass this function to TopBar
@@ -703,6 +712,7 @@ function App() {
           navigateToRooms={navigateToRooms} // Pass the function
           navigateToEvents={navigateToEvents} // Pass the function
           navigateToAdminDashboard={navigateToAdminDashboard} // Pass the function
+          navigateToRoomManagement={navigateToRoomManagement} // Add this line
         />
       )}
 
@@ -713,15 +723,15 @@ function App() {
           navigateToHold={navigateToHold}
           handleReturn={handleReturn}
           navigateToHome={navigateToHome}
-          userData={userData} 
-          isLoggedIn={isLoggedIn} 
+          userData={userData}
+          isLoggedIn={isLoggedIn}
           navigateToAddBook={navigateToAddBook}
-          navigateToUpdateBookList={navigateToUpdateBookList} 
+          navigateToUpdateBookList={navigateToUpdateBookList}
           navigateToDeleteBook={navigateToDeleteBook}
           navigateToDeleteBookList={navigateToDeleteBookList}
-          navigateToLogin={navigateToLogin} 
-          initialCategory={initialBookCategory} 
-          navigateToLanding={navigateToLanding} 
+          navigateToLogin={navigateToLogin}
+          initialCategory={initialBookCategory}
+          navigateToLanding={navigateToLanding}
         />
       )}
 
@@ -748,7 +758,10 @@ function App() {
       )}
 
       {currentScreen === "addDevice" && (
-        <AddDevice onAddDevice={handleAddDevice} navigateToHome={navigateToHome} />
+        <AddDevice
+          onAddDevice={handleAddDevice}
+          navigateToHome={navigateToHome}
+        />
       )}
 
       {currentScreen === "addMedia" && (
@@ -773,10 +786,10 @@ function App() {
       )} */}
 
       {currentScreen === "holds" && (
-        <HoldList 
-        holds={holds} 
-        navigateToHome={navigateToHome} 
-        handleCancelHold={handleCancelHold}
+        <HoldList
+          holds={holds}
+          navigateToHome={navigateToHome}
+          handleCancelHold={handleCancelHold}
         />
       )}
 
@@ -818,13 +831,13 @@ function App() {
       )}
 
       {currentScreen === "media" && (
-        <Media 
-          navigateToHome={navigateToHome} 
-          isLoggedIn={isLoggedIn} 
+        <Media
+          navigateToHome={navigateToHome}
+          isLoggedIn={isLoggedIn}
           navigateToLogin={navigateToLogin}
-          userData={userData} 
-          initialCategory={initialMediaCategory} 
-          navigateToLanding={navigateToLanding} 
+          userData={userData}
+          initialCategory={initialMediaCategory}
+          navigateToLanding={navigateToLanding}
           navigateToAddMedia={navigateToAddMedia}
           navigateToUpdateMediaList={navigateToUpdateMediaList}
           // navigateToDeleteMedia={navigateToDeleteMedia}
@@ -833,23 +846,23 @@ function App() {
       )}
 
       {currentScreen === "devices" && (
-        <Devices 
-          navigateToHome={navigateToHome} 
-          isLoggedIn={isLoggedIn} 
+        <Devices
+          navigateToHome={navigateToHome}
+          isLoggedIn={isLoggedIn}
           navigateToLogin={navigateToLogin}
-          userData={userData} 
-          initialCategory={initialDevicesCategory} 
-          navigateToLanding={navigateToLanding} 
-          navigateToAddDevice={navigateToAddDevice} 
-          navigateToUpdateDeviceList={navigateToUpdateDeviceList} 
+          userData={userData}
+          initialCategory={initialDevicesCategory}
+          navigateToLanding={navigateToLanding}
+          navigateToAddDevice={navigateToAddDevice}
+          navigateToUpdateDeviceList={navigateToUpdateDeviceList}
           navigateToDeleteDeviceList={navigateToDeleteDeviceList}
         />
       )}
 
       {currentScreen === "rooms" && (
-        <RoomReservation 
-          userData={userData} 
-          navigateToHome={navigateToHome} 
+        <RoomReservation
+          userData={userData}
+          navigateToHome={navigateToHome}
           isLoggedIn={isLoggedIn}
           navigateToLogin={navigateToLogin}
           initialCategory={initialRoomCategory} // Pass the initial category
@@ -858,8 +871,8 @@ function App() {
       )}
 
       {currentScreen === "events" && (
-        <Events 
-          navigateToHome={navigateToHome} 
+        <Events
+          navigateToHome={navigateToHome}
           userData={userData}
           initialCategory={initialEventCategory} // Pass the initial category
           navigateToLanding={navigateToLanding} // Add this prop
@@ -867,10 +880,7 @@ function App() {
       )}
 
       {currentScreen === "adminDashboard" && userData?.Role === "Admin" && (
-        <AdminDashboard 
-          userData={userData}
-          navigateToHome={navigateToHome}
-        />
+        <AdminDashboard userData={userData} navigateToHome={navigateToHome} />
       )}
 
       {currentScreen === "updateDeviceList" && (
@@ -960,6 +970,15 @@ function App() {
           bookData={selectedBook}
           onDeleteBook={handleDeleteBook}
           navigateToHome={navigateToHome}
+        />
+      )}
+
+      {currentScreen === "roomManagement" && (
+        <RoomManagement
+          userData={userData}
+          navigateToHome={navigateToHome}
+          isLoggedIn={isLoggedIn}
+          navigateToLogin={navigateToLogin}
         />
       )}
     </div>

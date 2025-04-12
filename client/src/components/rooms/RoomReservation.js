@@ -789,16 +789,19 @@ const RoomReservation = ({
                         Reserve Room
                       </button>
                     ) : (
-                      <button
+                      <div
                         style={{
-                          ...styles.button,
-                          backgroundColor: "#dc2626", // Red color for cancel button
-                          marginTop: "10px",
+                          ...styles.cardStatus,
+                          backgroundColor: "#f0f4ff",
+                          color: "#4a6bdf",
+                          fontWeight: "500",
+                          padding: "10px 15px",
+                          marginTop: "15px",
+                          textAlign: "center",
                         }}
-                        onClick={() => handleCancelReservation(room.RoomID)}
                       >
-                        Cancel Reservation
-                      </button>
+                        Room Already Reserved
+                      </div>
                     )
                   ) : (
                     <button
