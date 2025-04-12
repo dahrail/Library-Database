@@ -202,7 +202,7 @@ const Home = ({
             <div className="menu-item" onClick={navigateToRoomManagement}>
               <div className="menu-item-image-container">
                 <img
-                  src="/images/room-management.jpg"
+                  src="https://i0.wp.com/arabianhomes.sa/wp-content/uploads/2021/09/Booking-System-For-Meeting-Rooms.png?fit=1000%2C760&ssl=1.jpg"
                   alt="Room Management"
                   className="menu-image"
                 />
