@@ -15,20 +15,32 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
     AvailableCopies: '',
     ShelfLocation: ''
   });
+  const [coverImage, setCoverImage] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewBook(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    setCoverImage(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Prepare JSON instead of FormData since there is no file upload anymore
+    // Create a FormData to include text fields and the file
+    const formData = new FormData();
+    Object.entries(newBook).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    if (coverImage) {
+      formData.append('coverImage', coverImage);
+    }
+    // Pass formData to the add book API endpoint
     try {
       const response = await fetch("/api/addBook", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newBook),
+        body: formData,
       });
       const data = await response.json();
       if (data.success) {
@@ -113,6 +125,11 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
         <div className="form-group">
           <label>Shelf Location:</label>
           <input type="text" name="ShelfLocation" value={newBook.ShelfLocation} onChange={handleChange} required />
+        </div>
+
+        <div className="form-group">
+          <label>Cover Image:</label>
+          <input type="file" name="coverImage" accept="image/*" onChange={handleFileChange} />
         </div>
 
         <div className="button-group">

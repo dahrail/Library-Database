@@ -156,51 +156,54 @@ const getUserBooks = (req, res, userId) => {
 // Add a new book
 const addBook = async (req, res) => {
   try {
-    // Parse the request body (no file processing needed)
-    const {
-      Title,
-      Author,
-      Genre,
-      PublicationYear,
-      Publisher,
-      Language,
-      Format,
-      ISBN,
-      TotalCopies,
-      AvailableCopies,
-      ShelfLocation
-    } = await parseRequestBody(req);
-    
-    // Insert the book without a cover image (the default image will be used)
-    const query =
-      "INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    pool.query(
-      query,
-      [Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
-      (err, results) => {
-        if (err) {
-          console.error("Error adding book:", err);
-          return sendJsonResponse(res, 500, { success: false, error: "Database error" });
-        }
-        const BookID = results.insertId;
-        
-        // No file processing; the default image (e.g. default-book.jpg) will be used by the client when "/images/books/{BookID}.jpg" is missing
-        
-        const inventoryQuery =
-          "INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation) VALUES (?, ?, ?, ?)";
-        pool.query(
-          inventoryQuery,
-          [BookID, TotalCopies, AvailableCopies, ShelfLocation],
-          (invErr, inventoryResults) => {
-            if (invErr) {
-              console.error("Error updating inventory:", invErr);
-              return sendJsonResponse(res, 500, { success: false, error: "Failed to update inventory" });
-            }
-            sendJsonResponse(res, 200, { success: true, BookID });
-          }
-        );
+    // Use multer to process the file field "coverImage"
+    upload.single('coverImage')(req, res, (err) => {
+      if (err) {
+        console.error("Error uploading file:", err);
+        return sendJsonResponse(res, 500, { success: false, error: "File upload error" });
       }
-    );
+      const {
+        Title,
+        Author,
+        Genre,
+        PublicationYear,
+        Publisher,
+        Language,
+        Format,
+        ISBN,
+        TotalCopies,
+        AvailableCopies,
+        ShelfLocation
+      } = req.body;
+      
+      // Even though the file is stored on the file system, we are not storing it in the database.
+      const query =
+        "INSERT INTO BOOK (Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+      pool.query(
+        query,
+        [Title, Author, Genre, PublicationYear, Publisher, Language, Format, ISBN],
+        (err, results) => {
+          if (err) {
+            console.error("Error adding book:", err);
+            return sendJsonResponse(res, 500, { success: false, error: "Database error" });
+          }
+          const BookID = results.insertId;
+          const inventoryQuery =
+            "INSERT INTO BOOK_INVENTORY (BookID, TotalCopies, AvailableCopies, ShelfLocation) VALUES (?, ?, ?, ?)";
+          pool.query(
+            inventoryQuery,
+            [BookID, TotalCopies, AvailableCopies, ShelfLocation],
+            (invErr, inventoryResults) => {
+              if (invErr) {
+                console.error("Error updating inventory:", invErr);
+                return sendJsonResponse(res, 500, { success: false, error: "Failed to update inventory" });
+              }
+              sendJsonResponse(res, 200, { success: true, BookID });
+            }
+          );
+        }
+      );
+    });
   } catch (error) {
     console.error("Error in addBook:", error);
     sendJsonResponse(res, 500, { success: false, error: "Server error" });
