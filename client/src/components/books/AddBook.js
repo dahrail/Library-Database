@@ -15,15 +15,45 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
     AvailableCopies: '',
     ShelfLocation: ''
   });
+  const [coverImage, setCoverImage] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewBook(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleFileChange = (e) => {
+    setCoverImage(e.target.files[0]);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAddBook(newBook);
+    // Create a FormData to include text fields and the file
+    const formData = new FormData();
+    Object.entries(newBook).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    if (coverImage) {
+      formData.append('coverImage', coverImage);
+    }
+    // Pass formData to the add book API endpoint
+    try {
+      const response = await fetch("/api/addBook", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert("Book added successfully!");
+        onAddBook(newBook);
+        navigateToHome();
+      } else {
+        alert("Failed to add book: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error adding book:", error);
+      alert("An error occurred while adding the book.");
+    }
   };
 
   return (
@@ -48,6 +78,7 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
               name="Author"
               value={newBook.Author}
               onChange={handleChange}
+              required
             />
           </div>
         </div>
@@ -154,6 +185,16 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
             value={newBook.ShelfLocation}
             onChange={handleChange}
             required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Cover Image:</label>
+          <input
+            type="file"
+            name="coverImage"
+            accept="image/*"
+            onChange={handleFileChange}
           />
         </div>
 
