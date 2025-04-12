@@ -2,7 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import MediaBorrowConfirmation from "./MediaBorrowConfirmation";
 import MediaHoldConfirmation from "./MediaHoldConfirmation";
 
-const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialCategory, navigateToLanding, navigateToAddMedia, navigateToUpdateMediaList }) => {
+const Media = ({ 
+  navigateToHome, 
+  isLoggedIn, 
+  navigateToLogin, 
+  userData, 
+  initialCategory, 
+  navigateToLanding, 
+  navigateToAddMedia, 
+  navigateToUpdateMediaList ,
+  navigateToDeleteMediaList
+}) => {
   const [mediaItems, setMediaItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -519,6 +529,7 @@ const Media = ({ navigateToHome, isLoggedIn, navigateToLogin, userData, initialC
           <div style={{ display: "flex", justifyContent: "center", gap: "15px", margin: "20px 0" }}>
             <button onClick={navigateToAddMedia} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Add Media</button>
             <button onClick={() => navigateToUpdateMediaList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Update Media</button>
+            <button onClick={() => navigateToDeleteMediaList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Delete Media</button>
           </div>
         )}
 

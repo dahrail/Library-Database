@@ -33,6 +33,8 @@ import UpdateBookList from "./components/books/UpdateBookList";
 import UpdateBook from "./components/books/UpdateBook";
 import DeleteDeviceList from "./components/devices/DeleteDeviceList";
 import DeleteDevice from "./components/devices/DeleteDevice"; 
+import DeleteMediaList from "./components/media/DeleteMediaList";
+import DeleteMedia from "./components/media/DeleteMedia";
 
 // Import API service
 import API from "./services/api";
@@ -130,6 +132,23 @@ function App() {
     } catch (error) {
       console.error("Error deleting device:", error);
       alert("An error occurred while deleting the device.");
+    }
+  };
+
+  const handleDeleteMedia = async (mediaID) => {  
+    try {
+      const response = await API.deleteMedia(mediaID);
+      if (response.success) {
+        alert("Media deleted successfully!");
+        // Refresh the media list
+        const updatedMedia = await API.getMedia();
+        setCurrentScreen("media"); // Navigate back to media list
+      } else {
+        alert("Failed to delete media: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error deleting media:", error);
+      alert("An error occurred while deleting the media.");
     }
   };
 
@@ -333,6 +352,17 @@ function App() {
     window.scrollTo(0, 0);
     setSelectedDevice(device);
     setCurrentScreen("deleteDevice");
+  }
+
+  const navigateToDeleteMediaList = () => { 
+    window.scrollTo(0, 0);
+    setCurrentScreen("deleteMediaList");
+  }
+
+  const navigateToDeleteMedia = (media) => {  
+    window.scrollTo(0, 0);
+    setSelectedMedia(media);
+    setCurrentScreen("deleteMedia");
   }
 
   // Books navigation and handlers
@@ -771,7 +801,9 @@ function App() {
           initialCategory={initialMediaCategory} 
           navigateToLanding={navigateToLanding} 
           navigateToAddMedia={navigateToAddMedia}
-          navigateToUpdateMediaList={navigateToUpdateMediaList} 
+          navigateToUpdateMediaList={navigateToUpdateMediaList}
+          // navigateToDeleteMedia={navigateToDeleteMedia}
+          navigateToDeleteMediaList={navigateToDeleteMediaList}
         />
       )}
 
@@ -872,6 +904,21 @@ function App() {
         <DeleteDevice
           deviceData={selectedDevice}
           onDeleteDevice={handleDeleteDevice}
+          navigateToHome={navigateToHome}
+        />
+      )}
+
+      {currentScreen === "deleteMediaList" && (
+        <DeleteMediaList
+          navigateToHome={navigateToHome}
+          navigateToDeleteMedia={navigateToDeleteMedia}
+        />
+      )}
+
+      {currentScreen === "deleteMedia" && selectedMedia && (
+        <DeleteMedia
+          mediaData={selectedMedia}
+          onDeleteMedia={handleDeleteMedia}
           navigateToHome={navigateToHome}
         />
       )}

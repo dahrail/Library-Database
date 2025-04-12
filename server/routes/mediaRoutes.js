@@ -151,8 +151,46 @@ const updateMedia = async (req, res) => {
   }
 };
 
+const deleteMedia = async (req, res) => {
+  try {
+    const data = await parseRequestBody(req);
+    const { MediaID } = data;
+
+    if (!MediaID) {
+      sendJsonResponse(res, 400, { success: false, error: "MediaID is required" });
+      return;
+    }
+
+    console.log(`Deleting media with MediaID: ${MediaID}`);
+
+    const deleteQuery = "DELETE FROM MEDIA WHERE MediaID = ?";
+    pool.query(deleteQuery, [MediaID], (err, result) => {
+      if (err) {
+        console.error("Error deleting media:", err);
+        sendJsonResponse(res, 500, { success: false, error: "Failed to delete media" });
+        return;
+      }
+
+      if (result.affectedRows === 0) {
+        sendJsonResponse(res, 404, { success: false, error: "Media not found" });
+        return;
+      }
+
+      sendJsonResponse(res, 200, {
+        success: true,
+        message: "Media deleted successfully",
+        deletedMediaID: MediaID,
+      });
+    });
+  } catch (error) {
+    console.error("Error in deleteMedia:", error);
+    sendJsonResponse(res, 500, { success: false, error: "Server error" });
+  }
+};
+
 module.exports = {
   getAllMedia,
   addMedia,
   updateMedia,
+  deleteMedia,
 };

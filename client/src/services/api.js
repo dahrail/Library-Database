@@ -389,6 +389,20 @@ const API = {
     }
   },
 
+  deleteMedia: async (mediaId) => {
+    try {
+      const response = await fetch("/api/deleteMedia", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ MediaID: mediaId }),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error deleting media:", error);
+      throw error;
+    }
+  },
+
   borrowMedia: async (userId, mediaId) => {
     try {
       const response = await fetch("/api/borrowMedia", {

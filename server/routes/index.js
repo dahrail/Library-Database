@@ -89,6 +89,10 @@ const handleRequest = async (req, res) => {
       return await mediaRoutes.updateMedia(req, res);
     }
 
+    if (method === "DELETE" && path === "/api/deleteMedia") {
+      return await mediaRoutes.deleteMedia(req, res);
+    }
+
     // DEVICE ROUTES
     if (method === "GET" && path === "/api/device") {
       return deviceRoutes.getAllDevice(req, res);
