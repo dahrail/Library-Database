@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 // Import components
@@ -71,6 +71,20 @@ function App() {
   const [initialEventCategory, setInitialEventCategory] = useState(null);
 
   const [selectedDevice, setSelectedDevice] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setIsLoggedIn(true);
+        setUserData(user);
+      } catch (error) {
+        console.error("Failed to parse stored user data:", error);
+        localStorage.removeItem('user'); // Clear invalid data
+      }
+    }
+  }, []);
 
   const handleUpdateDevice = async (updatedDevice) => {
     try {
@@ -177,6 +191,7 @@ function App() {
       const data = await API.login(email, password);
 
       if (data.success) {
+        localStorage.setItem('user', JSON.stringify(data.user));
         setIsLoggedIn(true);
         setUserData(data.user);
         // Redirect directly to homepage (Library services)
@@ -192,6 +207,7 @@ function App() {
 
   // Logout handler
   const handleLogout = () => {
+    localStorage.removeItem('user');
     setIsLoggedIn(false);
     setUserData(null);
     setCurrentScreen("landing");
