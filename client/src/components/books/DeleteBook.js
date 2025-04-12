@@ -14,7 +14,7 @@ const DeleteBook = ({ bookData, onDeleteBook, navigateToHome}) => {
     <div className="content-container">
       <h2>Confirm Delete Book</h2>
       <div className="book-details">
-        <p><strong>Type:</strong> {bookData.Type}</p>
+        <p><strong>Title:</strong> {bookData.Title}</p>
         <p><strong>Author:</strong> {bookData.Author}</p>
         <p><strong>Genre:</strong> {bookData.Genre}</p>
         <p><strong>Publication Year:</strong> {bookData.PublicationYear}</p>
