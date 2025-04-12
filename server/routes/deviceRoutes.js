@@ -26,8 +26,14 @@ const getAllDevice = (req, res) => {
       return;
     }
 
-    console.log("Query executed successfully. Results:", results);
-    sendJsonResponse(res, 200, { success: true, devices: results });
+    // This ensures "Ipad" is displayed as "iPad" in responses
+    const formattedResults = results.map(device => ({
+      ...device,
+      Type: device.Type === "Ipad" ? "iPad" : device.Type
+    }));
+
+    console.log("Query executed successfully. Results:", formattedResults);
+    sendJsonResponse(res, 200, { success: true, devices: formattedResults });
   });
 };
 

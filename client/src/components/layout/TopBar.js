@@ -47,7 +47,7 @@ const TopBar = ({
     ],
     devices: [
       { label: 'Headphone', action: () => navigateToDevices('Headphone') },
-      { label: 'Ipad', action: () => navigateToDevices('Ipad') },
+      { label: 'iPad', action: () => navigateToDevices('iPad') },
       { label: 'Laptop', action: () => navigateToDevices('Laptop') },
       { label: 'All Devices', action: () => navigateToDevices('all') }
     ],

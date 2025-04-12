@@ -342,7 +342,7 @@ const Devices = ({
                   style={selectedCategory === category ? { ...styles.navButton, ...styles.activeNavButton } : styles.navButton}
                   onClick={() => setSelectedCategory(category)}
                 >
-                  {category === "all" ? "All Devices" : category.charAt(0).toUpperCase() + category.slice(1)}
+                  {category === "all" ? "All Devices" : category === "Ipad" ? "iPad" : category}
                 </button>
               ))}
             </div>

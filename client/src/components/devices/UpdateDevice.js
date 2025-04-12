@@ -43,7 +43,7 @@ const UpdateDevice = ({ deviceData, onUpdateDevice, navigateToHome }) => {
             >
               <option value="">Select Type</option>
               <option value="Laptop">Laptop</option>
-              <option value="Ipad">Ipad</option>
+              <option value="iPad">iPad</option>
               <option value="Headphone">Headphone</option>
             </select>
           </div>
