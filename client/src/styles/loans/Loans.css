@@ -1,3 +1,8 @@
+/* Global box-sizing reset to prevent horizontal scrolling due to padding/borders */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 /* Modern loans page styling */
 .loans-page {
   width: 100%;
