@@ -22,7 +22,6 @@ const itemReport = (req, res) => {
     LEFT JOIN LOAN l ON l.ItemID = i.ItemID AND l.ItemType = i.ItemType
     LEFT JOIN HOLD h ON h.ItemID = i.ItemID AND h.ItemType = i.ItemType
     GROUP BY i.ItemType, i.ItemID, i.DisplayTitle, i.DisplayAuthor
-    ORDER BY TotalBorrows DESC
   `;
 
   pool.query(query, (err, results) => {
