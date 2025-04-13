@@ -35,8 +35,8 @@ const ItemReport = () => {
             <tr>
               <th>Item Type</th>
               <th>Item ID</th>
-              <th>Title</th>
-              <th>Author</th>
+              <th>Title/Model</th>
+              <th>Author/Brand</th>
               <th>Total Borrows</th>
               <th>Active Borrows</th>
               <th>Total Holds</th>
