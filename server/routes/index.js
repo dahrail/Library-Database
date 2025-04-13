@@ -178,6 +178,10 @@ const handleRequest = async (req, res) => {
       return finalreportRoutes.itemReport(req, res);
     }
 
+    if (method == "GET" && path == "/api/userReport"){
+      return finalreportRoutes.userReport(req,res);
+    }
+
     // ROOM ROUTES
     if (method === "GET" && path === "/api/rooms") {
       return roomRoutes.getRooms(req, res);

@@ -880,7 +880,10 @@ function App() {
       )}
 
       {currentScreen === "adminDashboard" && userData?.Role === "Admin" && (
-        <AdminDashboard userData={userData} navigateToHome={navigateToHome} />
+        <AdminDashboard 
+          userData={userData} 
+          navigateToHome={navigateToHome} 
+        />
       )}
 
       {currentScreen === "updateDeviceList" && (
