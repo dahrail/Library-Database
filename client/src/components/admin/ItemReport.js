@@ -5,14 +5,19 @@ const ItemReport = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Inputs (what user selects/enters)
+  const [itemTypeInput, setItemTypeInput] = useState('All');
+  const [titleInput, setTitleInput] = useState('');
+  const [authorInput, setAuthorInput] = useState('');
+  const [sortByInput, setSortByInput] = useState('none');
+  const [sortOrderInput, setSortOrderInput] = useState('asc');
+
+  // Filters (applied when "Generate Report" is clicked)
   const [itemTypeFilter, setItemTypeFilter] = useState('All');
   const [titleSearch, setTitleSearch] = useState('');
   const [authorSearch, setAuthorSearch] = useState('');
-
-  // New state for sorting: "none", "TotalBorrows", "TotalHolds"
-  const [sortBy, setSortBy] = useState('none'); 
-  // New state for sorting order: "asc", "desc"
-  const [sortOrder, setSortOrder] = useState('asc'); 
+  const [sortBy, setSortBy] = useState('none');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
     const fetchItemReport = async () => {
@@ -38,7 +43,7 @@ const ItemReport = () => {
   useEffect(() => {
     let filtered = [...reportData];
 
-    // Filter by Item Type, Title, and Author as before
+    // Apply filters
     if (itemTypeFilter !== 'All') {
       filtered = filtered.filter(item => item.ItemType === itemTypeFilter);
     }
@@ -55,30 +60,37 @@ const ItemReport = () => {
       );
     }
 
-    // Apply sorting based on the selected criteria (Total Borrows or Total Holds)
+    // Apply sorting
     if (sortBy !== 'none') {
       filtered.sort((a, b) => {
         const aValue = sortBy === 'TotalBorrows' ? a.TotalBorrows : a.TotalHolds;
         const bValue = sortBy === 'TotalBorrows' ? b.TotalBorrows : b.TotalHolds;
 
-        return sortOrder === 'asc' 
-          ? aValue - bValue 
-          : bValue - aValue;
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
       });
     }
 
     setFilteredData(filtered);
-  }, [itemTypeFilter, titleSearch, authorSearch, reportData, sortBy, sortOrder]);
+  }, [itemTypeFilter, titleSearch, authorSearch, sortBy, sortOrder, reportData]);
+
+  // Triggered when user clicks "Generate Report"
+  const applyFilters = () => {
+    setItemTypeFilter(itemTypeInput);
+    setTitleSearch(titleInput);
+    setAuthorSearch(authorInput);
+    setSortBy(sortByInput);
+    setSortOrder(sortOrderInput);
+  };
 
   return (
     <div className="item-report">
       <h3>Item Report</h3>
 
       {/* Filters */}
-      <div className="filters" style={{ marginBottom: '1rem' }}>
+      <div className="filters" style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
         <label>
           Item Type:&nbsp;
-          <select value={itemTypeFilter} onChange={e => setItemTypeFilter(e.target.value)}>
+          <select value={itemTypeInput} onChange={e => setItemTypeInput(e.target.value)}>
             <option value="All">All</option>
             <option value="Book">Book</option>
             <option value="Media">Media</option>
@@ -86,52 +98,50 @@ const ItemReport = () => {
           </select>
         </label>
 
-        &nbsp;&nbsp;
-
         <label>
           Title/Model:&nbsp;
           <input
             type="text"
-            value={titleSearch}
-            onChange={e => setTitleSearch(e.target.value)}
-            placeholder="Search by title..."
+            value={titleInput}
+            onChange={e => setTitleInput(e.target.value)}
+            placeholder="Search by title or model"
           />
         </label>
-
-        &nbsp;&nbsp;
 
         <label>
           Author/Brand:&nbsp;
           <input
             type="text"
-            value={authorSearch}
-            onChange={e => setAuthorSearch(e.target.value)}
-            placeholder="Search by author..."
+            value={authorInput}
+            onChange={e => setAuthorInput(e.target.value)}
+            placeholder="Search by author or brand"
           />
         </label>
 
-        &nbsp;&nbsp;
-
-        {/* Sorting Criteria Dropdown */}
         <label>
           Sort by:&nbsp;
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+          <select value={sortByInput} onChange={e => setSortByInput(e.target.value)}>
             <option value="none">None</option>
             <option value="TotalBorrows">Total Borrows</option>
             <option value="TotalHolds">Total Holds</option>
           </select>
         </label>
 
-        &nbsp;&nbsp;
-
-        {/* Sorting Order Dropdown */}
         <label>
           Order:&nbsp;
-          <select value={sortOrder} onChange={e => setSortOrder(e.target.value)} disabled={sortBy === 'none'}>
+          <select
+            value={sortOrderInput}
+            onChange={e => setSortOrderInput(e.target.value)}
+            disabled={sortByInput === 'none'}
+          >
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
           </select>
         </label>
+
+        <button onClick={applyFilters} style={{ height: 'fit-content', padding: '0.5rem 1rem' }}>
+          Generate Report
+        </button>
       </div>
 
       {/* Table */}
@@ -152,18 +162,22 @@ const ItemReport = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((item, index) => (
-              <tr key={index}>
-                <td>{item.ItemType}</td>
-                <td>{item.ItemID}</td>
-                <td>{item.DisplayTitle}</td>
-                <td>{item.DisplayAuthor}</td>
-                <td>{item.TotalBorrows}</td>
-                <td>{item.ActiveBorrows}</td>
-                <td>{item.TotalHolds}</td>
-                <td>{item.PendingHolds}</td>
-              </tr>
-            ))}
+            {filteredData.length === 0 ? (
+              <tr><td colSpan="8">No results found.</td></tr>
+            ) : (
+              filteredData.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.ItemType}</td>
+                  <td>{item.ItemID}</td>
+                  <td>{item.DisplayTitle}</td>
+                  <td>{item.DisplayAuthor}</td>
+                  <td>{item.TotalBorrows}</td>
+                  <td>{item.ActiveBorrows}</td>
+                  <td>{item.TotalHolds}</td>
+                  <td>{item.PendingHolds}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       )}
