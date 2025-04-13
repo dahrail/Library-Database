@@ -1,17 +1,27 @@
 const pool = require("../config/db");
 const { sendJsonResponse } = require("../utils/requestUtils");
 
-const itemReport = (req, res) => {
-  const query = `
+const itemReport = (req, res, startDate, endDate) => {
+  let dateFilterLoan = "";
+  let dateFilterHold = "";
+
+  console.log("Received startDate and endDate:", startDate, endDate);
+
+  if (startDate && endDate) {
+    dateFilterLoan = `AND l.BorrowedAt BETWEEN '${startDate}' AND '${endDate}'`;
+    dateFilterHold = `AND h.RequestAT BETWEEN '${startDate}' AND '${endDate}'`;
+  }
+
+  const sqlQuery = `
     SELECT 
       i.ItemType,
       i.ItemID,
       i.DisplayTitle,
       i.DisplayAuthor,
-      COUNT(DISTINCT l.LoanID) AS TotalBorrows,
-      COUNT(DISTINCT CASE WHEN l.ReturnedAt IS NULL THEN l.LoanID END) AS ActiveBorrows,
-      COUNT(DISTINCT h.HoldID) AS TotalHolds,
-      COUNT(DISTINCT CASE WHEN h.HoldStatus = 'Pending' THEN h.HoldID END) AS PendingHolds
+      COUNT(DISTINCT CASE WHEN 1=1 ${dateFilterLoan} THEN l.LoanID END) AS TotalBorrows,
+      COUNT(DISTINCT CASE WHEN l.ReturnedAt IS NULL ${dateFilterLoan} THEN l.LoanID END) AS ActiveBorrows,
+      COUNT(DISTINCT CASE WHEN 1=1 ${dateFilterHold} THEN h.HoldID END) AS TotalHolds,
+      COUNT(DISTINCT CASE WHEN h.HoldStatus = 'Pending' ${dateFilterHold} THEN h.HoldID END) AS PendingHolds
     FROM (
       SELECT 'Book' AS ItemType, BookID AS ItemID, Title AS DisplayTitle, Author AS DisplayAuthor FROM BOOK
       UNION ALL
@@ -24,7 +34,9 @@ const itemReport = (req, res) => {
     GROUP BY i.ItemType, i.ItemID, i.DisplayTitle, i.DisplayAuthor
   `;
 
-  pool.query(query, (err, results) => {
+  console.log("Running SQL Query:\n", sqlQuery);
+
+  pool.query(sqlQuery, (err, results) => {
     if (err) {
       console.error("Error fetching item stats report:", err);
       sendJsonResponse(res, 500, {
@@ -40,6 +52,8 @@ const itemReport = (req, res) => {
     });
   });
 };
+
+
 
 const userReport = (req, res) => {
   const query = `

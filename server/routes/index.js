@@ -175,7 +175,8 @@ const handleRequest = async (req, res) => {
 
     // FINAL REPORT ROUTES
     if (method === "GET" && path === "/api/itemReport") {
-      return finalreportRoutes.itemReport(req, res);
+      const { startDate, endDate } = parsedUrl.query;
+      return finalreportRoutes.itemReport(req, res, startDate, endDate);
     }
 
     if (method == "GET" && path == "/api/userReport"){

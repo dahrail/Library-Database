@@ -650,6 +650,28 @@ function App() {
     setCurrentScreen("roomManagement");
   };
 
+  // const navigateToItemReport = async (startDate, endDate) => {
+  //   window.scrollTo(0, 0);
+  //   try {
+  //     const params = new URLSearchParams();
+  //     if (startDate) params.append('startDate', startDate);
+  //     if (endDate) params.append('endDate', endDate);
+
+  //     const response = await fetch(`/api/itemReport?${params.toString()}`);
+  //     const data = await response.json();
+
+  //     if (data.success) {
+  //       setReportData(data.data);
+  //       setCurrentScreen("dataReport");
+  //     } else {
+  //       alert("Failed to load item report: " + data.error);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading item report:", error);
+  //     alert("An error occurred while loading the item report.");
+  //   }
+  // };
+
   return (
     <div className="app-container">
       {/* Show TopBar on all screens */}
