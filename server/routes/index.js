@@ -173,14 +173,21 @@ const handleRequest = async (req, res) => {
       return reportRoutes.getFineReport(req, res);
     }
 
-    // FINAL REPORT ROUTES
     if (method === "GET" && path === "/api/itemReport") {
-      const { startDate, endDate } = parsedUrl.query;
+      const startDate = parsedUrl.query?.startDate;
+      const endDate = parsedUrl.query?.endDate;
       return finalreportRoutes.itemReport(req, res, startDate, endDate);
     }
 
-    if (method == "GET" && path == "/api/userReport"){
-      return finalreportRoutes.userReport(req,res);
+    if (method === "GET" && path === "/api/eventReport") {
+      console.log("Received event report request with query:", parsedUrl.query);
+      // Explicitly attach the parsed query to req.query
+      req.query = parsedUrl.query;
+      return reportRoutes.getEventReport(req, res);
+    }
+
+    if (method === "GET" && path === "/api/userReport") {
+      return finalreportRoutes.userReport(req, res);
     }
 
     // ROOM ROUTES

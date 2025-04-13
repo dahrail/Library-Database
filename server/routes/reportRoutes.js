@@ -87,8 +87,207 @@ const addRoom = async (req, res) => {
   }
 };
 
+const getEventReport = (req, res) => {
+  console.log("Fetching event report");
+  
+  // Make sure req.query exists before destructuring
+  const query = req.query || {};
+  
+  // Log received query parameters for debugging
+  console.log("Query parameters received:", query);
+  
+  // Get filter parameters from query string
+  const { 
+    startDate, 
+    endDate, 
+    category, 
+    roomId,
+    minAttendees,
+    maxAttendees
+  } = query;
+  
+  // Build WHERE clause based on filters
+  let whereConditions = [];
+  let queryParams = [];
+  
+  if (startDate) {
+    whereConditions.push("e.StartAt >= ?");
+    queryParams.push(startDate);
+  }
+  
+  if (endDate) {
+    whereConditions.push("e.EndAt <= ?");
+    queryParams.push(endDate);
+  }
+  
+  if (category && category !== 'all') {
+    whereConditions.push("e.EventCategory = ?");
+    queryParams.push(category);
+  }
+  
+  if (roomId && roomId !== 'all') {
+    whereConditions.push("e.RoomID = ?");
+    queryParams.push(roomId);
+  }
+  
+  // Construct the WHERE clause
+  const whereClause = whereConditions.length > 0 
+    ? `WHERE ${whereConditions.join(" AND ")}` 
+    : "";
+  
+  // Log the constructed WHERE clause for debugging
+  console.log("Constructed WHERE clause:", whereClause);
+  console.log("Query parameters:", queryParams);
+  
+  // Enhanced query with JOINs across multiple tables and more data points
+  const queryText = `
+    SELECT 
+      e.EventID,
+      e.EventName, 
+      e.EventCategory,
+      e.StartAt,
+      e.EndAt,
+      e.MaxAttendees,
+      e.EventDescription,
+      r.RoomID,
+      r.RoomNumber,
+      r.RoomName,
+      r.Capacity AS RoomCapacity,
+      u.FirstName AS OrganizerFirstName,
+      u.LastName AS OrganizerLastName,
+      COUNT(DISTINCT ea.EventAttendeeID) AS RegisteredAttendees,
+      COUNT(CASE WHEN ea.CheckedIn = 1 THEN ea.EventAttendeeID END) AS CheckedInAttendees,
+      
+      # Additional metrics for data report
+      DATEDIFF(e.EndAt, e.StartAt) AS EventDurationDays,
+      TIMESTAMPDIFF(HOUR, e.StartAt, e.EndAt) AS EventDurationHours,
+      
+      # Get the most recent check-in time
+      MAX(ea.CheckedInAt) AS LatestCheckIn,
+      
+      # Get the earliest check-in time
+      MIN(CASE WHEN ea.CheckedIn = 1 THEN ea.CheckedInAt ELSE NULL END) AS EarliestCheckIn
+      
+    FROM 
+      event e
+    LEFT JOIN ROOMS r ON e.RoomID = r.RoomID
+    LEFT JOIN user u ON e.UserID = u.UserID
+    LEFT JOIN event_attendee ea ON e.EventID = ea.EventID
+    ${whereClause}
+    GROUP BY 
+      e.EventID, e.EventName, e.EventCategory, e.StartAt, e.EndAt,
+      e.MaxAttendees, e.EventDescription, r.RoomID, r.RoomNumber, 
+      r.RoomName, r.Capacity, u.FirstName, u.LastName
+    ORDER BY e.StartAt DESC
+  `;
+
+  console.log("Executing SQL query:", queryText);
+
+  pool.query(queryText, queryParams, (err, results) => {
+    if (err) {
+      console.error("Error executing event report query:", err);
+      sendJsonResponse(res, 500, {
+        success: false,
+        error: "Failed to fetch event report: " + err.message,
+      });
+      return;
+    }
+
+    console.log(`Raw query results returned ${results ? results.length : 0} events`);
+    
+    if (!results || results.length === 0) {
+      console.log("No event data found in the database");
+      // Return empty data array rather than error when no results found
+      sendJsonResponse(res, 200, { success: true, data: [] });
+      return;
+    }
+
+    // Apply post-query filters that can't be done easily in SQL
+    let filteredResults = results;
+    
+    if (minAttendees !== undefined) {
+      const minValue = parseInt(minAttendees);
+      console.log(`Filtering by min attendees: ${minValue}`);
+      filteredResults = filteredResults.filter(
+        event => event.RegisteredAttendees >= minValue
+      );
+    }
+    
+    if (maxAttendees !== undefined) {
+      const maxValue = parseInt(maxAttendees);
+      console.log(`Filtering by max attendees: ${maxValue}`);
+      filteredResults = filteredResults.filter(
+        event => event.RegisteredAttendees <= maxValue
+      );
+    }
+
+    // Format dates for frontend display and calculate enhanced metrics
+    filteredResults = filteredResults.map(event => {
+      // Log each event for debugging
+      console.log(`Processing event ${event.EventID}: ${event.EventName}`);
+      
+      // Calculate attendance and check-in rates
+      const attendanceRate = event.MaxAttendees > 0 
+        ? parseFloat(((event.RegisteredAttendees / event.MaxAttendees) * 100).toFixed(1)) 
+        : 0;
+      
+      const checkInRate = event.RegisteredAttendees > 0 
+        ? parseFloat(((event.CheckedInAttendees / event.RegisteredAttendees) * 100).toFixed(1)) 
+        : 0;
+      
+      // Calculate room utilization
+      const roomUtilization = event.RoomCapacity > 0 && event.MaxAttendees > 0
+        ? parseFloat(((event.MaxAttendees / event.RoomCapacity) * 100).toFixed(1))
+        : 0;
+      
+      // Format event duration for display
+      let eventDuration = "Unknown";
+      if (event.EventDurationHours != null) {
+        if (event.EventDurationDays >= 1) {
+          eventDuration = `${event.EventDurationDays} day(s), ${event.EventDurationHours % 24} hr(s)`;
+        } else {
+          eventDuration = `${event.EventDurationHours} hour(s)`;
+        }
+      }
+      
+      return {
+        ...event,
+        StartAt: event.StartAt ? new Date(event.StartAt).toISOString() : null,
+        EndAt: event.EndAt ? new Date(event.EndAt).toISOString() : null,
+        EarliestCheckIn: event.EarliestCheckIn ? new Date(event.EarliestCheckIn).toISOString() : null,
+        LatestCheckIn: event.LatestCheckIn ? new Date(event.LatestCheckIn).toISOString() : null,
+        AttendanceRate: attendanceRate,
+        CheckInRate: checkInRate,
+        RoomUtilization: roomUtilization,
+        EventDuration: eventDuration
+      };
+    });
+
+    // Additional analytics for the report
+    const analytics = {
+      totalEvents: filteredResults.length,
+      totalRegistrations: filteredResults.reduce((sum, event) => sum + event.RegisteredAttendees, 0),
+      totalCheckIns: filteredResults.reduce((sum, event) => sum + event.CheckedInAttendees, 0),
+      averageAttendance: filteredResults.length > 0 
+        ? (filteredResults.reduce((sum, event) => sum + event.RegisteredAttendees, 0) / filteredResults.length).toFixed(1) 
+        : 0,
+      averageCheckInRate: filteredResults.length > 0 
+        ? (filteredResults.reduce((sum, event) => sum + event.CheckInRate, 0) / filteredResults.length).toFixed(1) 
+        : 0
+    };
+
+    console.log(`Event report generated with ${filteredResults.length} records after filtering`);
+    sendJsonResponse(res, 200, { 
+      success: true, 
+      data: filteredResults,
+      analytics: analytics 
+    });
+  });
+};
+
 module.exports = {
   getDataReport,
   getFineReport,
   addRoom,
+  getEventReport
 };
