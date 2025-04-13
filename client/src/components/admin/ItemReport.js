@@ -9,6 +9,11 @@ const ItemReport = () => {
   const [titleSearch, setTitleSearch] = useState('');
   const [authorSearch, setAuthorSearch] = useState('');
 
+  // New state for sorting: "none", "TotalBorrows", "TotalHolds"
+  const [sortBy, setSortBy] = useState('none'); 
+  // New state for sorting order: "asc", "desc"
+  const [sortOrder, setSortOrder] = useState('asc'); 
+
   useEffect(() => {
     const fetchItemReport = async () => {
       try {
@@ -33,6 +38,7 @@ const ItemReport = () => {
   useEffect(() => {
     let filtered = [...reportData];
 
+    // Filter by Item Type, Title, and Author as before
     if (itemTypeFilter !== 'All') {
       filtered = filtered.filter(item => item.ItemType === itemTypeFilter);
     }
@@ -49,8 +55,20 @@ const ItemReport = () => {
       );
     }
 
+    // Apply sorting based on the selected criteria (Total Borrows or Total Holds)
+    if (sortBy !== 'none') {
+      filtered.sort((a, b) => {
+        const aValue = sortBy === 'TotalBorrows' ? a.TotalBorrows : a.TotalHolds;
+        const bValue = sortBy === 'TotalBorrows' ? b.TotalBorrows : b.TotalHolds;
+
+        return sortOrder === 'asc' 
+          ? aValue - bValue 
+          : bValue - aValue;
+      });
+    }
+
     setFilteredData(filtered);
-  }, [itemTypeFilter, titleSearch, authorSearch, reportData]);
+  }, [itemTypeFilter, titleSearch, authorSearch, reportData, sortBy, sortOrder]);
 
   return (
     <div className="item-report">
@@ -90,6 +108,29 @@ const ItemReport = () => {
             onChange={e => setAuthorSearch(e.target.value)}
             placeholder="Search by author..."
           />
+        </label>
+
+        &nbsp;&nbsp;
+
+        {/* Sorting Criteria Dropdown */}
+        <label>
+          Sort by:&nbsp;
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <option value="none">None</option>
+            <option value="TotalBorrows">Total Borrows</option>
+            <option value="TotalHolds">Total Holds</option>
+          </select>
+        </label>
+
+        &nbsp;&nbsp;
+
+        {/* Sorting Order Dropdown */}
+        <label>
+          Order:&nbsp;
+          <select value={sortOrder} onChange={e => setSortOrder(e.target.value)} disabled={sortBy === 'none'}>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
         </label>
       </div>
 
