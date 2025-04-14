@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ItemReport from './ItemReport';
 import UserReport from './UserReport';
 import EventReport from './EventReport';
+import '../../styles/admin/AdminDashboard.css';
 
 const AdminDashboard = ({ navigateToHome }) => {
   const [activeReport, setActiveReport] = useState(null);
@@ -9,25 +10,64 @@ const AdminDashboard = ({ navigateToHome }) => {
   const renderReport = () => {
     switch (activeReport) {
       case 'itemReport':
-        return <ItemReport />;
       case 'userReport':
-        return <UserReport />;
       case 'eventReport':
-        return <EventReport />;
-      default:
         return (
           <div>
-            <h2>Reports</h2>
-            <button onClick={() => setActiveReport('itemReport')}>Item Report</button>
-            <button onClick={() => setActiveReport('userReport')}>User Report</button>
-            <button onClick={() => setActiveReport('eventReport')}>Event Report</button>
-            <button onClick={navigateToHome}>Back</button>
+            <div className="report-nav">
+              <button 
+                className="dashboard-button back-button" 
+                onClick={() => setActiveReport(null)}
+              >
+                Back to Reports
+              </button>
+            </div>
+            
+            {activeReport === 'itemReport' && <ItemReport />}
+            {activeReport === 'userReport' && <UserReport />}
+            {activeReport === 'eventReport' && <EventReport />}
+          </div>
+        );
+      default:
+        return (
+          <div className="admin-dashboard">
+            <h2>Library Reports Dashboard</h2>
+            <div className="admin-nav">
+              <button 
+                className={`dashboard-button`}
+                onClick={() => setActiveReport('itemReport')}
+              >
+                Item Report
+              </button>
+              <button 
+                className={`dashboard-button`}
+                onClick={() => setActiveReport('userReport')}
+              >
+                User Report
+              </button>
+              <button 
+                className={`dashboard-button`}
+                onClick={() => setActiveReport('eventReport')}
+              >
+                Event Report
+              </button>
+              <button 
+                className={`dashboard-button back-button`}
+                onClick={navigateToHome}
+              >
+                Back to Home
+              </button>
+            </div>
           </div>
         );
     }
   };
 
-  return <div>{renderReport()}</div>;
+  return (
+    <div className="admin-dashboard-container">
+      {renderReport()}
+    </div>
+  );
 };
 
 export default AdminDashboard;
