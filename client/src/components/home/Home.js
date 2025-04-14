@@ -233,12 +233,12 @@ const Home = ({
               <div className="menu-item-image-container">
                 <img
                   src="https://media.istockphoto.com/id/1157569047/photo/red-arrow-moving-up-over-graph-paper-background.jpg?s=612x612&w=0&k=20&c=h_mHs726U_Osy2IapdLYJCfZHQoh8oxfG_lJoG4SwXI="
-                  alt="Admin Dashboard"
+                  alt="Reports"
                   className="menu-image"
                 />
               </div>
               <div className="menu-item-content">
-                <h3>Admin Dashboard</h3>
+                <h3>Reports</h3>
                 <p>Access administrative tools and reports</p>
               </div>
             </div>

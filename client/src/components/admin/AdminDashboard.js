@@ -17,7 +17,7 @@ const AdminDashboard = ({ navigateToHome }) => {
       default:
         return (
           <div>
-            <h2>Admin Dashboard</h2>
+            <h2>Reports</h2>
             <button onClick={() => setActiveReport('itemReport')}>Item Report</button>
             <button onClick={() => setActiveReport('userReport')}>User Report</button>
             <button onClick={() => setActiveReport('eventReport')}>Event Report</button>
