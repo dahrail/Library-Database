@@ -241,6 +241,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin-top: 20px;
+  gap: 15px; /* Changed from 20px to 15px to match media page */
+  margin: 20px 0; /* Changed from margin-top: 20px to match media page margin */
+  flex-wrap: wrap; /* Added to handle smaller screens */
+}
+
+/* Admin button styles for Device management */
+.admin-button {
+  display: inline-block;
+  background-color: #1a1a1a; /* matches top bar color */
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 12px 30px;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 10px;
+  transition: background-color 0.2s ease, transform 0.1s;
+  text-align: center;
+}
+
+.admin-button:hover {
+  transform: translateY(-2px);
 }

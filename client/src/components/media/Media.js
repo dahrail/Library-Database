@@ -569,9 +569,9 @@ const Media = ({
         {/* Show "Add Media" button for admins */}
         {isLoggedIn && userData?.Role === "Admin" && (
           <div style={{ display: "flex", justifyContent: "center", gap: "15px", margin: "20px 0" }}>
-            <button onClick={navigateToAddMedia} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Add Media</button>
-            <button onClick={() => navigateToUpdateMediaList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Update Media</button>
-            <button onClick={() => navigateToDeleteMediaList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Delete Media</button>
+            <button onClick={navigateToAddMedia} className="admin-button">Add Media</button>
+            <button onClick={() => navigateToUpdateMediaList()} className="admin-button">Update Media</button>
+            <button onClick={() => navigateToDeleteMediaList()} className="admin-button">Delete Media</button>
           </div>
         )}
 

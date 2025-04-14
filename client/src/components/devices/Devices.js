@@ -376,10 +376,10 @@ const Devices = ({
 
           {/* Show "Add Device" and "Update Device" buttons for admins */}
           {isLoggedIn && userData?.Role === "Admin" && (
-            <div className="button-group">
-              <button onClick={navigateToAddDevice} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Add Device</button>
-              <button onClick={() => navigateToUpdateDeviceList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Update Device</button>
-              <button onClick={() => navigateToDeleteDeviceList()} className="btn-secondary" style={{ backgroundColor: "#212121", color: "white" }}>Delete Device</button>
+            <div style={{ display: "flex", justifyContent: "center", gap: "15px", margin: "20px 0" }}>
+              <button onClick={navigateToAddDevice} className="admin-button">Add Device</button>
+              <button onClick={() => navigateToUpdateDeviceList()} className="admin-button">Update Device</button>
+              <button onClick={() => navigateToDeleteDeviceList()} className="admin-button">Delete Device</button>
             </div>
           )}
 
