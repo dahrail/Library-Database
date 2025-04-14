@@ -366,22 +366,31 @@ const UserReport = () => {
           </div>
 
           <div className="filter-group">
-            <label>Last Name</label>
-            <input
-              type="text"
-              value={lastNameInput}
-              onChange={e => setLastNameInput(e.target.value)}
-              placeholder="Search by last name"
-            />
-          </div>
-
-          <div className="filter-group">
             <label>Title/Model</label>
             <input
               type="text"
               value={titleInput}
               onChange={e => setTitleInput(e.target.value)}
               placeholder="Search by title"
+            />
+          </div>
+
+          <div className="filter-group">
+            <label>Date Field</label>
+            <select value={dateFieldInput} onChange={e => setDateFieldInput(e.target.value)}>
+              <option value="BorrowedAt">Borrowed Date</option>
+              <option value="ReturnedAt">Returned Date</option>
+              <option value="DueAT">Due Date</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label>Last Name</label>
+            <input
+              type="text"
+              value={lastNameInput}
+              onChange={e => setLastNameInput(e.target.value)}
+              placeholder="Search by last name"
             />
           </div>
 
@@ -393,15 +402,6 @@ const UserReport = () => {
               onChange={e => setAuthorInput(e.target.value)}
               placeholder="Search by author"
             />
-          </div>
-
-          <div className="filter-group">
-            <label>Date Field</label>
-            <select value={dateFieldInput} onChange={e => setDateFieldInput(e.target.value)}>
-              <option value="BorrowedAt">Borrowed Date</option>
-              <option value="ReturnedAt">Returned Date</option>
-              <option value="DueAT">Due Date</option>
-            </select>
           </div>
 
           <div className="filter-group date-range-group">
