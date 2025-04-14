@@ -160,6 +160,31 @@
   font-weight: 500;
 }
 
+/* Modify the report card hover effect to use black */
+.report-container .report-section:hover,
+.report-card:hover,
+.card:hover,
+.report-item:hover {
+  border-color: #1d1d1f !important; /* Change to black instead of blue */
+  box-shadow: 0 0 0 2px rgba(29, 29, 31, 0.2) !important; /* Black shadow with opacity */
+}
+
+/* For any elements that might use box-shadow for the hover effect */
+.report-container .report-section:hover,
+.report-card:hover,
+.card:hover,
+.report-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important; /* Black shadow with opacity */
+}
+
+/* For any elements that might use bottom border for the hover effect */
+.report-container .report-section:hover,
+.report-card:hover,
+.card:hover,
+.report-item:hover {
+  border-bottom-color: #1d1d1f !important; /* Black border */
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .filter-group {
