@@ -526,6 +526,7 @@ const BookList = ({
                   <h3 style={styles.cardTitle}>{book.title}</h3>
                   <p style={styles.cardInfo}>Author: {book.author}</p>
                   <p style={styles.cardInfo}>Genre: {book.genre}</p>
+                  <p style={styles.cardInfo}>Available Copies: {book.copies}</p>
 
                   {/* Conditional button rendering based on availability and holds */}
                   {isLoggedIn ? (

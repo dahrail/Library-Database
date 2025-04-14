@@ -667,6 +667,7 @@ const Media = ({
                   <p style={styles.cardInfo}>Author: {item.Author}</p>
                   <p style={styles.cardInfo}>Genre: {item.Genre}</p>
                   <p style={styles.cardInfo}>Year: {item.PublicationYear}</p>
+                  <p style={styles.cardInfo}>Available Copies: {item.AvailableCopies}</p>
                   
                   {isLoggedIn ? (
                     item.AvailableCopies > 0 ? (

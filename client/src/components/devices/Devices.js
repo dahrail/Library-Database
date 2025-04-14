@@ -433,6 +433,7 @@ const Devices = ({
                     <h3 style={styles.cardTitle}>{device.Model}</h3>
                     <p style={styles.cardInfo}>Type: {device.Type}</p>
                     <p style={styles.cardInfo}>Brand: {device.Brand}</p>
+                    <p style={styles.cardInfo}>Available Copies: {device.AvailableCopies}</p>
                     {isLoggedIn ? (
                       device.AvailableCopies > 0 ? (
                         <button style={styles.button} onClick={() => navigateToBorrowConfirmation(device)}>Borrow</button>
