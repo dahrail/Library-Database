@@ -70,30 +70,27 @@ const Events = ({
 
   useEffect(() => {
     if (initialCategory) {
-      setFilters(prev => ({
-        ...prev,
-        eventCategory: initialCategory
-      }));
+      // Only apply a specific filter if initialCategory is meaningful
+      // (not 'all', which would show everything anyway)
+      if (initialCategory !== 'all') {
+        setFilters(prev => ({
+          ...prev,
+          eventCategory: initialCategory
+        }));
+      }
+    } else {
+      // Reset filters to show all events when no initialCategory is provided
+      // (this happens when navigating from the Home page)
+      setFilters({
+        dateFrom: '',
+        dateTo: '',
+        roomId: 'all',
+        searchTerm: '',
+        eventCategory: 'all',
+      });
     }
-  }, [initialCategory]);
-
-  const isUserRegisteredForEvent = (event) => {
-    if (!userData || !userData.UserID) return false;
-    if (eventAttendees.length > 0 && selectedEvent && selectedEvent.EventID === event.EventID) {
-      return eventAttendees.some(a => a.UserID === userData.UserID);
-    }
-    return event.userRegistered === true;
-  };
-
-  const isUserCheckedInForEvent = (event) => {
-    if (!userData || !userData.UserID || !isUserRegisteredForEvent(event)) return false;
-    if (eventAttendees.length > 0 && selectedEvent && selectedEvent.EventID === event.EventID) {
-      return eventAttendees.some(a => a.UserID === userData.UserID && a.CheckedIn === 1);
-    }
-    return event.userCheckedIn === true;
-  };
-
-  useEffect(() => {
+    
+    // Ensure the component fetches all events initially
     const fetchEvents = async () => {
       try {
         setLoading(true);
@@ -160,7 +157,7 @@ const Events = ({
 
     fetchEvents();
     fetchRooms();
-  }, [userData]);
+  }, [initialCategory, userData]);
 
   useEffect(() => {
     if (events.length > 0) {
@@ -171,6 +168,22 @@ const Events = ({
       }
     }
   }, [selectedCategory, events]);
+
+  const isUserRegisteredForEvent = (event) => {
+    if (!userData || !userData.UserID) return false;
+    if (eventAttendees.length > 0 && selectedEvent && selectedEvent.EventID === event.EventID) {
+      return eventAttendees.some(a => a.UserID === userData.UserID);
+    }
+    return event.userRegistered === true;
+  };
+
+  const isUserCheckedInForEvent = (event) => {
+    if (!userData || !userData.UserID || !isUserRegisteredForEvent(event)) return false;
+    if (eventAttendees.length > 0 && selectedEvent && selectedEvent.EventID === event.EventID) {
+      return eventAttendees.some(a => a.UserID === userData.UserID && a.CheckedIn === 1);
+    }
+    return event.userCheckedIn === true;
+  };
 
   const handleAddEvent = async (eventData) => {
     try {
