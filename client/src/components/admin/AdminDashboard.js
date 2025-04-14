@@ -15,6 +15,11 @@ const AdminDashboard = ({ navigateToHome }) => {
     eventReport: "https://remsoft.com/wp-content/uploads/2024/11/Report-database-SQL-Woodstock.jpg"
   };
 
+  // Navigation function to go back to reports dashboard
+  const navigateBackToReports = () => {
+    setActiveReport(null);
+  };
+
   const renderReport = () => {
     switch (activeReport) {
       case 'itemReport':
@@ -32,9 +37,9 @@ const AdminDashboard = ({ navigateToHome }) => {
             </div>
             
             <div className="report-content">
-              {activeReport === 'itemReport' && <ItemReport />}
-              {activeReport === 'userReport' && <UserReport />}
-              {activeReport === 'eventReport' && <EventReport />}
+              {activeReport === 'itemReport' && <ItemReport navigateBack={navigateBackToReports} />}
+              {activeReport === 'userReport' && <UserReport navigateBack={navigateBackToReports} />}
+              {activeReport === 'eventReport' && <EventReport navigateBack={navigateBackToReports} />}
             </div>
           </div>
         );

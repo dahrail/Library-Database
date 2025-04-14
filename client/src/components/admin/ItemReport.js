@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import '../../styles/admin/ItemReport.css';
 import DataReportChart from '../DataReportChart';
 
-const ItemReport = () => {
+const ItemReport = ({ navigateBack }) => {
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -155,6 +155,13 @@ const ItemReport = () => {
             <path d="M6 20v-4"></path>
           </svg>
           Chart View
+        </button>
+      </div>
+      
+      {/* Back to Reports Button */}
+      <div className="back-to-reports">
+        <button onClick={navigateBack} className="apply-button">
+          Back to Reports
         </button>
       </div>
 

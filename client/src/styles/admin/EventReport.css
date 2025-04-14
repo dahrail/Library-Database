@@ -450,6 +450,18 @@
   background-color: #f0f0f0;
 }
 
+/* Back to reports button */
+.back-to-reports {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+.back-to-reports .apply-button {
+  min-width: 180px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .summary-stats {
