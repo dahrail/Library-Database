@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import '../../styles/admin/reports.css';
+import '../../styles/admin/EventReport.css';
 import DataReportChart from '../DataReportChart';
 
 const EventReport = () => {
@@ -103,7 +103,7 @@ const EventReport = () => {
     if (!filteredData || filteredData.length === 0) {
       return { totalEvents: 0, totalAttendees: 0, avgAttendance: 0, avgCheckIn: 0 };
     }
-
+    
     const totalEvents = filteredData.length;
     const totalAttendees = filteredData.reduce((sum, event) => sum + (event.RegisteredAttendees || 0), 0);
     const avgAttendance = totalEvents > 0 ? (totalAttendees / totalEvents).toFixed(1) : 0;
@@ -124,7 +124,7 @@ const EventReport = () => {
     setSortBy(sortByInput);
     setSortOrder(sortOrderInput);
     setIsLoading(true);
-
+    
     try {
       // Build query string from filters
       const queryParams = new URLSearchParams();
@@ -286,180 +286,254 @@ const EventReport = () => {
     }
   };
 
-  const eventCategories = ['all', 'Workshops', 'Seminar', 'Conference'];
+  // Clear all filters
+  const clearFilters = () => {
+    setStartDateInput('');
+    setEndDateInput('');
+    setCategoryInput('all');
+    setRoomIdInput('all');
+    setEventNameInput('');
+    setSortByInput('none');
+    setSortOrderInput('asc');
+    
+    // Also apply the cleared filters
+    setStartDateFilter('');
+    setEndDateFilter('');
+    setCategoryFilter('all');
+    setRoomIdFilter('all');
+    setEventNameFilter('');
+    setSortBy('none');
+    setSortOrder('asc');
+    
+    // Refresh the data
+    applyFilters();
+  };
+
   const chartData = prepareChartData();
   const stats = calculateStats();
 
   return (
     <div className="event-report">
-      <h3>Event Report</h3>
+      <h2>Event Report</h2>
 
       {/* View toggle */}
-      <div className="view-toggle" style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', justifyContent: 'end' }}>
+      <div className="view-toggle">
         <button 
-          onClick={() => setViewMode('table')} 
-          style={{ 
-            padding: '0.5rem 1rem',
-            backgroundColor: viewMode === 'table' ? '#0071e3' : '#e1e1e1',
-            color: viewMode === 'table' ? 'white' : 'black',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
+          className={viewMode === 'table' ? 'active' : ''} 
+          onClick={() => setViewMode('table')}
         >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 10h18M3 14h18M3 18h18M3 6h18"></path>
+          </svg>
           Table View
         </button>
         <button 
-          onClick={() => setViewMode('chart')} 
-          style={{ 
-            padding: '0.5rem 1rem',
-            backgroundColor: viewMode === 'chart' ? '#0071e3' : '#e1e1e1',
-            color: viewMode === 'chart' ? 'white' : 'black',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
+          className={viewMode === 'chart' ? 'active' : ''} 
+          onClick={() => setViewMode('chart')}
         >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 20V10"></path>
+            <path d="M18 20V4"></path>
+            <path d="M6 20v-4"></path>
+          </svg>
           Chart View
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="filters" style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-        <label>
-          Event Name:&nbsp;
-          <input
-            type="text"
-            value={eventNameInput}
-            onChange={e => setEventNameInput(e.target.value)}
-            placeholder="Search by event name"
-          />
-        </label>
-
-        <label>
-          Start Date:&nbsp;
-          <input
-            type="date"
-            value={startDateInput}
-            onChange={e => setStartDateInput(e.target.value)}
-          />
-        </label>
-
-        <label>
-          End Date:&nbsp;
-          <input
-            type="date"
-            value={endDateInput}
-            onChange={e => setEndDateInput(e.target.value)}
-          />
-        </label>
-
-        <label>
-          Category:&nbsp;
-          <select value={categoryInput} onChange={e => setCategoryInput(e.target.value)}>
-            <option value="all">All Categories</option>
-            <option value="Workshops">Workshops</option>
-            <option value="Seminar">Seminar</option>
-            <option value="Conference">Conference</option>
-          </select>
-        </label>
-
-        <label>
-          Room:&nbsp;
-          <select value={roomIdInput} onChange={e => setRoomIdInput(e.target.value)}>
-            <option value="all">All Rooms</option>
-            {roomsList.map(room => (
-              <option key={room.RoomID} value={room.RoomID}>
-                {room.RoomName || room.RoomNumber}
-              </option>
-            ))}
-          </select>
-        </label>
-        
-        <label>
-          Sort by:&nbsp;
-          <select value={sortByInput} onChange={e => setSortByInput(e.target.value)}>
-            <option value="none">None</option>
-            <option value="RegisteredAttendees">Total Registrations</option>
-            <option value="CheckedInAttendees">Check-ins</option>
-            <option value="CheckInRate">Check-in Rate</option>
-            <option value="EventName">Event Name</option>
-            <option value="StartDate">Start Date</option>
-          </select>
-        </label>
-
-        <label>
-          Order:&nbsp;
-          <select
-            value={sortOrderInput}
-            onChange={e => setSortOrderInput(e.target.value)}
-            disabled={sortByInput === 'none'}
-          >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
-        </label>
-
-        <button onClick={applyFilters} style={{ height: 'fit-content', padding: '0.5rem 1rem' }}>
-          Generate Report
-        </button>
+      {/* Summary Statistics */}
+      <div className="summary-stats">
+        <div className="stat-box">
+          <div className="stat-value">{stats.totalEvents}</div>
+          <div className="stat-label">Total Events</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-value">{stats.totalAttendees}</div>
+          <div className="stat-label">Total Registrations</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-value">{stats.avgAttendance}</div>
+          <div className="stat-label">Avg. Attendees per Event</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-value">{stats.avgCheckIn}%</div>
+          <div className="stat-label">Avg. Check-in Rate</div>
+        </div>
       </div>
 
-      {/* Summary Statistics */}
-      <div className="summary-stats" style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        margin: '1rem 0', 
-        backgroundColor: '#f5f5f7', 
-        padding: '1rem', 
-        borderRadius: '8px' 
-      }}>
-        <div className="stat-box">
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalEvents}</div>
-          <div>Total Events</div>
+      {/* Filters */}
+      <div className="filters-panel">
+        <div className="filters-header">
+          <h3>Filter Options</h3>
+          <button onClick={clearFilters} className="clear-button">
+            Clear All
+          </button>
         </div>
-        <div className="stat-box">
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalAttendees}</div>
-          <div>Total Registrations</div>
+        
+        <div className="filters-grid">
+          <div className="filter-group">
+            <label>Event Name</label>
+            <input
+              type="text"
+              value={eventNameInput}
+              onChange={e => setEventNameInput(e.target.value)}
+              placeholder="Search by name"
+            />
+          </div>
+
+          <div className="filter-group">
+            <label>Category</label>
+            <select value={categoryInput} onChange={e => setCategoryInput(e.target.value)}>
+              <option value="all">All Categories</option>
+              <option value="Workshops">Workshops</option>
+              <option value="Seminar">Seminar</option>
+              <option value="Conference">Conference</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label>Room</label>
+            <select value={roomIdInput} onChange={e => setRoomIdInput(e.target.value)}>
+              <option value="all">All Rooms</option>
+              {roomsList.map(room => (
+                <option key={room.RoomID} value={room.RoomID}>
+                  {room.RoomName || room.RoomNumber}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label>Sort By</label>
+            <select value={sortByInput} onChange={e => setSortByInput(e.target.value)}>
+              <option value="none">None</option>
+              <option value="RegisteredAttendees">Total Registrations</option>
+              <option value="CheckedInAttendees">Check-ins</option>
+              <option value="CheckInRate">Check-in Rate</option>
+              <option value="EventName">Event Name</option>
+              <option value="StartDate">Start Date</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label>Order</label>
+            <select
+              value={sortOrderInput}
+              onChange={e => setSortOrderInput(e.target.value)}
+              disabled={sortByInput === 'none'}
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+
+          <div className="filter-group date-range-group">
+            <label>Date Range</label>
+            <div className="date-inputs">
+              <input
+                type="date"
+                value={startDateInput}
+                onChange={e => setStartDateInput(e.target.value)}
+                placeholder="From"
+              />
+              <span>to</span>
+              <input
+                type="date"
+                value={endDateInput}
+                onChange={e => setEndDateInput(e.target.value)}
+                placeholder="To"
+              />
+            </div>
+          </div>
         </div>
-        <div className="stat-box">
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.avgAttendance}</div>
-          <div>Avg. Attendees per Event</div>
-        </div>
-        <div className="stat-box">
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.avgCheckIn}%</div>
-          <div>Avg. Check-in Rate</div>
+
+        <div className="filters-actions">
+          <button onClick={applyFilters} className="apply-button">
+            Generate Report
+          </button>
         </div>
       </div>
 
       {/* Chart View */}
       {viewMode === 'chart' && (
         <div className="chart-container">
-          <div className="chart-controls" style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-            <label>
-              Chart Type:&nbsp;
-              <select value={chartType} onChange={e => setChartType(e.target.value)}>
-                <option value="bar">Bar Chart</option>
-                <option value="pie">Pie Chart</option>
-              </select>
-            </label>
-            <label>
-              Data to Show:&nbsp;
-              <select value={chartMetric} onChange={e => setChartMetric(e.target.value)}>
-                <option value="attendance">Attendance by Event</option>
-                <option value="checkInRate">Check-in Rate by Event</option>
-                <option value="categories">Attendance by Category</option>
-                <option value="roomUtilization">Events by Room</option>
-              </select>
-            </label>
+          <div className="chart-controls">
+            <h3>
+              {chartMetric === 'attendance' ? 'Event Attendance' : 
+               chartMetric === 'checkInRate' ? 'Check-in Rates' :
+               chartMetric === 'categories' ? 'Attendance by Category' :
+               'Events by Room'}
+            </h3>
+            <div className="chart-type-selector">
+              <label>
+                <input
+                  type="radio"
+                  name="chartType"
+                  checked={chartType === 'bar'}
+                  onChange={() => setChartType('bar')}
+                />
+                Bar Chart
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chartType"
+                  checked={chartType === 'pie'}
+                  onChange={() => setChartType('pie')}
+                />
+                Pie Chart
+              </label>
+            </div>
+            <div className="chart-type-selector">
+              <label>
+                <input
+                  type="radio"
+                  name="chartMetric"
+                  checked={chartMetric === 'attendance'}
+                  onChange={() => setChartMetric('attendance')}
+                />
+                Attendance
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chartMetric"
+                  checked={chartMetric === 'checkInRate'}
+                  onChange={() => setChartMetric('checkInRate')}
+                />
+                Check-in Rate
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chartMetric"
+                  checked={chartMetric === 'categories'}
+                  onChange={() => setChartMetric('categories')}
+                />
+                Categories
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chartMetric"
+                  checked={chartMetric === 'roomUtilization'}
+                  onChange={() => setChartMetric('roomUtilization')}
+                />
+                Rooms
+              </label>
+            </div>
           </div>
           
           {isLoading ? (
-            <p>Loading chart data...</p>
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading chart data...</p>
+            </div>
           ) : chartData.length === 0 ? (
-            <p>No data available for chart visualization.</p>
+            <div className="no-data-message">
+              <p>No data available for chart visualization.</p>
+            </div>
           ) : (
-            <div style={{ height: '400px' }}>
+            <div className="chart-wrapper">
               <DataReportChart reportData={chartData} chartType={chartType} />
             </div>
           )}
@@ -468,141 +542,133 @@ const EventReport = () => {
 
       {/* Table View */}
       {viewMode === 'table' && (
-        isLoading ? (
-          <p>Loading...</p>
-        ) : (
-          <table style={{ 
-            width: '100%', 
-            borderCollapse: 'separate',
-            borderSpacing: '0',
-            marginTop: '20px'
-          }}>
-            <thead>
-              <tr>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}></th> {/* Column for expand/collapse button */}
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Event ID</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Event Name</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Category</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Start Date</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Start Time</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>End Date</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>End Time</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Room</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Organizer</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'right' }}>Registered</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'right' }}>Checked In</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'right' }}>Max Capacity</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'right' }}>Attendance %</th>
-                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'right' }}>Check-in %</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.length === 0 ? (
-                <tr><td colSpan="15" style={{ padding: '15px', textAlign: 'center' }}>No results found.</td></tr>
-              ) : (
-                filteredData.map((event, index) => (
-                  <React.Fragment key={event.EventID}>
-                    <tr style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>
-                        <button 
-                          onClick={() => fetchEventAttendees(event.EventID)}
-                          style={{ 
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: '1.2rem',
-                            color: '#0071e3',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            transition: 'background-color 0.2s'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                        >
-                          {expandedEventId === event.EventID ? '−' : '+'}
-                        </button>
-                      </td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{event.EventID}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee', fontWeight: '500' }}>{event.EventName}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{event.EventCategory}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{formatDate(event.StartAt)}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{formatTime(event.StartAt)}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{formatDate(event.EndAt)}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{formatTime(event.EndAt)}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{event.RoomName || event.RoomNumber || 'N/A'}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{`${event.OrganizerFirstName || ''} ${event.OrganizerLastName || ''}`.trim() || 'N/A'}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee', textAlign: 'right' }}>{event.RegisteredAttendees}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee', textAlign: 'right' }}>{event.CheckedInAttendees}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee', textAlign: 'right' }}>{event.MaxAttendees}</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee', textAlign: 'right' }}>{event.AttendanceRate}%</td>
-                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee', textAlign: 'right' }}>{event.CheckInRate}%</td>
+        <div className="table-wrapper">
+          {isLoading ? (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading event data...</p>
+            </div>
+          ) : (
+            <>
+              <p className="results-count">{filteredData.length} events found</p>
+              <div className="table-container">
+                <table className="events-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>ID</th>
+                      <th>Event Name</th>
+                      <th>Category</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Location</th>
+                      <th>Organizer</th>
+                      <th className="numeric-column">Registered</th>
+                      <th className="numeric-column">Checked In</th>
+                      <th className="numeric-column">Capacity</th>
+                      <th className="numeric-column">Attendance %</th>
+                      <th className="numeric-column">Check-in %</th>
                     </tr>
-                    {expandedEventId === event.EventID && (
+                  </thead>
+                  <tbody>
+                    {filteredData.length === 0 ? (
                       <tr>
-                        <td colSpan="15" style={{ padding: '0' }}>
-                          <div style={{ 
-                            padding: '20px 25px', 
-                            backgroundColor: '#f8f9fa',
-                            borderTop: '1px solid #e9ecef',
-                            borderBottom: '1px solid #e9ecef',
-                            margin: '0 0 10px 0'
-                          }}>
-                            <h4 style={{ margin: '5px 0 20px 0', fontSize: '16px' }}>Attendee Details</h4>
-                            
-                            {loadingAttendees ? (
-                              <p style={{ padding: '10px 0', color: '#666' }}>Loading attendees...</p>
-                            ) : attendeeData[event.EventID]?.length > 0 ? (
-                              <table style={{ 
-                                width: '100%', 
-                                marginBottom: '10px', 
-                                borderCollapse: 'collapse', 
-                                fontSize: '14px' 
-                              }}>
-                                <thead>
-                                  <tr>
-                                    <th style={{ padding: '10px 15px', borderBottom: '2px solid #ddd', textAlign: 'left', backgroundColor: '#f1f1f1' }}>User ID</th>
-                                    <th style={{ padding: '10px 15px', borderBottom: '2px solid #ddd', textAlign: 'left', backgroundColor: '#f1f1f1' }}>Name</th>
-                                    <th style={{ padding: '10px 15px', borderBottom: '2px solid #ddd', textAlign: 'left', backgroundColor: '#f1f1f1' }}>Email</th>
-                                    <th style={{ padding: '10px 15px', borderBottom: '2px solid #ddd', textAlign: 'left', backgroundColor: '#f1f1f1' }}>Check-in Status</th>
-                                    <th style={{ padding: '10px 15px', borderBottom: '2px solid #ddd', textAlign: 'left', backgroundColor: '#f1f1f1' }}>Check-in Time</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {attendeeData[event.EventID].map((attendee, idx) => (
-                                    <tr key={attendee.EventAttendeeID} style={{ backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f9f9f9' }}>
-                                      <td style={{ padding: '10px 15px', borderBottom: '1px solid #eee' }}>{attendee.UserID}</td>
-                                      <td style={{ padding: '10px 15px', borderBottom: '1px solid #eee' }}>{attendee.FirstName} {attendee.LastName}</td>
-                                      <td style={{ padding: '10px 15px', borderBottom: '1px solid #eee' }}>{attendee.Email}</td>
-                                      <td style={{ padding: '10px 15px', borderBottom: '1px solid #eee' }}>
-                                        <span style={{
-                                          display: 'inline-block',
-                                          padding: '4px 8px',
-                                          borderRadius: '4px',
-                                          backgroundColor: attendee.CheckedIn === 1 ? '#d1fadf' : '#f3f4f6',
-                                          color: attendee.CheckedIn === 1 ? '#15803d' : '#6b7280',
-                                          fontSize: '13px'
-                                        }}>
-                                          {attendee.CheckedIn === 1 ? 'Checked In' : 'Registered'}
-                                        </span>
-                                      </td>
-                                      <td style={{ padding: '10px 15px', borderBottom: '1px solid #eee' }}>{formatCheckInTime(attendee.CheckedInAt)}</td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            ) : (
-                              <p style={{ padding: '10px 0', color: '#666' }}>No attendees found for this event.</p>
-                            )}
-                          </div>
-                        </td>
+                        <td colSpan="13" className="no-results">No events match your search criteria.</td>
                       </tr>
+                    ) : (
+                      filteredData.map((event, index) => (
+                        <React.Fragment key={event.EventID}>
+                          <tr className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                            <td>
+                              <button 
+                                className="toggle-button"
+                                onClick={() => fetchEventAttendees(event.EventID)}
+                                aria-label={expandedEventId === event.EventID ? 'Collapse' : 'Expand'}
+                              >
+                                {expandedEventId === event.EventID ? '−' : '+'}
+                              </button>
+                            </td>
+                            <td>{event.EventID}</td>
+                            <td className="primary-cell">{event.EventName}</td>
+                            <td>
+                              <span className="category-badge">
+                                {event.EventCategory || 'General'}
+                              </span>
+                            </td>
+                            <td>{formatDate(event.StartAt)}</td>
+                            <td>{formatTime(event.StartAt)} - {formatTime(event.EndAt)}</td>
+                            <td>{event.RoomName || event.RoomNumber || 'N/A'}</td>
+                            <td>{`${event.OrganizerFirstName || ''} ${event.OrganizerLastName || ''}`.trim() || 'N/A'}</td>
+                            <td className="numeric-column">{event.RegisteredAttendees}</td>
+                            <td className="numeric-column">{event.CheckedInAttendees}</td>
+                            <td className="numeric-column">{event.MaxAttendees}</td>
+                            <td className="numeric-column">{event.AttendanceRate}%</td>
+                            <td className="numeric-column">
+                              <div className="check-in-rate">
+                                <span className={
+                                  `check-in-rate-value ${
+                                    event.CheckInRate >= 70 ? 'high-rate' : 
+                                    event.CheckInRate >= 40 ? 'medium-rate' : 
+                                    'low-rate'
+                                  }`
+                                }>
+                                  {event.CheckInRate}%
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                          {expandedEventId === event.EventID && (
+                            <tr>
+                              <td colSpan="13" className="attendee-details">
+                                <h4>Attendee Details</h4>
+                                
+                                {loadingAttendees ? (
+                                  <div className="loading-container" style={{padding: "20px 0"}}>
+                                    <div className="loading-spinner"></div>
+                                    <p>Loading attendees...</p>
+                                  </div>
+                                ) : attendeeData[event.EventID]?.length > 0 ? (
+                                  <table className="attendees-table">
+                                    <thead>
+                                      <tr>
+                                        <th>User ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Check-in Time</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {attendeeData[event.EventID].map((attendee, idx) => (
+                                        <tr key={attendee.EventAttendeeID}>
+                                          <td>{attendee.UserID}</td>
+                                          <td>{attendee.FirstName} {attendee.LastName}</td>
+                                          <td>{attendee.Email}</td>
+                                          <td>
+                                            <span className={attendee.CheckedIn === 1 ? 'checked-in-tag' : 'registered-tag'}>
+                                              {attendee.CheckedIn === 1 ? 'Checked In' : 'Registered'}
+                                            </span>
+                                          </td>
+                                          <td>{formatCheckInTime(attendee.CheckedInAt)}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                ) : (
+                                  <p className="no-data-message">No attendees found for this event.</p>
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))
                     )}
-                  </React.Fragment>
-                ))
-              )}
-            </tbody>
-          </table>
-        )
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
       )}
     </div>
   );
