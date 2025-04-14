@@ -15,16 +15,18 @@ const EventReport = () => {
   const [endDateInput, setEndDateInput] = useState('');
   const [categoryInput, setCategoryInput] = useState('all');
   const [roomIdInput, setRoomIdInput] = useState('all');
-  const [minAttendeesInput, setMinAttendeesInput] = useState('');
-  const [maxAttendeesInput, setMaxAttendeesInput] = useState('');
+  const [eventNameInput, setEventNameInput] = useState('');
+  const [sortByInput, setSortByInput] = useState('none');
+  const [sortOrderInput, setSortOrderInput] = useState('asc');
 
   // Applied filters (used for actual filtering)
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [roomIdFilter, setRoomIdFilter] = useState('all');
-  const [minAttendeesFilter, setMinAttendeesFilter] = useState('');
-  const [maxAttendeesFilter, setMaxAttendeesFilter] = useState('');
+  const [eventNameFilter, setEventNameFilter] = useState('');
+  const [sortBy, setSortBy] = useState('none');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const [roomsList, setRoomsList] = useState([]);
   const [expandedEventId, setExpandedEventId] = useState(null);
@@ -118,8 +120,9 @@ const EventReport = () => {
     setEndDateFilter(endDateInput);
     setCategoryFilter(categoryInput);
     setRoomIdFilter(roomIdInput);
-    setMinAttendeesFilter(minAttendeesInput);
-    setMaxAttendeesFilter(maxAttendeesInput);
+    setEventNameFilter(eventNameInput);
+    setSortBy(sortByInput);
+    setSortOrder(sortOrderInput);
     setIsLoading(true);
 
     try {
@@ -129,8 +132,11 @@ const EventReport = () => {
       if (endDateInput) queryParams.append('endDate', endDateInput);
       if (categoryInput !== 'all') queryParams.append('category', categoryInput);
       if (roomIdInput !== 'all') queryParams.append('roomId', roomIdInput);
-      if (minAttendeesInput) queryParams.append('minAttendees', minAttendeesInput);
-      if (maxAttendeesInput) queryParams.append('maxAttendees', maxAttendeesInput);
+      if (eventNameInput) queryParams.append('eventName', eventNameInput);
+      if (sortByInput !== 'none') {
+        queryParams.append('sortBy', sortByInput);
+        queryParams.append('sortOrder', sortOrderInput);
+      }
       
       const queryString = queryParams.toString();
       console.log(`Sending request to /api/eventReport?${queryString}`);
@@ -146,8 +152,23 @@ const EventReport = () => {
       
       if (data.success) {
         console.log(`Retrieved ${data.data.length} event records`);
-        setReportData(data.data);
-        setFilteredData(data.data);
+        const serverData = data.data;
+        
+        // Apply client-side filtering for event name if needed
+        let filteredResult = [...serverData];
+        
+        // Add client-side event name filtering if the field has a value
+        if (eventNameInput) {
+          const searchTerm = eventNameInput.toLowerCase();
+          filteredResult = filteredResult.filter(event => 
+            (event.EventName && event.EventName.toLowerCase().includes(searchTerm)) || 
+            (event.EventDescription && event.EventDescription.toLowerCase().includes(searchTerm))
+          );
+          console.log(`Client-side filtered to ${filteredResult.length} events matching "${eventNameInput}"`);
+        }
+        
+        setReportData(serverData);
+        setFilteredData(filteredResult);
       } else {
         console.error('Failed to fetch event report:', data.error);
       }
@@ -163,10 +184,56 @@ const EventReport = () => {
     applyFilters();
   }, []);
 
+  // Apply client-side sorting if needed
+  useEffect(() => {
+    if (filteredData.length > 0 && sortBy !== 'none') {
+      const sorted = [...filteredData].sort((a, b) => {
+        let aValue, bValue;
+        
+        switch(sortBy) {
+          case 'RegisteredAttendees':
+            aValue = a.RegisteredAttendees || 0;
+            bValue = b.RegisteredAttendees || 0;
+            break;
+          case 'CheckedInAttendees':
+            aValue = a.CheckedInAttendees || 0;
+            bValue = b.CheckedInAttendees || 0;
+            break;
+          case 'CheckInRate':
+            aValue = a.CheckInRate || 0;
+            bValue = b.CheckInRate || 0;
+            break;
+          case 'EventName':
+            aValue = a.EventName || '';
+            bValue = b.EventName || '';
+            return sortOrder === 'asc' 
+              ? aValue.localeCompare(bValue) 
+              : bValue.localeCompare(aValue);
+          case 'StartDate':
+            aValue = new Date(a.StartAt || 0).getTime();
+            bValue = new Date(b.StartAt || 0).getTime();
+            break;
+          default:
+            return 0;
+        }
+        
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+      });
+      
+      setFilteredData(sorted);
+    }
+  }, [sortBy, sortOrder, reportData]);
+
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
+  };
+
+  // Format time for display
+  const formatTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
   };
 
   // Format check-in time
@@ -260,6 +327,16 @@ const EventReport = () => {
       {/* Filters */}
       <div className="filters" style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
         <label>
+          Event Name:&nbsp;
+          <input
+            type="text"
+            value={eventNameInput}
+            onChange={e => setEventNameInput(e.target.value)}
+            placeholder="Search by event name"
+          />
+        </label>
+
+        <label>
           Start Date:&nbsp;
           <input
             type="date"
@@ -298,25 +375,29 @@ const EventReport = () => {
             ))}
           </select>
         </label>
-
+        
         <label>
-          Min Attendees:&nbsp;
-          <input
-            type="number"
-            value={minAttendeesInput}
-            onChange={e => setMinAttendeesInput(e.target.value)}
-            min="0"
-          />
+          Sort by:&nbsp;
+          <select value={sortByInput} onChange={e => setSortByInput(e.target.value)}>
+            <option value="none">None</option>
+            <option value="RegisteredAttendees">Total Registrations</option>
+            <option value="CheckedInAttendees">Check-ins</option>
+            <option value="CheckInRate">Check-in Rate</option>
+            <option value="EventName">Event Name</option>
+            <option value="StartDate">Start Date</option>
+          </select>
         </label>
 
         <label>
-          Max Attendees:&nbsp;
-          <input
-            type="number"
-            value={maxAttendeesInput}
-            onChange={e => setMaxAttendeesInput(e.target.value)}
-            min="0"
-          />
+          Order:&nbsp;
+          <select
+            value={sortOrderInput}
+            onChange={e => setSortOrderInput(e.target.value)}
+            disabled={sortByInput === 'none'}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
         </label>
 
         <button onClick={applyFilters} style={{ height: 'fit-content', padding: '0.5rem 1rem' }}>
@@ -403,7 +484,9 @@ const EventReport = () => {
                 <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Event Name</th>
                 <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Category</th>
                 <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Start Date</th>
+                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Start Time</th>
                 <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>End Date</th>
+                <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>End Time</th>
                 <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Room</th>
                 <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Organizer</th>
                 <th style={{ padding: '12px 15px', borderBottom: '2px solid #ddd', textAlign: 'right' }}>Registered</th>
@@ -415,7 +498,7 @@ const EventReport = () => {
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
-                <tr><td colSpan="13" style={{ padding: '15px', textAlign: 'center' }}>No results found.</td></tr>
+                <tr><td colSpan="15" style={{ padding: '15px', textAlign: 'center' }}>No results found.</td></tr>
               ) : (
                 filteredData.map((event, index) => (
                   <React.Fragment key={event.EventID}>
@@ -443,7 +526,9 @@ const EventReport = () => {
                       <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee', fontWeight: '500' }}>{event.EventName}</td>
                       <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{event.EventCategory}</td>
                       <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{formatDate(event.StartAt)}</td>
+                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{formatTime(event.StartAt)}</td>
                       <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{formatDate(event.EndAt)}</td>
+                      <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{formatTime(event.EndAt)}</td>
                       <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{event.RoomName || event.RoomNumber || 'N/A'}</td>
                       <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee' }}>{`${event.OrganizerFirstName || ''} ${event.OrganizerLastName || ''}`.trim() || 'N/A'}</td>
                       <td style={{ padding: '12px 15px', borderBottom: '1px solid #eee', textAlign: 'right' }}>{event.RegisteredAttendees}</td>
@@ -454,7 +539,7 @@ const EventReport = () => {
                     </tr>
                     {expandedEventId === event.EventID && (
                       <tr>
-                        <td colSpan="13" style={{ padding: '0' }}>
+                        <td colSpan="15" style={{ padding: '0' }}>
                           <div style={{ 
                             padding: '20px 25px', 
                             backgroundColor: '#f8f9fa',
