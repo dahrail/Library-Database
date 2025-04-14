@@ -418,7 +418,7 @@ const UserReport = ({ navigateBack }) => {
             />
           </div>
 
-          <div className="filter-group date-range-group">
+          <div className="filter-group">
             <label>Date Range</label>
             <div className="date-inputs">
               <input
