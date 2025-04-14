@@ -493,6 +493,7 @@ const UserReport = () => {
                 <table className="loans-table">
                   <thead>
                     <tr>
+                      <th>User ID</th>
                       <th>User</th>
                       <th>Role</th>
                       <th>Item Type</th>
@@ -507,13 +508,13 @@ const UserReport = () => {
                   <tbody>
                     {filteredData.length === 0 ? (
                       <tr>
-                        <td colSpan="9" className="no-results">No loans match your search criteria.</td>
+                        <td colSpan="10" className="no-results">No loans match your search criteria.</td>
                       </tr>
                     ) : (
                       filteredData.map((item, index) => (
                         <tr key={index} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                          <td>{item.UserID}</td>
                           <td className="user-cell">
-                            <div className="user-id">{item.UserID}</div>
                             <div className="user-name">{item.FirstName} {item.LastName}</div>
                           </td>
                           <td>

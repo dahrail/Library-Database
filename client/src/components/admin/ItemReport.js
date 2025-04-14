@@ -316,6 +316,7 @@ const ItemReport = () => {
                   <thead>
                     <tr>
                       <th>Item Type</th>
+                      <th>Item ID</th>
                       <th>Title/Model</th>
                       <th>Author/Brand</th>
                       <th className="numeric-column">Total Borrows</th>
@@ -326,7 +327,7 @@ const ItemReport = () => {
                   </thead>
                   <tbody>
                     {filteredData.length === 0 ? (
-                      <tr><td colSpan="7" className="no-results">No items match your search criteria.</td></tr>
+                      <tr><td colSpan="8" className="no-results">No items match your search criteria.</td></tr>
                     ) : (
                       filteredData.map((item, index) => (
                         <tr key={index} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
@@ -335,6 +336,7 @@ const ItemReport = () => {
                               {item.ItemType}
                             </div>
                           </td>
+                          <td>{item.ItemID}</td>
                           <td className="primary-cell">{item.DisplayTitle}</td>
                           <td>{item.DisplayAuthor}</td>
                           <td className="numeric-column">{item.TotalBorrows}</td>
