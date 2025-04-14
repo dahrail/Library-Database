@@ -8,6 +8,7 @@ const itemReport = (req, res, startDate, endDate) => {
   console.log("Received startDate and endDate:", startDate, endDate);
 
   if (startDate && endDate) {
+    endDate += ' 23:59:59';
     dateFilterLoan = `AND l.BorrowedAt BETWEEN '${startDate}' AND '${endDate}'`;
     dateFilterHold = `AND h.RequestAT BETWEEN '${startDate}' AND '${endDate}'`;
   }

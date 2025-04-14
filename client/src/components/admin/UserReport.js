@@ -5,7 +5,7 @@ const UserReport = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Live input fields (unapplied filters)
+  // Live inputs
   const [roleInput, setRoleInput] = useState('');
   const [itemTypeInput, setItemTypeInput] = useState('');
   const [statusInput, setStatusInput] = useState('');
@@ -13,8 +13,11 @@ const UserReport = () => {
   const [lastNameInput, setLastNameInput] = useState('');
   const [titleInput, setTitleInput] = useState('');
   const [authorInput, setAuthorInput] = useState('');
+  const [dateFieldInput, setDateFieldInput] = useState('BorrowedAt');
+  const [dateFromInput, setDateFromInput] = useState('');
+  const [dateToInput, setDateToInput] = useState('');
 
-  // Actual applied filters (used to filter data)
+  // Applied filters
   const [roleFilter, setRoleFilter] = useState('');
   const [itemTypeFilter, setItemTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -22,6 +25,9 @@ const UserReport = () => {
   const [lastNameFilter, setLastNameFilter] = useState('');
   const [titleFilter, setTitleFilter] = useState('');
   const [authorFilter, setAuthorFilter] = useState('');
+  const [dateFieldFilter, setDateFieldFilter] = useState('');
+  const [dateFromFilter, setDateFromFilter] = useState('');
+  const [dateToFilter, setDateToFilter] = useState('');
 
   useEffect(() => {
     const fetchUserReport = async () => {
@@ -77,6 +83,23 @@ const UserReport = () => {
       );
     }
 
+    if (dateFieldFilter) {
+      filtered = filtered.filter(item => {
+        const dateValue = item[dateFieldFilter];
+        if (!dateValue) return false;
+
+        const date = new Date(dateValue);
+        const from = dateFromFilter ? new Date(dateFromFilter + "T00:00:00") : null; // Start of day
+        const to = dateToFilter ? new Date(dateToFilter + "T23:59:59.999") : null;   // End of day
+
+        // Ensure the date is within the from and to range (inclusive of both)
+        if (from && date < from) return false;
+        if (to && date > to) return false;
+
+        return true;
+      });
+    }
+
     setFilteredData(filtered);
   }, [
     roleFilter,
@@ -86,6 +109,9 @@ const UserReport = () => {
     lastNameFilter,
     titleFilter,
     authorFilter,
+    dateFieldFilter,
+    dateFromFilter,
+    dateToFilter,
     reportData
   ]);
 
@@ -93,7 +119,6 @@ const UserReport = () => {
   const uniqueItemTypes = [...new Set(reportData.map(item => item.ItemType))];
   const uniqueStatuses = [...new Set(reportData.map(item => item.Status))];
 
-  // When user clicks Generate Report
   const applyFilters = () => {
     setRoleFilter(roleInput);
     setItemTypeFilter(itemTypeInput);
@@ -102,6 +127,9 @@ const UserReport = () => {
     setLastNameFilter(lastNameInput);
     setTitleFilter(titleInput);
     setAuthorFilter(authorInput);
+    setDateFieldFilter(dateFieldInput);
+    setDateFromFilter(dateFromInput);
+    setDateToFilter(dateToInput);
   };
 
   return (
@@ -177,6 +205,32 @@ const UserReport = () => {
             value={authorInput}
             onChange={e => setAuthorInput(e.target.value)}
             placeholder="Search Author"
+          />
+        </label>
+
+        <label>
+          Date Field:
+          <select value={dateFieldInput} onChange={e => setDateFieldInput(e.target.value)}>
+            <option value="BorrowedAt">Borrowed At</option>
+            <option value="ReturnedAt">Returned At</option>
+          </select>
+        </label>
+
+        <label>
+          From:
+          <input
+            type="date"
+            value={dateFromInput}
+            onChange={e => setDateFromInput(e.target.value)}
+          />
+        </label>
+
+        <label>
+          To:
+          <input
+            type="date"
+            value={dateToInput}
+            onChange={e => setDateToInput(e.target.value)}
           />
         </label>
 
