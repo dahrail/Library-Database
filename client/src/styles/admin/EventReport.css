@@ -43,9 +43,9 @@
 }
 
 .view-toggle button.active {
-  background-color: #0071e3;
+  background-color: #6e6e73;
   color: #ffffff;
-  border-color: #0071e3;
+  border-color: #6e6e73;
 }
 
 .view-toggle button:hover:not(.active) {
@@ -183,7 +183,7 @@
 }
 
 .apply-button {
-  background-color: #0071e3;
+  background-color: #6e6e73;
   color: white;
   border: none;
   border-radius: 12px;
@@ -195,7 +195,7 @@
 }
 
 .apply-button:hover {
-  background-color: #0077ED;
+  background-color: #505055;
 }
 
 /* Table styling */
