@@ -83,8 +83,8 @@
 /* Menu container grid layout */
 .menu-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 35px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 25px;
   margin-bottom: 40px;
   justify-content: center;
 }
@@ -179,6 +179,12 @@
 }
 
 /* Responsive adjustments */
+@media (max-width: 1200px) {
+  .menu-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .hero-title {
     font-size: 42px;
@@ -189,7 +195,13 @@
   }
   
   .menu-container {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-container {
+    grid-template-columns: 1fr;
   }
 }

@@ -250,9 +250,11 @@ const Devices = ({
     },
     grid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", // Adjusted min column width for 3 columns
+      gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", // Changed from 350px to 280px to match book cards
       gap: "35px",
       marginBottom: "40px",
+      maxWidth: "1200px",  // Added max-width constraint for larger screens
+      margin: "0 auto",    // Center the grid
     },
     card: {
       borderRadius: "18px",
