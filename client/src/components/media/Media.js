@@ -21,6 +21,7 @@ const Media = ({
   const initialRenderRef = useRef(true);
   const [currentAction, setCurrentAction] = useState(null); // "borrow" or "hold"
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchMediaItems = async () => {
     try {
@@ -55,6 +56,7 @@ const Media = ({
     if (mediaItems.length > 0) {
       let items = [...mediaItems];
       
+      // Filter by category first
       if (selectedCategory !== "all") {
         const categoryMap = {
           "music": "Music",
@@ -65,6 +67,16 @@ const Media = ({
         const dbCategory = categoryMap[selectedCategory];
         items = items.filter(item => 
           item.Type && item.Type === dbCategory
+        );
+      }
+      
+      // Then filter by search query
+      if (searchQuery.trim() !== '') {
+        const query = searchQuery.toLowerCase();
+        items = items.filter(item => 
+          (item.Title && item.Title.toLowerCase().includes(query)) ||
+          (item.Author && item.Author.toLowerCase().includes(query)) ||
+          (item.Genre && item.Genre.toLowerCase().includes(query))
         );
       }
       
@@ -81,7 +93,7 @@ const Media = ({
         initialRenderRef.current = false;
       }
     }
-  }, [selectedCategory, mediaItems]);
+  }, [selectedCategory, mediaItems, searchQuery]);
 
   const styles = {
     container: {
@@ -179,10 +191,7 @@ const Media = ({
       overflow: "hidden",
       backgroundColor: "#fff",
       boxShadow: "0 8px 30px rgba(0, 0, 0, 0.08)",
-      opacity: "1",
-      transform: "translateY(0)",
       cursor: "pointer",
-      animation: "none",
     },
     cardImage: {
       width: "100%",
@@ -270,6 +279,39 @@ const Media = ({
       marginTop: "15px",
       textAlign: "center",
       opacity: "0.9",
+    },
+  };
+
+  const searchBarStyles = {
+    searchContainer: {
+      display: "flex",
+      justifyContent: "center",
+      width: "100%",
+      maxWidth: "600px",
+      margin: "20px auto",
+      position: "relative",
+    },
+    searchInput: {
+      width: "100%",
+      padding: "12px 20px",
+      paddingLeft: "40px",
+      fontSize: "17px",
+      border: "none",
+      borderRadius: "8px",
+      backgroundColor: "#f5f5f7",
+      color: "#1d1d1f",
+      transition: "all 0.2s ease",
+      outline: "none",
+    },
+    searchIcon: {
+      position: "absolute",
+      left: "12px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      width: "18px",
+      height: "18px",
+      color: "#86868b",
+      pointerEvents: "none",
     },
   };
 
@@ -559,6 +601,23 @@ const Media = ({
           >
             Video Games
           </button>
+        </div>
+        
+        {/* Search Bar */}
+        <div style={searchBarStyles.searchContainer}>
+          <span style={searchBarStyles.searchIcon}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input
+            type="text"
+            placeholder="Search by title, author, or genre"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={searchBarStyles.searchInput}
+          />
         </div>
       </div>
 

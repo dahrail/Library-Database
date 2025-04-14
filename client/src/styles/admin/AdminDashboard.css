@@ -350,6 +350,10 @@ table tr:hover {
   background-color: #2d2d2f;
 }
 
+.btn-back:hover {
+  text-decoration: none;
+}
+
 /* Animation for the dashboard */
 @keyframes fadeInDown {
   from {

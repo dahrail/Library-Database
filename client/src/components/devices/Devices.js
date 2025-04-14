@@ -24,6 +24,7 @@ const Devices = ({
   const initialRenderRef = useRef(true);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [currentAction, setCurrentAction] = useState(null); // "borrow" or "hold"
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch devices from the backend
   const fetchDevices = async () => {
@@ -59,13 +60,26 @@ const Devices = ({
     }
   }, [initialCategory]);
 
-  // Filter devices by category
+  // Filter devices by category and search query
   useEffect(() => {
-    if (devices.length > 0) {
+    if (devices && devices.length > 0) {
       let filtered = [...devices];
+      
+      // Filter by category first
       if (selectedCategory !== "all") {
         filtered = filtered.filter((device) => device.Type === selectedCategory);
       }
+      
+      // Then filter by search query
+      if (searchQuery.trim() !== '') {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(device => 
+          (device.Brand && device.Brand.toLowerCase().includes(query)) ||
+          (device.Model && device.Model.toLowerCase().includes(query)) ||
+          (device.Type && device.Type.toLowerCase().includes(query))
+        );
+      }
+      
       setDisplayedDevices(filtered);
 
       // Trigger animation on category change
@@ -80,7 +94,7 @@ const Devices = ({
         initialRenderRef.current = false;
       }
     }
-  }, [selectedCategory, devices]);
+  }, [selectedCategory, devices, searchQuery]);
 
   const navigateToBorrowConfirmation = (device) => {
     setSelectedDevice(device);
@@ -300,6 +314,40 @@ const Devices = ({
     },
   };
 
+  // Apple-styled search bar styles
+  const searchBarStyles = {
+    searchContainer: {
+      display: "flex",
+      justifyContent: "center",
+      width: "100%",
+      maxWidth: "600px",
+      margin: "20px auto",
+      position: "relative",
+    },
+    searchInput: {
+      width: "100%",
+      padding: "12px 20px",
+      paddingLeft: "40px",
+      fontSize: "17px",
+      border: "none",
+      borderRadius: "8px",
+      backgroundColor: "#f5f5f7",
+      color: "#1d1d1f",
+      transition: "all 0.2s ease",
+      outline: "none",
+    },
+    searchIcon: {
+      position: "absolute",
+      left: "12px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      width: "18px",
+      height: "18px",
+      color: "#86868b",
+      pointerEvents: "none",
+    },
+  };
+
   return (
     <div style={styles.container}>
       {currentAction === "borrow" && selectedDevice ? (
@@ -345,6 +393,23 @@ const Devices = ({
                   {category === "all" ? "All Devices" : category.charAt(0).toUpperCase() + category.slice(1)}
                 </button>
               ))}
+            </div>
+            
+            {/* Search Bar */}
+            <div style={searchBarStyles.searchContainer}>
+              <span style={searchBarStyles.searchIcon}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </span>
+              <input
+                type="text"
+                placeholder="Search by brand, model, or type"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={searchBarStyles.searchInput}
+              />
             </div>
           </div>
 

@@ -19,7 +19,7 @@ const BookList = ({
   const [displayedBooks, setDisplayedBooks] = useState([]);
   const initialRenderRef = useRef(true);
   const [imageLoadingStatus, setImageLoadingStatus] = useState({});
-  
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Use the initialCategory prop on mount
   useEffect(() => {
@@ -29,11 +29,12 @@ const BookList = ({
     }
   }, [initialCategory]);
 
-  // Filter books by category
+  // Filter books by category and search query
   useEffect(() => {
     if (books.length > 0) {
       let filteredBooks = [...books];
       
+      // Filter by category first
       if (selectedCategory !== "all") {
         filteredBooks = filteredBooks.filter(book => 
           book.genre && typeof book.genre === 'string' && 
@@ -42,9 +43,19 @@ const BookList = ({
         );
       }
       
+      // Then filter by search query
+      if (searchQuery.trim() !== '') {
+        const query = searchQuery.toLowerCase();
+        filteredBooks = filteredBooks.filter(book => 
+          (book.title && book.title.toLowerCase().includes(query)) ||
+          (book.author && book.author.toLowerCase().includes(query)) ||
+          (book.genre && book.genre.toLowerCase().includes(query))
+        );
+      }
+      
       setDisplayedBooks(filteredBooks);
       
-      // Only apply animation on initial render or category change
+      // Only apply animation on initial render or category/search change
       if (!initialRenderRef.current) {
         // Add a class to the container to trigger a CSS animation
         const container = document.querySelector('#books-grid');
@@ -60,7 +71,7 @@ const BookList = ({
     } else {
       setDisplayedBooks([]);
     }
-  }, [selectedCategory, books]);
+  }, [selectedCategory, books, searchQuery]);
 
   // Add CSS styles for animations to document head
   useEffect(() => {
@@ -336,6 +347,40 @@ const BookList = ({
     }
   };
 
+  // Apple-styled search bar styles
+  const searchBarStyles = {
+    searchContainer: {
+      display: "flex",
+      justifyContent: "center",
+      width: "100%",
+      maxWidth: "600px",
+      margin: "20px auto",
+      position: "relative",
+    },
+    searchInput: {
+      width: "100%",
+      padding: "12px 20px",
+      paddingLeft: "40px",
+      fontSize: "17px",
+      border: "none",
+      borderRadius: "8px",
+      backgroundColor: "#f5f5f7",
+      color: "#1d1d1f",
+      transition: "all 0.2s ease",
+      outline: "none",
+    },
+    searchIcon: {
+      position: "absolute",
+      left: "12px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      width: "18px",
+      height: "18px",
+      color: "#86868b",
+      pointerEvents: "none",
+    },
+  };
+
   const handleLoanClick = (book) => {
     // Only process if user is logged in
     if (!isLoggedIn) {
@@ -415,6 +460,23 @@ const BookList = ({
               {genre === 'all' ? 'All Books' : genre}
             </button>
           ))}
+        </div>
+        
+        {/* Search Bar */}
+        <div style={searchBarStyles.searchContainer}>
+          <span style={searchBarStyles.searchIcon}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input
+            type="text"
+            placeholder="Search by title, author, or genre"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={searchBarStyles.searchInput}
+          />
         </div>
       </div>
 
