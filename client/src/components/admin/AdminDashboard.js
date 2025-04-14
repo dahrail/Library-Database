@@ -98,7 +98,7 @@ const AdminDashboard = ({ navigateToHome }) => {
             
             <div className="back-home-container">
               <button 
-                className="report-nav-button back-button"
+                className="btn-back"
                 onClick={navigateToHome}
               >
                 Back to Home
