@@ -384,7 +384,14 @@ const UserReport = ({ navigateBack }) => {
 
           <div className="filter-group">
             <label>Date Field</label>
-            <select value={dateFieldInput} onChange={e => setDateFieldInput(e.target.value)}>
+            <select value={dateFieldInput} onChange={e => {
+              setDateFieldInput(e.target.value);
+              if (e.target.value === '') {
+                setDateFromInput('');
+                setDateToInput('');
+              }
+            }}>
+              <option value="">None</option>
               <option value="BorrowedAt">Borrowed Date</option>
               <option value="ReturnedAt">Returned Date</option>
               <option value="DueAT">Due Date</option>
@@ -419,6 +426,7 @@ const UserReport = ({ navigateBack }) => {
                 value={dateFromInput}
                 onChange={e => setDateFromInput(e.target.value)}
                 placeholder="From"
+                disabled={!dateFieldInput}
               />
               <span>to</span>
               <input
@@ -426,6 +434,7 @@ const UserReport = ({ navigateBack }) => {
                 value={dateToInput}
                 onChange={e => setDateToInput(e.target.value)}
                 placeholder="To"
+                disabled={!dateFieldInput}
               />
             </div>
           </div>
