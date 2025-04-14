@@ -38,6 +38,8 @@ import DeleteMedia from "./components/media/DeleteMedia";
 import DeleteBookList from "./components/books/DeleteBookList";
 import DeleteBook from "./components/books/DeleteBook";
 import RoomManagement from "./components/rooms/RoomManagement"; // Import the RoomManagement component
+import PayFine from "./components/fines/PayFine";
+
 
 // Import API service
 import API from "./services/api";
@@ -63,6 +65,7 @@ function App() {
     "mystery/Thriller",
     "all Books",
   ]); // Add default genres
+  const [selectedFine, setSelectedFine] = useState(null);
 
   // Add state variables for initial categories
   const [initialBookCategory, setInitialBookCategory] = useState(null);
@@ -294,6 +297,11 @@ function App() {
   const navigateToAddMedia = () => {
     window.scrollTo(0, 0);
     setCurrentScreen("addMedia");
+  };
+
+  const navigateToPayFine = (fine) => {
+    setSelectedFine(fine);
+    setCurrentScreen("payfine");
   };
 
   // Room reservation navigation with optional category parameter
@@ -816,7 +824,30 @@ function App() {
       )}
 
       {currentScreen === "fines" && (
-        <FineList fines={fines} navigateToHome={navigateToHome} />
+        <FineList 
+          fines={fines} 
+          navigateToHome={navigateToHome} 
+          navigateToPayFine={navigateToPayFine} 
+        />
+      )}
+
+      {currentScreen === "payfine" && selectedFine && (
+        <PayFine
+          fine={selectedFine}
+          navigateToFines={() => setCurrentScreen("fines")}
+          onConfirmPayment={(paymentInfo) => {
+            // Update fines state so that the fine with matching FineID is marked as "Paid"
+            setFines(prevFines =>
+              prevFines.map(fine =>
+                fine.FineID === paymentInfo.fine.FineID
+                  ? { ...fine, Status: "Paid" }
+                  : fine
+              )
+            );
+            // Return to fines list page
+            setCurrentScreen("fines");
+          }}
+        />
       )}
 
       {currentScreen === "dataReport" && (

@@ -1,6 +1,9 @@
 const http = require("http");
+const url = require("url");
 const { releaseExpiredReservations } = require("./routes/roomRoutes");
 const handleRequest = require("./routes/index");
+const { updateFinePayment } = require("./routes/fineRoutes");
+const { sendJsonResponse } = require("./utils/requestUtils");
 
 // Import the sendEmail function
 const sendEmail = require("../sendEmail");
@@ -9,36 +12,32 @@ const sendEmail = require("../sendEmail");
 const { startEmailNotificationService } = require("./emailNotificationService");
 
 const server = http.createServer(async (req, res) => {
-  // Log the incoming request
-  const { method, url } = req;
-  console.log(`${method} ${url}`);
+  // Parse the incoming URL for routing
+  const parsedUrl = url.parse(req.url, true);
+  const { method, url: reqUrl } = req;
+  console.log(`${method} ${reqUrl}`);
+
+  if (req.method === "POST" && parsedUrl.pathname === "/api/payFine") {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk;
+    });
+    req.on("end", () => {
+      try {
+        req.body = JSON.parse(body);
+      } catch (error) {
+        return sendJsonResponse(res, 400, { success: false, error: "Invalid JSON" });
+      }
+      // Call updateFinePayment from fineRoutes.js
+      updateFinePayment(req, res);
+    });
+    return;
+  }
   
   // No need to duplicate routes here - let routes/index.js handle everything
   // Process the request with our main handler
   await handleRequest(req, res);
 });
-
-// Example of how you might use it in the server
-// You can add this to the appropriate route handlers
-/*
-app.post('/api/some-route', async (req, res) => {
-  try {
-    // Your route logic here
-    
-    // Send an email notification
-    await sendEmail(
-      'recipient@example.com',
-      'Subject of the email',
-      'Body text of the email'
-    );
-    
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-*/
 
 // Schedule the task to run every minute
 setInterval(() => {
@@ -53,7 +52,7 @@ server.listen(PORT, () => {
   // Start the email notification service when the server starts
   const emailService = startEmailNotificationService();
   
-  // Optionally, set up graceful shutdown to stop the email service
+  // Set up graceful shutdown to stop the email service
   process.on("SIGINT", () => {
     console.log("Shutting down server...");
     emailService.stop();

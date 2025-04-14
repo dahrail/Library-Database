@@ -7,6 +7,7 @@ const getUserFines = (req, res, userId) => {
   
   const query = `
     SELECT 
+      F.FineID,
       L.ItemType, 
       B.Title, 
       B.Author, 
@@ -19,7 +20,7 @@ const getUserFines = (req, res, userId) => {
     JOIN FINE AS F ON L.LoanID = F.LoanID
     WHERE L.UserID = ?
   `;
-
+  
   pool.query(query, [userId], (err, results) => {
     if (err) {
       console.error('Error fetching fines for user:', err);
@@ -32,6 +33,23 @@ const getUserFines = (req, res, userId) => {
   });
 };
 
-module.exports = {
-  getUserFines
+const updateFinePayment = (req, res) => {
+  const { fineId } = req.body;
+  console.log("Received fineId:", fineId);
+  if (!fineId) {
+    return sendJsonResponse(res, 400, { success: false, error: "fineId is required" });
+  }
+  const query = "UPDATE fine SET PaymentStatus = 'Paid' WHERE FineID = ?";
+  pool.query(query, [fineId], (err, results) => {
+    if (err) {
+      console.error("Error updating fine:", err);
+      return sendJsonResponse(res, 500, { success: false, error: "Database error" });
+    }
+    if (results.affectedRows === 0) {
+      return sendJsonResponse(res, 404, { success: false, error: "Fine not found" });
+    }
+    sendJsonResponse(res, 200, { success: true });
+  });
 };
+
+module.exports = { getUserFines, updateFinePayment };
