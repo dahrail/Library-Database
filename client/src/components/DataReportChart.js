@@ -19,7 +19,7 @@ const DataReportChart = ({ reportData, chartType }) => {
     // Configure chart based on type
     const labels = reportData.map(item => item.label);
     const values = reportData.map(item => item.value);
-    const colors = generateColors(reportData.length);
+    const colors = generateColors(reportData);
 
     // Create chart configuration
     const config = {
@@ -86,13 +86,25 @@ const DataReportChart = ({ reportData, chartType }) => {
     };
   }, [reportData, chartType]);
 
-  // Generate random colors for pie chart segments
-  const generateColors = (count) => {
+  // Generate colors for chart segments with specific colors for Paid/Unpaid fines
+  const generateColors = (reportItems) => {
     const colors = [];
-    for (let i = 0; i < count; i++) {
-      const hue = (i * 137.5) % 360; // Use golden angle approximation for better distribution
-      colors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+    
+    for (let i = 0; i < reportItems.length; i++) {
+      const item = reportItems[i];
+      
+      // Assign specific colors to Paid/Unpaid fines
+      if (item.label === 'Paid Fines') {
+        colors.push('rgba(46, 125, 50, 0.7)'); // Green for Paid
+      } else if (item.label === 'Unpaid Fines') {
+        colors.push('rgba(211, 47, 47, 0.7)'); // Red for Unpaid
+      } else {
+        // Use the golden angle approximation for other items
+        const hue = (i * 137.5) % 360;
+        colors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+      }
     }
+    
     return colors;
   };
 

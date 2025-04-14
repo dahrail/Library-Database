@@ -1,5 +1,6 @@
 const pool = require("../config/db");
 const { sendJsonResponse } = require("../utils/requestUtils");
+const url = require("url"); // Add this import
 
 const getDataReport = (req, res) => {
   const query = `
@@ -26,37 +27,146 @@ const getDataReport = (req, res) => {
   });
 };
 
-const getFineReport = (req, res) => {
-  console.log("Fetching fine report");
-
-  const query = `
-    SELECT 
-      U.FirstName, 
-      U.LastName, 
-      B.Title, 
-      B.Author, 
+const fineReport = (req, res) => {
+  // Parse query parameters directly from URL
+  const parsedUrl = url.parse(req.url, true);
+  const queryParams = parsedUrl.query;
+  
+  console.log("Fetching fine report with query:", queryParams);
+  
+  // Extract filter parameters from parsed URL
+  const { startDate, endDate, paymentStatus, role, itemType } = queryParams;
+  
+  console.log("Date filter parameters:", { startDate, endDate });
+  
+  // Define the date conditions to be applied to each part of the UNION
+  let dateConditions = [];
+  if (startDate) {
+    // Ensure proper date format for MySQL
+    dateConditions.push(`DATE(L.BorrowedAt) >= '${startDate}'`);
+  }
+  if (endDate) {
+    // Ensure proper date format for MySQL and include the entire day
+    dateConditions.push(`DATE(L.BorrowedAt) <= '${endDate}'`);
+  }
+  
+  const dateCondition = dateConditions.length > 0 
+    ? `AND ${dateConditions.join(' AND ')}` 
+    : '';
+  
+  console.log("Generated date condition:", dateCondition);
+  
+  // Role condition if provided
+  let roleCondition = '';
+  if (role && role !== 'All') {
+    roleCondition = `AND U.Role = '${role}'`;
+  }
+  
+  // Item type condition - we'll handle this later with a WHERE clause on the final result
+  let itemTypeWhere = '';
+  if (itemType && itemType !== 'All') {
+    itemTypeWhere = `WHERE ItemType = '${itemType}'`;
+  }
+  
+  // Payment status condition - applied at the end
+  let paymentStatusWhere = '';
+  if (paymentStatus && paymentStatus !== 'All') {
+    if (itemType && itemType !== 'All') {
+      paymentStatusWhere = `AND Status = '${paymentStatus}'`;
+    } else {
+      paymentStatusWhere = `WHERE Status = '${paymentStatus}'`;
+    }
+  }
+  
+  let baseQuery = `
+    SELECT
+      F.FineID AS FineID,
+      U.FirstName,
+      U.LastName,
+      U.Role,
+      'Book' AS ItemType,
+      B.Title,
+      B.Author,
       DATE_FORMAT(L.BorrowedAt, '%Y-%m-%d %H:%i:%s') AS BorrowedAt, 
-      DATE_FORMAT(L.DueAT, '%Y-%m-%d %H:%i:%s') AS DueAt, 
+      DATE_FORMAT(L.DueAT, '%Y-%m-%d %H:%i:%s') AS DueAT, 
       F.Amount, 
       F.PaymentStatus AS Status
     FROM FINE AS F
     JOIN LOAN AS L ON F.LoanID = L.LoanID
     JOIN USER AS U ON L.UserID = U.UserID
     JOIN BOOK AS B ON L.ItemID = B.BookID
+    WHERE L.ItemType = 'Book'
+    ${dateCondition}
+    ${roleCondition}
+    
+    UNION ALL
+    
+    SELECT
+      F.FineID AS FineID,
+      U.FirstName,
+      U.LastName,
+      U.Role,
+      'Media' AS ItemType,
+      M.Title,
+      M.Author,
+      DATE_FORMAT(L.BorrowedAt, '%Y-%m-%d %H:%i:%s') AS BorrowedAt, 
+      DATE_FORMAT(L.DueAT, '%Y-%m-%d %H:%i:%s') AS DueAT, 
+      F.Amount, 
+      F.PaymentStatus AS Status
+    FROM FINE AS F
+    JOIN LOAN AS L ON F.LoanID = L.LoanID
+    JOIN USER AS U ON L.UserID = U.UserID
+    JOIN MEDIA AS M ON L.ItemID = M.MediaID
+    WHERE L.ItemType = 'Media'
+    ${dateCondition}
+    ${roleCondition}
+    
+    UNION ALL
+    
+    SELECT
+      F.FineID AS FineID,
+      U.FirstName,
+      U.LastName,
+      U.Role,
+      'Device' AS ItemType,
+      D.Model AS Title,
+      D.Brand AS Author,
+      DATE_FORMAT(L.BorrowedAt, '%Y-%m-%d %H:%i:%s') AS BorrowedAt, 
+      DATE_FORMAT(L.DueAT, '%Y-%m-%d %H:%i:%s') AS DueAT, 
+      F.Amount, 
+      F.PaymentStatus AS Status
+    FROM FINE AS F
+    JOIN LOAN AS L ON F.LoanID = L.LoanID
+    JOIN USER AS U ON L.UserID = U.UserID
+    JOIN DEVICE AS D ON L.ItemID = D.DeviceID
+    WHERE L.ItemType = 'Device'
+    ${dateCondition}
+    ${roleCondition}
   `;
-
-  pool.query(query, (err, results) => {
+  
+  // Apply the final filters for item type and payment status
+  if (itemTypeWhere || paymentStatusWhere) {
+    baseQuery = `SELECT * FROM (${baseQuery}) AS combined_results ${itemTypeWhere} ${paymentStatusWhere}`;
+  }
+  
+  console.log("Executing SQL query:", baseQuery);
+  
+  pool.query(baseQuery, (err, results) => {
     if (err) {
       console.error("Error executing fine report query:", err);
-      sendJsonResponse(res, 500, {
+      return sendJsonResponse(res, 500, {
         success: false,
-        error: "Failed to fetch fine report",
+        error: "Failed to fetch fine report: " + err.message,
       });
-      return;
     }
-
-    console.log(`Fine report generated with ${results.length} records`);
-    sendJsonResponse(res, 200, { success: true, data: results });
+    
+    console.log(`Fine report generated with ${results?.length || 0} records`);
+    
+    // Always return success, with empty array if no results
+    sendJsonResponse(res, 200, { 
+      success: true, 
+      data: results || [] 
+    });
   });
 };
 
@@ -287,7 +397,7 @@ const getEventReport = (req, res) => {
 
 module.exports = {
   getDataReport,
-  getFineReport,
+  getFineReport: fineReport,  // alias fineReport as getFineReport
   addRoom,
   getEventReport
 };

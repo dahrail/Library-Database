@@ -189,6 +189,29 @@ const API = {
     }
   },
 
+  // Reports API calls
+  getFineReport: async (startDate, endDate, paymentStatus, role, itemType) => {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (paymentStatus && paymentStatus !== 'All') params.append('paymentStatus', paymentStatus);
+      if (role && role !== 'All') params.append('role', role);
+      if (itemType && itemType !== 'All') params.append('itemType', itemType);
+
+      const response = await fetch(`/api/fineReport?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching fine report:', error);
+      throw error;
+    }
+  },
+
   // Events API calls
   getEvents: async () => {
     try {

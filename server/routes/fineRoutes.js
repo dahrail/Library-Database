@@ -9,15 +9,27 @@ const getUserFines = (req, res, userId) => {
     SELECT 
       F.FineID,
       L.ItemType, 
-      B.Title, 
-      B.Author, 
+      CASE 
+        WHEN L.ItemType = 'Book' THEN B.Title
+        WHEN L.ItemType = 'Media' THEN M.Title
+        WHEN L.ItemType = 'Device' THEN D.Model
+        ELSE 'Unknown Item'
+      END AS Title,
+      CASE 
+        WHEN L.ItemType = 'Book' THEN B.Author
+        WHEN L.ItemType = 'Media' THEN M.Author
+        WHEN L.ItemType = 'Device' THEN D.Brand
+        ELSE 'Unknown Creator'
+      END AS Author,
       L.BorrowedAt, 
       L.DueAT, 
       F.Amount, 
       F.PaymentStatus AS Status
     FROM LOAN AS L
-    JOIN BOOK AS B ON L.ItemID = B.BookID
     JOIN FINE AS F ON L.LoanID = F.LoanID
+    LEFT JOIN BOOK AS B ON L.ItemType = 'Book' AND L.ItemID = B.BookID
+    LEFT JOIN MEDIA AS M ON L.ItemType = 'Media' AND L.ItemID = M.MediaID
+    LEFT JOIN DEVICE AS D ON L.ItemType = 'Device' AND L.ItemID = D.DeviceID
     WHERE L.UserID = ?
   `;
   
