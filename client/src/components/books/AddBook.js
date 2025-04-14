@@ -51,7 +51,6 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
       // If a valid BookID is provided, treat the add as successful
       if (data.BookID) {
         alert("Book added successfully!");
-        onAddBook(newBook);
         navigateToHome();
       } 
     } catch (error) {
