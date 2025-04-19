@@ -113,5 +113,3 @@ BookFinder provides a comprehensive library management system with the following
 - Fine calculation based on overdue items
 - Payment processing and tracking
 - Outstanding balance reporting
-
-The system ensures data integrity through MySQL database constraints and triggers, while providing an intuitive interface for all user types through a responsive React frontend.
