@@ -245,10 +245,10 @@ const RoomManagement = ({
                   <td style={styles.tableCell}>{reservation.RoomName}</td>
                   <td style={styles.tableCell}>{reservation.RoomNumber}</td>
                   <td style={styles.tableCell}>
-                    {new Date(reservation.StartAT).toLocaleString()}
+                    {new Date(reservation.StartAt).toLocaleString()}
                   </td>
                   <td style={styles.tableCell}>
-                    {new Date(reservation.EndAT).toLocaleString()}
+                    {new Date(reservation.EndAt).toLocaleString()}
                   </td>
                   <td style={styles.tableCell}>
                     <button
