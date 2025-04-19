@@ -25,10 +25,16 @@ const AddEventForm = ({ onSubmit, rooms, onCancel, bookedRooms = [] }) => {
     onSubmit(eventData);
   };
   
-  // Format datetime for input fields
+  // Format datetime for input fields - modified to handle timezones better
   const formatDateTimeForInput = (date) => {
     const d = new Date(date || new Date());
-    return d.toISOString().slice(0, 16); // Format as YYYY-MM-DDTHH:MM
+    
+    // Format for datetime-local input (YYYY-MM-DDThh:mm) with timezone adjustment
+    const tzoffset = d.getTimezoneOffset() * 60000; // offset in milliseconds
+    const localISOTime = (new Date(d.getTime() - tzoffset)).toISOString().slice(0, 16);
+    
+    console.log("Formatted date for input:", localISOTime);
+    return localISOTime;
   };
   
   // Update eventCategories to match the database enum values
@@ -39,7 +45,13 @@ const AddEventForm = ({ onSubmit, rooms, onCancel, bookedRooms = [] }) => {
   ];
   
   // Filter out rooms that are already booked
-  const availableRooms = rooms.filter(room => !bookedRooms.includes(room.RoomID));
+  const availableRooms = rooms.filter(room => {
+    const isAvailable = !bookedRooms.includes(room.RoomID);
+    console.log(`Room ${room.RoomID} (${room.RoomName || room.RoomNumber}): available=${isAvailable}`);
+    return isAvailable;
+  });
+  
+  console.log("Total rooms:", rooms.length, "Available rooms:", availableRooms.length);
   
   return (
     <div className="add-event-form-container">
