@@ -81,8 +81,8 @@ Deployed Website: http://170.9.244.55:3000/
 BookFinder provides a comprehensive library management system with the following features:
 
 ### User Authentication and Role Management
-- **Students**: Can borrow one item per category with a one-week checkout period
-- **Faculty**: Can borrow two items per category with a two-week checkout period
+- **Students**: Can borrow two item per category with a one-week checkout period
+- **Faculty**: Can borrow three items per category with a two-week checkout period
 - **Admins**: Have complete control over inventory management and reporting
 
 ### Inventory Management
