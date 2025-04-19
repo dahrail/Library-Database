@@ -77,16 +77,20 @@ function App() {
   const [selectedDevice, setSelectedDevice] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = sessionStorage.getItem("user"); // Changed from localStorage to sessionStorage
     if (storedUser) {
       try {
-        const user = JSON.parse(storedUser);
+        const userData = JSON.parse(storedUser);
+        setUserData(userData);
         setIsLoggedIn(true);
-        setUserData(user);
-      } catch (error) {
-        console.error("Failed to parse stored user data:", error);
-        localStorage.removeItem("user"); // Clear invalid data
+      } catch (e) {
+        console.error("Error parsing stored user data:", e);
+        sessionStorage.removeItem("user"); // Remove invalid data
       }
+    } else {
+      // No stored user data found, ensure user is logged out
+      setUserData(null);
+      setIsLoggedIn(false);
     }
   }, []);
 
@@ -195,7 +199,7 @@ function App() {
       const data = await API.login(email, password);
 
       if (data.success) {
-        localStorage.setItem("user", JSON.stringify(data.user));
+        sessionStorage.setItem("user", JSON.stringify(data.user)); // Changed from localStorage to sessionStorage
         setIsLoggedIn(true);
         setUserData(data.user);
         // Redirect directly to homepage (Library services)
@@ -211,7 +215,7 @@ function App() {
 
   // Logout handler
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user"); // Changed from localStorage to sessionStorage
     setIsLoggedIn(false);
     setUserData(null);
     setCurrentScreen("landing");
