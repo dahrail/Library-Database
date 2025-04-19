@@ -69,26 +69,15 @@ const Events = ({
   });
 
   useEffect(() => {
-    if (initialCategory) {
-      // Only apply a specific filter if initialCategory is meaningful
-      // (not 'all', which would show everything anyway)
-      if (initialCategory !== 'all') {
-        setFilters(prev => ({
-          ...prev,
-          eventCategory: initialCategory
-        }));
-      }
-    } else {
-      // Reset filters to show all events when no initialCategory is provided
-      // (this happens when navigating from the Home page)
-      setFilters({
-        dateFrom: '',
-        dateTo: '',
-        roomId: 'all',
-        searchTerm: '',
-        eventCategory: 'all',
-      });
-    }
+    // Reset filters to default values regardless of initialCategory
+    // This ensures events will always display on first load
+    setFilters({
+      dateFrom: '',
+      dateTo: '',
+      roomId: 'all',
+      searchTerm: '',
+      eventCategory: initialCategory && initialCategory !== 'all' ? initialCategory : 'all',
+    });
     
     // Ensure the component fetches all events initially
     const fetchEvents = async () => {

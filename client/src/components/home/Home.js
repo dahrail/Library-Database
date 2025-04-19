@@ -214,7 +214,7 @@ const Home = ({
             </div>
           ) : null}
 
-          <div className="menu-item" onClick={navigateToEvents}>
+          <div className="menu-item" onClick={() => navigateToEvents("all")}>
             <div className="menu-item-image-container">
               <img
                 src="/images/events.jpg"
