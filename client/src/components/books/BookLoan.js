@@ -9,9 +9,9 @@ const BookLoan = ({ selectedBook, userData, handleBorrowBook, navigateToBooks })
       <h2>Borrow Confirmation</h2>
       <p>Are you sure you want to borrow this book? </p>
       <div className="book-details">
-        <p><strong>Type:</strong> {selectedBook.title}</p>
-        <p><strong>Model:</strong> {selectedBook.author}</p>
-        <p><strong>Brand:</strong> {selectedBook.genre}</p>
+        <p><strong>Title:</strong> {selectedBook.title}</p>
+        <p><strong>Author:</strong> {selectedBook.author}</p>
+        <p><strong>Genre:</strong> {selectedBook.genre}</p>
         <p><strong>Borrow Duration:</strong> {borrowDays} days</p>
       </div>
       <div className="button-group">
