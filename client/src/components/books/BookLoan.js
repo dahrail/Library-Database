@@ -2,7 +2,7 @@ import React from 'react';
 import '../../styles/books/Books.css';
 
 const BookLoan = ({ selectedBook, userData, handleBorrowBook, navigateToBooks }) => {
-  const borrowDays = userData.Role === "Faculty" ? 14 : 7;
+  const borrowDays = userData.Role === "Student" ? 7 : 14;
 
   return (
     <div className="content-container">

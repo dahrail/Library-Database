@@ -2,7 +2,7 @@ import React from "react";
 import "../../styles/devices/devices.css";
 
 const DeviceBorrowConfirmation = ({ device, userData, handleConfirmBorrow, navigateToDevices }) => {
-  const borrowDays = userData.Role === "Faculty" ? 14 : 7;
+  const borrowDays = userData.Role === "Student" ? 7 : 14;
 
   return (
     <div className="content-container">
