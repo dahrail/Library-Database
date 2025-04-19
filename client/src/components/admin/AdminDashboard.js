@@ -117,7 +117,7 @@ const AdminDashboard = ({ navigateToHome }) => {
                 </div>
                 <div className="report-card-content">
                   <h3>Fines Report</h3>
-                  <p>Displays fines data (no data available yet)</p>
+                  <p>Displays fines data</p>
                 </div>
               </div>
             </div>
