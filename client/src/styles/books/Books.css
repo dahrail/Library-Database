@@ -226,3 +226,16 @@
   display: flex;
   align-items: center;
 }
+
+/* Error styling */
+.input-error {
+  border: 1px solid #ff4d4d !important;
+  background-color: #fff0f0;
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 0.8rem;
+  margin-top: 3px;
+  font-weight: 500;
+}
