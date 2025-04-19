@@ -67,6 +67,25 @@ const borrowBook = async (req, res) => {
         error: "You have borrowed this item. You can only borrow this item once." 
       });
     }
+    
+    // Determine loan period based on user role
+    const roleQuery = `SELECT Role FROM USER WHERE UserID = ?`;
+    const [user] = await pool.promise().query(roleQuery, [UserID]);
+    const role = user[0]?.Role || "Student";
+    const borrowLimit = role === "Student" ? 2 : 3;
+
+    // Chekc if the user meet the borrow limit
+    const activeLoansQuery = `
+      SELECT COUNT(*) AS activeLoans
+      FROM LOAN
+      WHERE UserID = ? AND ItemType = 'Book' AND ReturnedAt IS NULL
+    `;
+    const [activeLoans] = await pool.promise().query(activeLoansQuery, [UserID]);
+
+    // If the number of active loans exceeds the borrow limit, reject the request
+    if (activeLoans[0].activeLoans >= borrowLimit) {
+      return sendJsonResponse(res, 400, { success: false, error: `You can only borrow up to ${borrowLimit} book at a time.` });
+    }
 
     // Check if there is an active hold on this book
     const holdQuery = `
