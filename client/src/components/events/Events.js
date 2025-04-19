@@ -981,9 +981,24 @@ const Events = ({
   }, []);
 
   const getBookedRoomIDs = (excludeEventId = null) => {
-    return events
-      .filter(event => event.EventID !== excludeEventId)
+    const now = new Date();
+    console.log("Current time:", now.toISOString());
+    
+    const bookedRooms = events
+      .filter(event => {
+        const eventEndTime = new Date(event.EndAt);
+        const isPastEvent = eventEndTime <= now;
+        const isExcluded = event.EventID === excludeEventId;
+        
+        console.log(`Event ${event.EventID} (${event.EventName}): EndAt=${eventEndTime.toISOString()}, isPast=${isPastEvent}, excluded=${isExcluded}`);
+        
+        // Only include event if it's not past and not the event being edited
+        return !isPastEvent && !isExcluded;
+      })
       .map(event => event.RoomID);
+    
+    console.log("Currently booked room IDs:", bookedRooms);
+    return bookedRooms;
   };
 
   if (currentAction === 'detail' && selectedEvent) {
