@@ -66,12 +66,12 @@
 }
 
 .cta-button.primary {
-  background-color: #0071e3;
+  background-color: #808080; /* Changed from blue (#0071e3) to gray */
   color: white;
 }
 
 .cta-button.primary:hover {
-  background-color: #0077ed;
+  background-color: #666666; /* Changed from #0077ed to a darker gray */
   transform: scale(1.05);
 }
 
@@ -213,7 +213,7 @@
   border-radius: 30px;
   font-size: 18px;
   font-weight: 500;
-  background-color: #0071e3;
+  background-color: #808080; /* Changed from #0071e3 to gray */
   color: white;
   border: none;
   cursor: pointer;
@@ -221,7 +221,7 @@
 }
 
 .promo-button:hover {
-  background-color: #0077ed;
+  background-color: #666666; /* Changed from #0077ed to a darker gray */
   transform: scale(1.05);
 }
 
