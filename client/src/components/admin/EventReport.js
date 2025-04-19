@@ -563,7 +563,7 @@ const EventReport = ({ navigateBack }) => {
                   <thead>
                     <tr>
                       <th></th>
-                      <th>ID</th>
+                      <th>EventID</th>
                       <th>Event Name</th>
                       <th>Category</th>
                       <th>Date</th>
