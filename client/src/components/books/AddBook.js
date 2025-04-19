@@ -16,18 +16,42 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
     ShelfLocation: ''
   });
   const [coverImage, setCoverImage] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewBook(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error for this field when user starts typing again
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
   };
 
   const handleFileChange = (e) => {
     setCoverImage(e.target.files[0]);
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Validate ISBN has exactly 13 digits
+    if (!/^\d{13}$/.test(newBook.ISBN)) {
+      newErrors.ISBN = "ISBN must be exactly 13 digits";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+    
     // Create a FormData to include text fields and (if provided) the file
     const formData = new FormData();
     // Ensure numeric fields are correctly sent
@@ -110,7 +134,15 @@ const AddBook = ({ onAddBook, navigateToHome }) => {
           </div>
           <div className="form-group">
             <label>ISBN:</label>
-            <input type="text" name="ISBN" value={newBook.ISBN} onChange={handleChange} required />
+            <input 
+              type="text" 
+              name="ISBN" 
+              value={newBook.ISBN} 
+              onChange={handleChange} 
+              required 
+              className={errors.ISBN ? "input-error" : ""}
+            />
+            {errors.ISBN && <div className="error-message">{errors.ISBN}</div>}
           </div>
         </div>
 
