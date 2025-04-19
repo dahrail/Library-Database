@@ -254,11 +254,17 @@ const handleRequest = async (req, res) => {
       return eventRoutes.updateEvent(req, res, eventId);
     }
 
-    // Add this new route handler for deleting events
     if (method === "DELETE" && path.match(/^\/api\/events\/(\d+)$/)) {
       const eventId = path.match(/^\/api\/events\/(\d+)$/)[1];
       req.params = { eventId };
       return eventRoutes.deleteEvent(req, res, eventId);
+    }
+
+    // Add route to get all events a user is registered for
+    if (method === "GET" && path.match(/^\/api\/events\/user\/(\d+)\/registered$/)) {
+      const userId = path.match(/^\/api\/events\/user\/(\d+)\/registered$/)[1];
+      req.params = { userId };
+      return eventRoutes.getUserRegisteredEvents(req, res);
     }
 
     // If we reach here, no route was matched

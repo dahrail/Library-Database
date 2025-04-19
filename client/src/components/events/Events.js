@@ -1021,6 +1021,7 @@ const Events = ({
         event={selectedEvent}
         onConfirm={handleConfirmRegistration}
         onCancel={() => setCurrentAction(null)}
+        userData={userData}
       />
     );
   }

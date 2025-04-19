@@ -714,6 +714,42 @@ const updateEvent = async (req, res, eventId) => {
   }
 };
 
+// Get all events a user is registered for
+const getUserRegisteredEvents = (req, res) => {
+  const userId = req.params.userId;
+  
+  if (!userId) {
+    return sendJsonResponse(res, 400, {
+      success: false,
+      error: "UserID is required"
+    });
+  }
+  
+  const query = `
+    SELECT e.*, r.RoomNumber, ea.CheckedIn
+    FROM event e
+    JOIN event_attendee ea ON e.EventID = ea.EventID
+    LEFT JOIN rooms r ON e.RoomID = r.RoomID
+    WHERE ea.UserID = ?
+    ORDER BY e.StartAt ASC
+  `;
+  
+  pool.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("Error fetching user registered events:", err);
+      return sendJsonResponse(res, 500, {
+        success: false,
+        error: "Failed to fetch registered events: " + err.message
+      });
+    }
+    
+    sendJsonResponse(res, 200, {
+      success: true,
+      events: results
+    });
+  });
+};
+
 module.exports = {
   getAllEvents,
   addEvent,
@@ -721,5 +757,6 @@ module.exports = {
   getEventAttendees,
   checkInForEvent,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  getUserRegisteredEvents
 };
