@@ -184,10 +184,12 @@ const EventDetail = ({
                 <span>Registered:</span>
                 <span>{localAttendeeCount.total} of {event.MaxAttendees} {isFull ? '(Full)' : ''}</span>
               </div>
-              <div className="capacity-row">
-                <span>Checked In:</span>
-                <span>{localAttendeeCount.checked} attendees</span>
-              </div>
+              {userData?.Role === 'Admin' && (
+                <div className="capacity-row">
+                  <span>Checked In:</span>
+                  <span>{localAttendeeCount.checked} attendees</span>
+                </div>
+              )}
               <div className="capacity-row">
                 <span>Availability:</span>
                 <span className={isFull ? 'full-event' : (remainingSpots <= 3 ? 'low-spots' : 'available-spots')}>
