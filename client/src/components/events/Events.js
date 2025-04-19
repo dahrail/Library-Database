@@ -158,6 +158,12 @@ const Events = ({
     }
   }, [selectedCategory, events]);
 
+  // Add this new useEffect to reset the view when navigation happens through TopBar
+  useEffect(() => {
+    // Reset the current action when initialCategory changes (TopBar navigation)
+    setCurrentAction(null);
+  }, [initialCategory]);
+
   const isUserRegisteredForEvent = (event) => {
     if (!userData || !userData.UserID) return false;
     if (eventAttendees.length > 0 && selectedEvent && selectedEvent.EventID === event.EventID) {
