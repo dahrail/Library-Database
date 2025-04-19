@@ -132,8 +132,7 @@ const EventRegistration = ({ event, onConfirm, onCancel, userData }) => {
           
           {error && (
             <div className="error-message" style={{ color: '#e53935', padding: '10px', marginBottom: '15px', backgroundColor: '#ffebee', borderRadius: '4px' }}>
-              <p><strong>Error:</strong> {error}</p>
-              <p>Cannot register for this event due to time conflict with event you're already registered for.</p>
+              <p>Error: You cannot register for this event due to a time conflict with an event you're already registered for.</p>
             </div>
           )}
           
