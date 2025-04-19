@@ -50,6 +50,32 @@ npm start
 
 Deployed Website: http://170.9.244.55:3000/
 
+## 5 Must Haves
+
+1. **User authentication for different user roles**
+   - The system supports authentication for Students, Faculty, and Admins, each with different permissions and access levels.
+
+2. **Data entry forms**
+   - The application provides forms to add, update, and delete data for books, media, devices, rooms, events, and users. Admins can manage inventory and user records through intuitive interfaces.
+
+3. **Triggers (At least 2)**
+   - The backend database implements triggers, such as:
+     - Automatically generating a fine when an item is overdue.
+     - Updating item availability when a loan is returned or a reservation is cancelled.
+
+4. **Data queries (At least 3)**
+   - The application executes various queries, including:
+     - Retrieving available items by category and genre.
+     - Fetching user loan and fine history.
+     - Searching and filtering items and users based on multiple criteria.
+
+5. **Data reports (At least 3)**
+   - The admin dashboard features multiple reports:
+     - **Item Report:** Usage statistics for books, media, and devices (borrows, holds, etc.).
+     - **User Report:** User activity, loan history, and borrowing patterns.
+     - **Fines Report:** Fines data with payment status tracking.
+     - **Event Report:** Attendance, check-in rates, and room utilization for events.
+
 ## Project Functionality
 
 BookFinder provides a comprehensive library management system with the following features:
