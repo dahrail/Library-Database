@@ -11,7 +11,7 @@ pool.query("SELECT 1", (err) => {
 
 // Fetch all rooms
 const getRooms = (req, res) => {
-  pool.query("SELECT * FROM ROOMS", (err, results) => {
+  pool.query("SELECT * FROM rooms", (err, results) => {
     if (err) {
       console.error("Error fetching rooms:", err);
       sendJsonResponse(res, 500, {
@@ -31,7 +31,7 @@ const addRoom = async (req, res) => {
     );
     console.log("Request body:", { RoomNumber, RoomName, Capacity, Notes }); // Debugging log
     const query = `
-      INSERT INTO ROOMS (RoomNumber, RoomName, Capacity, Notes)
+      INSERT INTO rooms (RoomNumber, RoomName, Capacity, Notes)
       VALUES (?, ?, ?, ?)
     `;
     pool.query(query, [RoomNumber, RoomName, Capacity, Notes], (err) => {
@@ -59,7 +59,7 @@ const borrowRoom = async (req, res) => {
 
     // Check if the room is available
     const checkQuery = `
-      SELECT * FROM ROOMS WHERE RoomID = ? AND IsAvailable = 1
+      SELECT * FROM rooms WHERE RoomID = ? AND IsAvailable = 1
     `;
     pool.query(checkQuery, [RoomID], (err, results) => {
       console.log("Check query results:", results); // Debugging log
@@ -74,7 +74,7 @@ const borrowRoom = async (req, res) => {
 
       // Mark the room as reserved
       const reserveQuery = `
-        UPDATE ROOMS SET IsAvailable = 0 WHERE RoomID = ?
+        UPDATE rooms SET IsAvailable = 0 WHERE RoomID = ?
       `;
       pool.query(reserveQuery, [RoomID], (err) => {
         if (err) {
@@ -155,7 +155,7 @@ const reserveRoom = async (req, res) => {
 
       // Check if the room is available
       const checkQuery = `
-        SELECT * FROM ROOMS WHERE RoomID = ? AND IsAvailable = 1
+        SELECT * FROM rooms WHERE RoomID = ? AND IsAvailable = 1
       `;
       pool.query(checkQuery, [RoomID], (err, results) => {
         console.log("Check query results:", results); // Debugging log
@@ -170,7 +170,7 @@ const reserveRoom = async (req, res) => {
 
         // Mark the room as reserved
         const reserveQuery = `
-          UPDATE ROOMS SET IsAvailable = 0 WHERE RoomID = ?
+          UPDATE rooms SET IsAvailable = 0 WHERE RoomID = ?
         `;
         pool.query(reserveQuery, [RoomID], (err) => {
           if (err) {
@@ -216,37 +216,79 @@ const reserveRoom = async (req, res) => {
   }
 };
 
-const releaseExpiredReservations = () => {
-  const releaseQuery = `
-    UPDATE ROOMS
-    SET IsAvailable = 1
-    WHERE RoomID IN (
-      SELECT RoomID
-      FROM ROOM_RESERVATIONS
-      WHERE EndAT <= NOW()
-    )
-  `;
+const releaseExpiredReservations = async () => {
+  let connection = null;
+  try {
+    console.log("Running expired reservations cleanup...");
 
-  const deleteQuery = `
-    DELETE FROM ROOM_RESERVATIONS
-    WHERE EndAT <= NOW()
-  `;
+    connection = await pool.promise().getConnection();
+    await connection.beginTransaction();
 
-  pool.query(releaseQuery, (err, results) => {
-    if (err) {
-      console.error("Error releasing expired reservations:", err);
-    } else {
-      console.log("Expired reservations released:", results.affectedRows);
+    // Check if IsAvailable column exists in rooms table
+    const [columns] = await connection.query(`
+      SELECT COLUMN_NAME
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'rooms' AND COLUMN_NAME = 'IsAvailable'
+    `);
+    const hasIsAvailableColumn = columns.length > 0;
+
+    if (!hasIsAvailableColumn) {
+      console.log("IsAvailable column not found in rooms table. Adding the column...");
+      await connection.query(`
+        ALTER TABLE rooms
+        ADD COLUMN IsAvailable BOOLEAN DEFAULT 1
+      `);
+      console.log("IsAvailable column added to rooms table");
     }
-  });
 
-  pool.query(deleteQuery, (err, results) => {
-    if (err) {
-      console.error("Error deleting expired reservations:", err);
-    } else {
-      console.log("Expired reservations deleted:", results.affectedRows);
+    // 1. Find all expired reservations (before deleting them)
+    const [expiredReservations] = await connection.query(`
+      SELECT RoomID FROM room_reservation WHERE EndAt <= NOW()
+    `);
+
+    if (expiredReservations.length === 0) {
+      console.log("No expired reservations found");
+      await connection.commit();
+      return;
     }
-  });
+
+    // 2. Set rooms as available for all expired reservations
+    const roomIds = expiredReservations.map(r => r.RoomID);
+    if (roomIds.length > 0) {
+      await connection.query(
+        `UPDATE rooms SET IsAvailable = 1 WHERE RoomID IN (${roomIds.map(() => '?').join(',')})`,
+        roomIds
+      );
+      console.log(`Set IsAvailable=1 for RoomIDs: ${roomIds.join(', ')}`);
+    }
+
+    // 3. Delete expired reservations
+    const [deleteResult] = await connection.query(
+      `DELETE FROM room_reservation WHERE EndAt <= NOW()`
+    );
+    console.log(`Deleted ${deleteResult.affectedRows} expired reservations`);
+
+    await connection.commit();
+    console.log("Room cleanup transaction completed successfully");
+  } catch (err) {
+    console.error("Error processing expired reservations:", err);
+    if (connection) {
+      try {
+        await connection.rollback();
+        console.log("Transaction rolled back due to error");
+      } catch (rollbackErr) {
+        console.error("Error during rollback:", rollbackErr);
+      }
+    }
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (releaseErr) {
+        console.error("Error releasing connection:", releaseErr);
+      }
+    }
+  }
 };
 
 const cancelReservation = async (req, res) => {
@@ -291,9 +333,9 @@ const cancelReservation = async (req, res) => {
           return;
         }
 
-        // Mark the room as available in ROOMS
+        // Mark the room as available in rooms
         const updateQuery = `
-          UPDATE ROOMS SET IsAvailable = 1 WHERE RoomID = ?
+          UPDATE rooms SET IsAvailable = 1 WHERE RoomID = ?
         `;
         pool.query(updateQuery, [RoomID], (err) => {
           if (err) {
@@ -341,7 +383,7 @@ const updateRoom = async (req, res) => {
       }
 
       const updateQuery = `
-        UPDATE ROOMS
+        UPDATE rooms
         SET RoomName = ?, Capacity = ?, Notes = ?, IsAvailable = ?
         WHERE RoomID = ?
       `;
@@ -392,11 +434,11 @@ const getUserReservations = (req, res) => {
 
   const query = `
     SELECT r.RoomID, r.RoomNumber, r.RoomName, r.Capacity, r.Notes,
-           res.RoomReservationID, res.UserID, res.StartAT, res.EndAT
+           res.RoomReservationID, res.UserID, res.StartAt, res.EndAt
     FROM ROOM_RESERVATIONS res
-    JOIN ROOMS r ON res.RoomID = r.RoomID
-    WHERE res.UserID = ? AND res.EndAT > NOW()
-    ORDER BY res.StartAT ASC
+    JOIN rooms r ON res.RoomID = r.RoomID
+    WHERE res.UserID = ? AND res.EndAt > NOW()
+    ORDER BY res.StartAt ASC
   `;
 
   pool.query(query, [userId], (err, results) => {

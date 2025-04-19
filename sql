@@ -435,15 +435,16 @@ UNLOCK TABLES;
 -- Table structure for table `room`
 --
 
-DROP TABLE IF EXISTS `room`;
+DROP TABLE IF EXISTS `rooms`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `room` (
+CREATE TABLE `rooms` (
   `RoomID` int NOT NULL AUTO_INCREMENT,
   `RoomNumber` varchar(50) NOT NULL,
   `RoomName` varchar(50) DEFAULT NULL,
   `Capacity` int DEFAULT NULL,
   `Notes` varchar(250) DEFAULT NULL,
+  `IsAvailable` tinyint(1) DEFAULT 1,
   PRIMARY KEY (`RoomID`),
   UNIQUE KEY `RoomNumber` (`RoomNumber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -475,7 +476,7 @@ CREATE TABLE `room_reservation` (
   KEY `UserID` (`UserID`),
   KEY `RoomID` (`RoomID`),
   CONSTRAINT `room_reservation_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `room_reservation_ibfk_2` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `room_reservation_ibfk_2` FOREIGN KEY (`RoomID`) REFERENCES `rooms` (`RoomID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
