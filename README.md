@@ -21,7 +21,7 @@ BookFinder is our custom-made library management system made for a university, w
 ![GitHub](https://img.shields.io/badge/-GitHub-181717?logo=github&logoColor=white&style=flat-square)
 
 ### Deployment
-![Vercel](https://img.shields.io/badge/-Vercel-000?logo=vercel&logoColor=white&style=flat-square) &nbsp;&nbsp; ![Render](https://img.shields.io/badge/-Render-46E3B7?logo=render&logoColor=white&style=flat-square) &nbsp;&nbsp; ![Azure](https://img.shields.io/badge/-Azure-0078D4?logo=microsoft-azure&logoColor=white&style=flat-square)
+![Oracle](https://img.shields.io/badge/-Oracle-F80000?logo=oracle&logoColor=white&style=flat-square) &nbsp;&nbsp; ![Oracle](https://img.shields.io/badge/-Oracle-F80000?logo=oracle&logoColor=white&style=flat-square) &nbsp;&nbsp; ![Azure](https://img.shields.io/badge/-Azure-0078D4?logo=microsoft-azure&logoColor=white&style=flat-square)
 
 ## How to host website locally
 
@@ -48,100 +48,44 @@ npm install react react-dom
 npm start
 ```
 
-Deployed Website: WIP
+Deployed Website: http://170.9.244.55:3000/
 
-## 5 Project Requirements
+## Project Functionality
 
-## User Authentication for Different User Roles
-Registering:
+BookFinder provides a comprehensive library management system with the following features:
 
-Students:
-Registering is possible on the website. When you hit register, it default takes you to register as a student.
+### User Authentication and Role Management
+- **Students**: Can borrow one item per category with a one-week checkout period
+- **Faculty**: Can borrow two items per category with a two-week checkout period
+- **Admins**: Have complete control over inventory management and reporting
 
-Faculty:
-Registering is possible on the website, as long as you know the passcode. After you hit register and it takes you to the register as a student page, you are given the option to register as a faculty member. If you enter the correct passcode, it takes you to the page where you can register as faculty.
+### Inventory Management
+- Books, media, and electronics cataloging
+- ISBN validation ensures accurate book information
+- Inventory tracking for available and checked-out items
+- Detailed item information including publication dates, authors, and genres
 
-Admins:
-Admins are manually added into the database because of the nature of the admin permissions.
+### Borrowing System
+- Check out and check in functionality
+- Reservation system for unavailable items
+- Waitlist management with automatic notifications
+- Due date tracking and reminders
 
+### Reporting and Analytics
+- Fines reporting with payment status tracking
+- Item usage statistics showing popular materials
+- User activity reports for administrative oversight
+- Event attendance and registration tracking
 
-Roles and Permissions:
+### Room and Event Management
+- Room reservation system
+- Event scheduling and management
+- Attendance tracking for library events
+- Room utilization reporting
 
-Students:
-Has the ability to check out an item per category of Books, Media, and Electronics. These items must be returned in one week.
+### Financial Management
+- Fine calculation based on overdue items
+- Payment processing and tracking
+- Outstanding balance reporting
 
-Faculty: 
-Has the ability to check out 2 items per category. These must be returned in two weeks.
-
-Common capabilities:
-Browse categories, check out and reserve items, and join waitlists. View accounts where users can see their checked out items, fines, and holds. There is also manage event sign-ups and check-ins
-
-Admins:
-Admins are able to manage books, media, electronics, events, and view members.
-
-## Data Entry Forms
-
-Add New Data:
-WIP
-
-Modify Existing Data:
-WIP
-
-Delete Data:
-WIP
-
-## Data Queries
-
-### Queries Supported:
-
-Catalog Search Queries:
-
-WIP
-
-### Reports for Admins:
-### Fines Report:
-
-Displays total fines collected over time, filtered by date range.
-Includes:
-Total fines collected.
-List of members with outstanding fines.
-Bar graph of fines collected over time.
-
-![Logo](Images/FinesReport.png)
-
-### Checked-Out Books Report:
-
-Displays statistics on books checked out, filtered by category or time range.
-Includes:
-Total books checked out.
-Average return time.
-List of books currently checked out.
-Line graph of book checkouts over time.
-
-![Logo](Images/CheckedOutBooksReport.png)
-
-### Checked-Out Music Report:
-
-Similar to the books report but focused on music items.
-Includes:
-Total music items checked out.
-List of members who checked out music items.
-Pie chart of genres most frequently checked out.
-
-![Logo](Images/CheckedOutMusicReport.png)
-
-## Triggers
-
-### Waitlist Trigger
-This trigger is activated when an item that was fully checked out is returned or was previously unavailable. It ensures the waitlist is managed by notifying the next member in the queue about the availability of the item. It does this by sending an email to that user.
-
-WIP
-
-### Fines Trigger
-WIP
-```
-
-## Addtional Notes
-Improvements to be made:
-
-- Fix time zones conversion
+The system ensures data integrity through MySQL database constraints and triggers, while providing an intuitive interface for all user types through a responsive React frontend.
