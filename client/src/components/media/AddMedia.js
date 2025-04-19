@@ -43,7 +43,7 @@ const AddMedia = ({ onAddMedia, navigateToHome }) => {
 
   return (
     <div className="content-container">
-      <h2>Add New Device</h2>
+      <h2>Add New Media</h2>
       <form onSubmit={handleSubmit} className="add-device-form">
         <div className="form-row">
           <div className="form-group">
