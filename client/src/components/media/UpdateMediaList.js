@@ -52,6 +52,12 @@ const UpdateMediaList = ({ navigateToHome, navigateToUpdateMedia }) => {
   return (
     <div className="content-container">
       <h2>Update Media</h2>
+      
+      <div className="header-actions">
+        <button onClick={navigateToHome} className="btn-secondary">
+          Back to Home
+        </button>
+      </div>
 
       {loading ? (
         <p>Loading media...</p>
@@ -59,91 +65,92 @@ const UpdateMediaList = ({ navigateToHome, navigateToUpdateMedia }) => {
         <p style={{ color: 'red' }}>{error}</p>
       ) : (
         <>
-          {/* Filter by Type */}
-          <div className="filter-container">
-            <label htmlFor="typeFilter">Type: </label>
-            <select
-              id="typeFilter"
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.target.value);
-                setSelectedGenre('All'); // Reset genre filter when type changes
-              }}
-            >
-              {mediaTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+          {/* Enhanced Filter Controls */}
+          <div className="filter-controls">
+            <div className="filter-group">
+              <label htmlFor="typeFilter">Type:</label>
+              <select
+                id="typeFilter"
+                className="filter-select"
+                value={selectedType}
+                onChange={(e) => {
+                  setSelectedType(e.target.value);
+                  setSelectedGenre('All');
+                }}
+              >
+                {mediaTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="genreFilter">Genre:</label>
+              <select
+                id="genreFilter"
+                className="filter-select"
+                value={selectedGenre}
+                onChange={(e) => setSelectedGenre(e.target.value)}
+              >
+                {genres.map((genre) => (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Filter by Genre */}
-          <div className="filter-container">
-            <label htmlFor="genreFilter">Genre: </label>
-            <select
-              id="genreFilter"
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
-            >
-              {genres.map((genre) => (
-                <option key={genre} value={genre}>
-                  {genre}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Filtered Table */}
-          <table className="media-table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Genre</th>
-                <th>Publication Year</th>
-                <th>Language</th>
-                <th>Total Copies</th>
-                <th>Available Copies</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMedia.length > 0 ? (
-                filteredMedia.map((mediaItem) => (
-                  <tr key={mediaItem.DeviceID}>
-                    <td>{mediaItem.Type}</td>
-                    <td>{mediaItem.Title}</td>
-                    <td>{mediaItem.Author}</td>
-                    <td>{mediaItem.Genre}</td>
-                    <td>{mediaItem.PublicationYear}</td>
-                    <td>{mediaItem.Language}</td>
-                    <td>{mediaItem.TotalCopies}</td>
-                    <td>{mediaItem.AvailableCopies}</td>
-                    <td>
-                      <button
-                        className="btn-primary"
-                        onClick={() => navigateToUpdateMedia(mediaItem)}
-                      >
-                        Update
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
+          {/* Redesigned Table */}
+          <div className="table-container">
+            <table className="modern-table">
+              <thead>
                 <tr>
-                  <td colSpan="9">No media items found for this type and genre.</td>
+                  <th>Type</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Genre</th>
+                  <th>Year</th>
+                  <th>Language</th>
+                  <th>Total Copies</th>
+                  <th>Available</th>
+                  <th>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredMedia.length > 0 ? (
+                  filteredMedia.map((mediaItem) => (
+                    <tr key={mediaItem.MediaID}>
+                      <td>{mediaItem.Type}</td>
+                      <td>{mediaItem.Title}</td>
+                      <td>{mediaItem.Author}</td>
+                      <td>{mediaItem.Genre}</td>
+                      <td>{mediaItem.PublicationYear}</td>
+                      <td>{mediaItem.Language}</td>
+                      <td>{mediaItem.TotalCopies}</td>
+                      <td>{mediaItem.AvailableCopies}</td>
+                      <td>
+                        <button
+                          className="action-button"
+                          onClick={() => navigateToUpdateMedia(mediaItem)}
+                        >
+                          Update
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9">No media items found for this type and genre.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
-
-      <button onClick={navigateToHome} className="btn-secondary">
-        Back to Home
-      </button>
     </div>
   );
 };

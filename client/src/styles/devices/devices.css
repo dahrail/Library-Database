@@ -265,3 +265,140 @@
 .admin-button:hover {
   transform: translateY(-2px);
 }
+
+/* Delete Device Confirmation Styling */
+.delete-confirmation-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.delete-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.warning-icon {
+  color: #ff4d4f;
+  margin-right: 12px;
+  margin-top: 35px; 
+  display: flex;
+  align-items: center;
+  height: 36px; /* Match icon height */
+}
+
+.delete-warning-text {
+  color: #5c5c5c;
+  font-size: 16px;
+  margin-bottom: 24px;
+}
+
+.device-info-box {
+  background-color: #f9f9f9;
+  border: 1px solid #eaeaea;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.device-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.device-info-header h3 {
+  margin: 0;
+  color: #2c2c2c;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.device-type-badge {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.device-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  margin-bottom: 8px;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #5c5c5c;
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #2c2c2c;
+  font-size: 15px;
+}
+
+.delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.delete-actions .btn-secondary,
+.delete-actions .btn-danger {
+  min-width: 120px;
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+}
+
+.btn-danger {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.btn-danger:hover {
+  background-color: #ff7875;
+}
+
+.delete-icon {
+  margin-right: 6px;
+}
+
+@media (max-width: 600px) {
+  .device-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .delete-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  
+  .btn-danger, .btn-secondary {
+    width: 100%;
+  }
+}

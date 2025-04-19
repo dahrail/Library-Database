@@ -40,6 +40,12 @@ const UpdateDeviceList = ({ navigateToHome, navigateToUpdateDevice }) => {
   return (
     <div className="content-container">
       <h2>Update Devices</h2>
+      
+      <div className="header-actions">
+        <button onClick={navigateToHome} className="btn-secondary">
+          Back to Home
+        </button>
+      </div>
 
       {loading ? (
         <p>Loading devices...</p>
@@ -47,70 +53,71 @@ const UpdateDeviceList = ({ navigateToHome, navigateToUpdateDevice }) => {
         <p style={{ color: 'red' }}>{error}</p>
       ) : (
         <>
-          {/* Filter by Type */}
-          <div className="filter-container">
-            <label htmlFor="typeFilter">Type: </label>
-            <select
-              id="typeFilter"
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-            >
-              {deviceTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+          {/* Enhanced Filter Controls */}
+          <div className="filter-controls">
+            <div className="filter-group">
+              <label htmlFor="typeFilter">Type:</label>
+              <select
+                id="typeFilter"
+                className="filter-select"
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+              >
+                {deviceTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Filtered Table */}
-          <table className="device-table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Serial Number</th>
-                <th>Total Copies</th>
-                <th>Available Copies</th>
-                <th>Shelf Location</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredDevices.length > 0 ? (
-                filteredDevices.map((device) => (
-                  <tr key={device.DeviceID}>
-                    <td>{device.Type}</td>
-                    <td>{device.Brand}</td>
-                    <td>{device.Model}</td>
-                    <td>{device.SerialNumber}</td>
-                    <td>{device.TotalCopies}</td>
-                    <td>{device.AvailableCopies}</td>
-                    <td>{device.ShelfLocation}</td>
-                    <td>
-                      <button
-                        className="btn-primary"
-                        onClick={() => navigateToUpdateDevice(device)}
-                      >
-                        Update
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
+          {/* Redesigned Table */}
+          <div className="table-container">
+            <table className="modern-table">
+              <thead>
                 <tr>
-                  <td colSpan="8">No devices found for this type.</td>
+                  <th>Type</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  <th>Serial Number</th>
+                  <th>Total Copies</th>
+                  <th>Available</th>
+                  <th>Location</th>
+                  <th>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredDevices.length > 0 ? (
+                  filteredDevices.map((device) => (
+                    <tr key={device.DeviceID}>
+                      <td>{device.Type}</td>
+                      <td>{device.Brand}</td>
+                      <td>{device.Model}</td>
+                      <td>{device.SerialNumber}</td>
+                      <td>{device.TotalCopies}</td>
+                      <td>{device.AvailableCopies}</td>
+                      <td>{device.ShelfLocation}</td>
+                      <td>
+                        <button
+                          className="action-button"
+                          onClick={() => navigateToUpdateDevice(device)}
+                        >
+                          Update
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8">No devices found for this type.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
-
-      <button onClick={navigateToHome} className="btn-secondary">
-        Back to Home
-      </button>
     </div>
   );
 };

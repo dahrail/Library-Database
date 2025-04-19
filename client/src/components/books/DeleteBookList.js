@@ -40,77 +40,84 @@ const DeleteBookList = ({ navigateToHome, navigateToDeleteBook}) => {
   return (
     <div className="content-container">
       <h2>Delete Book</h2>
+      
+      <div className="header-actions">
+        <button onClick={navigateToHome} className="btn-secondary">
+          Back to Home
+        </button>
+      </div>
 
       {loading ? (
-        <p>Loading book...</p>
+        <p>Loading books...</p>
       ) : error ? (
         <p style={{ color: 'red' }}>{error}</p>
       ) : (
         <>
-          {/* Genre Filter Dropdown */}
-          <div className="filter-container">
-            <label htmlFor="genreFilter">Genre: </label>
-            <select
-              id="genreFilter"
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
-            >
-              {genres.map((genre) => (
-                <option key={genre} value={genre}>
-                  {genre}
-                </option>
-              ))}
-            </select>
+          {/* Enhanced Filter Controls */}
+          <div className="filter-controls">
+            <div className="filter-group">
+              <label htmlFor="genreFilter">Genre:</label>
+              <select
+                id="genreFilter"
+                className="filter-select"
+                value={selectedGenre}
+                onChange={(e) => setSelectedGenre(e.target.value)}
+              >
+                {genres.map((genre) => (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Filtered Book Table */}
-          <table className="book-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Genre</th>
-                <th>Publication Year</th>
-                <th>Language</th>
-                <th>Total Copies</th>
-                <th>Available Copies</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBooks.length > 0 ? (
-                filteredBooks.map((book) => (
-                  <tr key={book.BookID}>
-                    <td>{book.Title}</td>
-                    <td>{book.Author}</td>
-                    <td>{book.Genre}</td>
-                    <td>{book.PublicationYear}</td>
-                    <td>{book.Language}</td>
-                    <td>{book.TotalCopies}</td>
-                    <td>{book.AvailableCopies}</td>
-                    <td>
-                      <button
-                        className="btn-primary"
-                        onClick={() => navigateToDeleteBook(book)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
+          {/* Redesigned Table */}
+          <div className="table-container">
+            <table className="modern-table">
+              <thead>
                 <tr>
-                  <td colSpan="8">No books found for this genre.</td>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Genre</th>
+                  <th>Year</th>
+                  <th>Language</th>
+                  <th>Total Copies</th>
+                  <th>Available</th>
+                  <th>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredBooks.length > 0 ? (
+                  filteredBooks.map((book) => (
+                    <tr key={book.BookID}>
+                      <td>{book.Title}</td>
+                      <td>{book.Author}</td>
+                      <td>{book.Genre}</td>
+                      <td>{book.PublicationYear}</td>
+                      <td>{book.Language}</td>
+                      <td>{book.TotalCopies}</td>
+                      <td>{book.AvailableCopies}</td>
+                      <td>
+                        <button
+                          className="action-button"
+                          onClick={() => navigateToDeleteBook(book)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8">No books found for this genre.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
-
-      <button onClick={navigateToHome} className="btn-secondary">
-        Back to Home
-      </button>
     </div>
   );
 };
