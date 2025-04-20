@@ -135,7 +135,7 @@
   top: 100%;
   left: 0;
   min-width: 180px;
-  background-color: #222222; /* Dark background to match the theme */
+  background-color: #222222;
   border-radius: 0 0 8px 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   z-index: 1000;
@@ -185,7 +185,7 @@
 
 .dropdown-item:hover {
   background-color: #333333; /* Darker highlight on hover */
-  color: #ffffff; /* White text on hover for better visibility */
+  color: #ffffff; 
 }
 
 /* Removing the dropdown arrows */

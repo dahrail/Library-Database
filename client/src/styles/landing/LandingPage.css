@@ -10,7 +10,7 @@
 /* Hero Section */
 .hero-section {
   background: linear-gradient(to bottom, #000000, #212121);
-  height: 100vh; /* Full viewport height */
+  height: 100vh; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,12 +66,12 @@
 }
 
 .cta-button.primary {
-  background-color: #808080; /* Changed from blue (#0071e3) to gray */
+  background-color: #808080; 
   color: white;
 }
 
 .cta-button.primary:hover {
-  background-color: #666666; /* Changed from #0077ed to a darker gray */
+  background-color: #666666; 
   transform: scale(1.05);
 }
 
@@ -213,7 +213,7 @@
   border-radius: 30px;
   font-size: 18px;
   font-weight: 500;
-  background-color: #808080; /* Changed from #0071e3 to gray */
+  background-color: #808080; 
   color: white;
   border: none;
   cursor: pointer;
@@ -221,7 +221,7 @@
 }
 
 .promo-button:hover {
-  background-color: #666666; /* Changed from #0077ed to a darker gray */
+  background-color: #666666; 
   transform: scale(1.05);
 }
 
@@ -235,7 +235,7 @@
   transition: transform 0.5s ease-out;
 }
 
-/* Optional: Add a dark overlay to ensure text readability if placed over the image */
+
 .promo-image::after {
   content: '';
   position: absolute;
@@ -243,7 +243,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.3); /* Adjust opacity as needed */
+  background-color: rgba(0, 0, 0, 0.3); 
   z-index: 1;
 }
 

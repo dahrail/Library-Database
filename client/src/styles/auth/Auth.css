@@ -50,7 +50,7 @@
   opacity: 0.8;
 }
 
-/* Register form styles - updated for modern Apple-like design */
+/* Register form styles */
 .register-container {
   display: flex;
   justify-content: center;
@@ -158,34 +158,34 @@
 }
 
 .phone-input {
-  width: 0; /* Start with 0 width to allow flex-grow to properly control size */
-  min-width: 0; /* Allow shrinking below content size if needed */
-  flex-grow: 1; /* Allow growing to fill available space */
+  width: 0; 
+  min-width: 0;
+  flex-grow: 1; 
   text-align: center;
-  padding: 14px 8px; /* Increased padding for more height and width */
+  padding: 14px 8px; 
   border: 1px solid #e1e1e1;
   border-radius: 8px;
-  font-size: 18px; /* Increased font size */
+  font-size: 18px; 
   transition: all 0.3s ease;
   background-color: #f9f9f9;
-  box-sizing: border-box; /* Include padding in width calculation */
+  box-sizing: border-box; 
 }
 
 /* Apply different widths for each phone input part */
 .phone-input[name="part1"],
 .phone-input[name="part2"] {
-  max-width: 85px; /* Increased from 70px */
+  max-width: 85px;
 }
 
 .phone-input[name="part3"] {
-  max-width: 100px; /* Increased from 85px */
+  max-width: 100px; 
 }
 
 .phone-separator {
   font-size: 18px;
   color: #666;
   margin: 0 2px;
-  flex-shrink: 1; /* Allow separators to shrink if needed */
+  flex-shrink: 1; 
 }
 
 .form-buttons {
@@ -253,27 +253,26 @@
   }
   
   .phone-input-group {
-    flex-wrap: nowrap; /* Prevent wrapping to keep inputs on one line */
+    flex-wrap: nowrap; 
   }
   
   .phone-input {
-    padding: 12px 3px; /* Reduce padding on smaller screens */
+    padding: 12px 3px; 
   }
   
   .phone-input[name="part1"],
   .phone-input[name="part2"],
   .phone-input[name="part3"] {
-    max-width: 28%; /* More proportional on small screens */
+    max-width: 28%; 
   }
 }
 
 @media (max-width: 480px) {
   .register-form {
-    padding: 30px 15px; /* Increase side padding to prevent overflow */
+    padding: 30px 15px; 
   }
 }
 
-/* Apple-style Passcode Modal */
 .passcode-modal-overlay {
   position: fixed;
   top: 0;

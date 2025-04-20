@@ -150,7 +150,7 @@
 /* Device Grid */
 #devices-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Changed from 350px to 280px */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 35px;
   margin-bottom: 40px;
   max-width: 1200px;
@@ -241,15 +241,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px; /* Changed from 20px to 15px to match media page */
-  margin: 20px 0; /* Changed from margin-top: 20px to match media page margin */
-  flex-wrap: wrap; /* Added to handle smaller screens */
+  gap: 15px; 
+  margin: 20px 0; 
+  flex-wrap: wrap; 
 }
 
 /* Admin button styles for Device management */
 .admin-button {
   display: inline-block;
-  background-color: #1a1a1a; /* matches top bar color */
+  background-color: #1a1a1a; 
   color: white;
   border: none;
   border-radius: 20px;
@@ -290,7 +290,7 @@
   margin-top: 35px; 
   display: flex;
   align-items: center;
-  height: 36px; /* Match icon height */
+  height: 36px; 
 }
 
 .delete-warning-text {

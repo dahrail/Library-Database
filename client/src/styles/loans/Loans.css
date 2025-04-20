@@ -28,7 +28,7 @@
 /* Header styling - Increased top padding to lower the title */
 .loans-header {
   text-align: center;
-  padding: 90px 0 16px;  /* Increased top padding from 16px to 40px */
+  padding: 90px 0 16px; 
   border-bottom: 1px solid #e1e1e6;
 }
 
@@ -106,7 +106,6 @@
   border: 1px solid #e1e1e6;
 }
 
-/* Apple-like table styling */
 .loans-table {
   width: 100%;
   border-collapse: collapse;

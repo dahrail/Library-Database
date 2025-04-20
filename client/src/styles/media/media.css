@@ -23,7 +23,7 @@
 /* Admin button styles for Media management */
 .admin-button {
   display: inline-block;
-  background-color: #1a1a1a; /* matches top bar color */
+  background-color: #1a1a1a; 
   color: white;
   border: none;
   border-radius: 20px;

@@ -1,4 +1,4 @@
-/* Events Page - Apple-inspired styling */
+/* Events Page*/
 
 .events-container {
   max-width: 100%;
@@ -9,7 +9,7 @@
   overflow-x: hidden;
 }
 
-/* Hero section - matches other pages */
+/* Hero section */
 .events-header {
   height: 70vh;
   background-image: linear-gradient(to bottom, #000000, #212121);

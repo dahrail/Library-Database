@@ -7,8 +7,8 @@
 /* Data report table styles */
 .data-report-table {
   width: 100%;
-  border-collapse: separate; /* Use separate borders for better spacing */
-  border-spacing: 0 100px; /* Add vertical spacing between rows */
+  border-collapse: separate; 
+  border-spacing: 0 100px; 
   margin-top: 20px;
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -19,14 +19,14 @@
 .data-report-table th {
   background-color: var(--secondary-color);
   color: white;
-  padding: 16px 20px; /* Increase padding for better readability */
+  padding: 16px 20px; 
   text-align: center;
 }
 
 .data-report-table td {
-  padding: 16px 20px; /* Increase padding for better readability */
-  background-color: #fff; /* Ensure consistent background color */
-  border-bottom: 1px solid #ddd; /* Add a subtle border for separation */
+  padding: 16px 20px; 
+  background-color: #fff; 
+  border-bottom: 1px solid #ddd; 
 }
 
 .data-report-table tr:last-child td {
@@ -34,10 +34,9 @@
 }
 
 .data-report-table tr:nth-child(even) {
-  background-color: #f8f9fa; /* Add alternating row colors for readability */
+  background-color: #f8f9fa; 
 }
 
-/* Button group styles */
 .button-group {
   display: flex;
   gap: 20px;

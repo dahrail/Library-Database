@@ -165,8 +165,8 @@
 .report-card:hover,
 .card:hover,
 .report-item:hover {
-  border-color: #1d1d1f !important; /* Change to black instead of blue */
-  box-shadow: 0 0 0 2px rgba(29, 29, 31, 0.2) !important; /* Black shadow with opacity */
+  border-color: #1d1d1f !important;
+  box-shadow: 0 0 0 2px rgba(29, 29, 31, 0.2) !important; 
 }
 
 /* For any elements that might use box-shadow for the hover effect */
@@ -174,7 +174,7 @@
 .report-card:hover,
 .card:hover,
 .report-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important; /* Black shadow with opacity */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important; 
 }
 
 /* For any elements that might use bottom border for the hover effect */
@@ -182,7 +182,7 @@
 .report-card:hover,
 .card:hover,
 .report-item:hover {
-  border-bottom-color: #1d1d1f !important; /* Black border */
+  border-bottom-color: #1d1d1f !important; 
 }
 
 /* Responsive adjustments */

@@ -1,7 +1,7 @@
 /* Responsive adjustments for the navigation buttons */
 @media (max-width: 800px) {
   .nav-buttons {
-    display: none; /* Hide navigation on small screens */
+    display: none; 
   }
 }
 

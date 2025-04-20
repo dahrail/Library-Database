@@ -88,10 +88,10 @@
 /* Admin button styles for BookList */
 .admin-button {
   display: inline-block;
-  background-color: #1a1a1a; /* matches top bar color */
+  background-color: #1a1a1a; 
   color: white;
   border: none;
-  border-radius: 20px; /* updated from 8px */
+  border-radius: 20px; 
   padding: 12px 30px;
   font-size: 17px;
   font-weight: 500;
@@ -342,7 +342,7 @@
 /* Styling for header actions section */
 .header-actions {
   display: flex;
-  justify-content: center; /* Changed from flex-start to center for alignment */
+  justify-content: center; 
   margin: 15px 0 25px;
 }
 
@@ -355,10 +355,10 @@
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
-  width: auto;  /* Changed from default to auto */
-  min-width: 120px;  /* Added min-width for consistency */
-  max-width: 150px;  /* Added max-width to limit button size */
-  text-align: center;  /* Added to center text in the smaller button */
+  width: auto; 
+  min-width: 120px;  
+  max-width: 150px;  
+  text-align: center;  
 }
 
 /* Adjusted spacing when filter controls are present */

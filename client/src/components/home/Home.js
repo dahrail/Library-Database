@@ -70,7 +70,7 @@ const Home = ({
             fontWeight: "600",
             margin: "0",
             letterSpacing: "-0.02em",
-            opacity: "1", // Change initial opacity to 1
+            opacity: "1", 
             color: "white",
             position: "relative",
             zIndex: "10",

@@ -1,5 +1,3 @@
-/* Item Report - Apple-inspired modern design */
-
 .item-report {
     padding: 20px 0;
     max-width: 1200px;
@@ -260,7 +258,7 @@
   
   .table-container {
     overflow-x: auto;
-    padding: 0 1px; /* Prevents box-shadow cutoff */
+    padding: 0 1px; 
   }
   
   .items-table {
@@ -365,8 +363,8 @@
   /* Back button */
   .back-to-reports {
     display: flex;
-    justify-content: flex-end; /* Change from center to flex-end */
-    margin-top: 10px; /* Reduce top margin to position closer to view toggle */
+    justify-content: flex-end; 
+    margin-top: 10px; 
     margin-bottom: 30px;
   }
   
